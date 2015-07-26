@@ -4,6 +4,14 @@
 		"selected_items":
 		[
 			[
+				"query",
+				"querySelectorAll(selector)	webcomponents.js"
+			],
+			[
+				"ta",
+				"target"
+			],
+			[
 				"Observ",
 				"Observer"
 			],
@@ -506,19 +514,95 @@
 			[
 				"upload_",
 				"upload_url"
-			],
-			[
-				"upl",
-				"upload"
-			],
-			[
-				"date",
-				"datepicker"
 			]
 		]
 	},
 	"buffers":
 	[
+		{
+			"file": "src/test/com/aleclofabbro/net/ssh/connection.js",
+			"settings":
+			{
+				"buffer_size": 363,
+				"line_ending": "Unix",
+				"name": "require(['com/aleclofabbro/platformm/browser-mock/"
+			}
+		},
+		{
+			"file": "src/com/aleclofabbro/net/ssh/connection.js",
+			"settings":
+			{
+				"buffer_size": 1945,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/com/aleclofabbro/platform/browser-mock/net/ssh/connection.js",
+			"settings":
+			{
+				"buffer_size": 978,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/com/aleclofabbro/requirejs/plugins/template.js",
+			"settings":
+			{
+				"buffer_size": 1697,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/com/aleclofabbro/requirejs/plugins/compile-template.js",
+			"settings":
+			{
+				"buffer_size": 531,
+				"line_ending": "Unix",
+				"name": "define(function(){"
+			}
+		},
+		{
+			"file": "builder/Gruntfile.js",
+			"settings":
+			{
+				"buffer_size": 2314,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/test/index.html",
+			"settings":
+			{
+				"buffer_size": 1573,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/test/templ.html",
+			"settings":
+			{
+				"buffer_size": 60,
+				"line_ending": "Unix",
+				"name": "<span>aaaa</span>"
+			}
+		},
+		{
+			"file": "src/com/aleclofabbro/dom/cpl/compiler.js",
+			"settings":
+			{
+				"buffer_size": 924,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/com/aleclofabbro/dom/ctl/bind.js",
+			"settings":
+			{
+				"buffer_size": 96,
+				"line_ending": "Unix",
+				"name": "define(['com/aleclofabbro/dom/cpl/compiler']"
+			}
+		}
 	],
 	"build_system": "",
 	"command_palette":
@@ -632,6 +716,24 @@
 	},
 	"file_history":
 	[
+		"/home/alec/My_Projects/src/com/aleclofabbro/dom/compiler.js",
+		"/home/alec/My_Projects/src/lib/bootstrap-css-only/css/bootstrap.css",
+		"/home/alec/My_Projects/src/com/aleclofabbro/dom/compile.js",
+		"/home/alec/My_Projects/src/test/com/aleclofabbro/requirejs/plugins/templ.js",
+		"/home/alec/My_Projects/src/test/index.html",
+		"/home/alec/My_Projects/builder/package.json",
+		"/home/alec/My_Projects/builder/Gruntfile.js",
+		"/home/alec/PTV-SISTEMA/WGL2.0/trunk/web/ptv/ptv-bootstrap.js",
+		"/home/alec/My_Projects/src/com/aleclofabbro/platform/browser-mock/_use.js",
+		"/home/alec/My_Projects/Cordova/CustomPlugins/Android/src/com/alec/cordova/ssh/Client.js",
+		"/home/alec/My_Projects/Cordova/CustomPlugins/Android/src/com/alec/cordova/ssh/BrowserAlecSSHProxy.js",
+		"/home/alec/My_Projects/src/com/aleclofabbro/platform/browser/net/ssh/connection.js",
+		"/home/alec/My_Projects/src/com/aleclofabbro/cordova/ssh/connection.js",
+		"/home/alec/My_Projects/test/index.html",
+		"/home/alec/My_Projects/Cordova/refresh_plugin.sh",
+		"/home/alec/My_Projects/Cordova/browser_build_serve.sh",
+		"/home/alec/My_Projects/Cordova/android_push.sh",
+		"/home/alec/My_Projects/Cordova/Gruntfile.js",
 		"/home/alec/Cordova/ubnt-app/browser_build_serve.sh",
 		"/home/alec/Cordova/ubnt-app/android_push.sh",
 		"/home/alec/Cordova/ubnt-app/Gruntfile.js",
@@ -706,7 +808,6 @@
 		"/home/alec/PTV-SISTEMA/start",
 		"/home/alec/Cordova/ubntlink/www/js/index.js",
 		"/home/alec/Eclipse/AndroidPlugins/src/com/alec/cordova/ssh/Client.java",
-		"/home/alec/PTV-SISTEMA/WGL2.0/trunk/web/ptv/ptv-bootstrap.js",
 		"/home/alec/PTV-SISTEMA/start_ts",
 		"/home/alec/PTV-SISTEMA/openvpn/pfsense-udp-1194-config.ovpn",
 		"/home/alec/PTV-SISTEMA/openvpn/start",
@@ -742,24 +843,7 @@
 		"/home/alec/Cordova/ubntlink/config.xml",
 		"/home/alec/Cordova/ubntlink/plugins/aleclofabbro-plugin-ssh/plugin.xml",
 		"/home/alec/Phonegap/ubntlink/www/index.html",
-		"/home/alec/Cordova/ubntlink/www/index.html",
-		"/home/alec/Cordova/aleclofabbro-plugin-ssh/plugin.xml",
-		"/home/alec/Cordova/aleclofabbro-plugin-ssh/src/android/SSH.java",
-		"/home/alec/Phonegap/ubntlink/config.xml",
-		"/home/alec/Phonegap/ubntlink/www/js/index.js",
-		"/home/alec/Phonegap/ubntlink/platforms/android/assets/www/js/index.js",
-		"/home/alec/Documenti/untitled.html",
-		"/home/alec/Cordova/ubntlink/www/lib/zepto.js",
-		"/home/alec/NOInet/ph.js",
-		"/home/alec/NOInet/node_modules/AIROS/index.js",
-		"/home/alec/NOInet/www/ctrl/noiStatus.js",
-		"/home/alec/NOInet/www/ctrl/noiSurvey.js",
-		"/home/alec/NOInet/www/html/status.html",
-		"/home/alec/NOInet/www/html/main.html",
-		"/home/alec/NOInet/www/index.html",
-		"/home/alec/NOInet/package.json",
-		"/home/alec/NOInet/AIROS/test_cfg.js",
-		"/home/alec/NOInet/AIROS/index.js"
+		"/home/alec/Cordova/ubntlink/www/index.html"
 	],
 	"find":
 	{
@@ -905,6 +989,15 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"col-",
+			"icon-",
+			"req",
+			"cordova_ssh",
+			"conn",
+			"_alec_ssh",
+			".require",
+			"require",
+			".min",
 			"']);\n",
 			"alec_ssh",
 			"isConnected",
@@ -1023,16 +1116,7 @@
 			"multi_test",
 			"qbUiFgTextSearch",
 			"'{{nome}}-{{cognome}}'",
-			"qbUiTextSearch",
-			"$",
-			"pirooll ",
-			"set_path_model",
-			"model_expr",
-			"qbModelCtrl",
-			"\"",
-			"qb-schema-typeahead",
-			"qb-form-group-datepicker",
-			"qb-form-group-default"
+			"qbUiTextSearch"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1178,8 +1262,299 @@
 	"groups":
 	[
 		{
+			"selected": 9,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "src/test/com/aleclofabbro/net/ssh/connection.js",
+					"settings":
+					{
+						"buffer_size": 363,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								359,
+								359
+							]
+						],
+						"settings":
+						{
+							"auto_name": "require(['com/aleclofabbro/platformm/browser-mock/",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/com/aleclofabbro/net/ssh/connection.js",
+					"settings":
+					{
+						"buffer_size": 1945,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								209,
+								209
+							],
+							[
+								272,
+								272
+							],
+							[
+								395,
+								395
+							],
+							[
+								774,
+								774
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/com/aleclofabbro/platform/browser-mock/net/ssh/connection.js",
+					"settings":
+					{
+						"buffer_size": 978,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								945,
+								945
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/com/aleclofabbro/requirejs/plugins/template.js",
+					"settings":
+					{
+						"buffer_size": 1697,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1647,
+								1647
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 663.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/com/aleclofabbro/requirejs/plugins/compile-template.js",
+					"settings":
+					{
+						"buffer_size": 531,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								208,
+								208
+							]
+						],
+						"settings":
+						{
+							"auto_name": "define(function(){",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "builder/Gruntfile.js",
+					"settings":
+					{
+						"buffer_size": 2314,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1099,
+								1099
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 51.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "src/test/index.html",
+					"settings":
+					{
+						"buffer_size": 1573,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								332,
+								332
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "src/test/templ.html",
+					"settings":
+					{
+						"buffer_size": 60,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								62,
+								62
+							]
+						],
+						"settings":
+						{
+							"auto_name": "<span>aaaa</span>",
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "src/com/aleclofabbro/dom/cpl/compiler.js",
+					"settings":
+					{
+						"buffer_size": 924,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								318,
+								318
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "src/com/aleclofabbro/dom/ctl/bind.js",
+					"settings":
+					{
+						"buffer_size": 96,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								96,
+								96
+							]
+						],
+						"settings":
+						{
+							"auto_name": "define(['com/aleclofabbro/dom/cpl/compiler']",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
 			]
 		}
 	],
@@ -1291,6 +1666,6 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 218.0,
+	"side_bar_width": 278.0,
 	"status_bar_visible": true
 }
