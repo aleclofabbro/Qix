@@ -37,7 +37,8 @@ module.exports = function(grunt) {
           // name: "path/to/almond", // assumes a production build using almond
           out: target,
           paths: {
-            "tpl": "com/aleclofabbro/requirejs/plugins/template",
+            "tpl": "com/aleclofabbro/reflux/requirejs/plugins/template",
+            "cpl": "com/aleclofabbro/reflux/requirejs/plugins/compile-template",
             // EXTERNALS
             "stomp": "lib/stomp/stomp.min",
             "ol3": "lib/ol3/ol.min",
