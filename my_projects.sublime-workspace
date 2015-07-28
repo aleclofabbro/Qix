@@ -548,7 +548,7 @@
 			"file": "src/com/aleclofabbro/requirejs/plugins/template.js",
 			"settings":
 			{
-				"buffer_size": 1697,
+				"buffer_size": 1555,
 				"line_ending": "Unix"
 			}
 		},
@@ -556,24 +556,26 @@
 			"file": "src/com/aleclofabbro/requirejs/plugins/compile-template.js",
 			"settings":
 			{
-				"buffer_size": 531,
+				"buffer_size": 526,
 				"line_ending": "Unix",
 				"name": "define(function(){"
 			}
 		},
 		{
-			"file": "builder/Gruntfile.js",
+			"contents": "Searching 601 files for \"com/aleclofabbro/dom/\" (case sensitive, whole word)\n\n/home/alec/My_Projects/src/com/aleclofabbro/dom/ctl/bind.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'], function(compiler) {\n    2    compiler.register('[cpl\\\\:bind]', function(elem, ctx, root) {\n    3      var attr = elem.getAttribute('cpl:bind');\n\n/home/alec/My_Projects/src/com/aleclofabbro/requirejs/plugins/compile-template.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'],\n    2    function(compiler) {\n    3      return {\n\n/home/alec/My_Projects/src/com/aleclofabbro/dom/ctl/bind.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'], function(compiler) {\n    2    compiler.register('[cpl\\\\:bind]', function(elem, ctx, root) {\n    3      var attr = elem.getAttribute('cpl:bind');\n\n/home/alec/My_Projects/src/com/aleclofabbro/requirejs/plugins/compile-template.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'],\n    2    function(compiler) {\n    3      return {\n\n4 matches across 4 files\n\n\nSearching 602 files for \"com/aleclofabbro/dom/\" (case sensitive, whole word)\n\n/home/alec/My_Projects/src/com/aleclofabbro/dom/ctl/bind.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'], function(compiler) {\n    2    compiler.register('[cpl\\\\:bind]', function(elem, ctx, root) {\n    3      var attr = elem.getAttribute('cpl:bind');\n\n/home/alec/My_Projects/src/com/aleclofabbro/requirejs/plugins/compile-template.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'],\n    2    function(compiler) {\n    3      return {\n\n/home/alec/My_Projects/src/com/aleclofabbro/dom/ctl/bind.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'], function(compiler) {\n    2    compiler.register('[cpl\\\\:bind]', function(elem, ctx, root) {\n    3      var attr = elem.getAttribute('cpl:bind');\n\n/home/alec/My_Projects/src/com/aleclofabbro/requirejs/plugins/compile-template.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'],\n    2    function(compiler) {\n    3      return {\n\n4 matches across 4 files\n\n\nSearching 602 files for \"com/aleclofabbro/dom/\" (case sensitive, whole word)\n\n/home/alec/My_Projects/src/com/aleclofabbro/dom/ctl/bind.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'], function(compiler) {\n    2    compiler.register('[cpl\\\\:bind]', function(elem, ctx, root) {\n    3      var attr = elem.getAttribute('cpl:bind');\n\n/home/alec/My_Projects/src/com/aleclofabbro/requirejs/plugins/compile-template.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'],\n    2    function(compiler) {\n    3      return {\n\n/home/alec/My_Projects/src/com/aleclofabbro/dom/ctl/bind.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'], function(compiler) {\n    2    compiler.register('[cpl\\\\:bind]', function(elem, ctx, root) {\n    3      var attr = elem.getAttribute('cpl:bind');\n\n/home/alec/My_Projects/src/com/aleclofabbro/requirejs/plugins/compile-template.js:\n    1: define(['com/aleclofabbro/dom/cpl/compiler'],\n    2    function(compiler) {\n    3      return {\n\n4 matches across 4 files\n",
 			"settings":
 			{
-				"buffer_size": 2314,
-				"line_ending": "Unix"
+				"buffer_size": 2995,
+				"line_ending": "Unix",
+				"name": "Find Results",
+				"scratch": true
 			}
 		},
 		{
 			"file": "src/test/index.html",
 			"settings":
 			{
-				"buffer_size": 1573,
+				"buffer_size": 1585,
 				"line_ending": "Unix"
 			}
 		},
@@ -590,7 +592,7 @@
 			"file": "src/com/aleclofabbro/dom/cpl/compiler.js",
 			"settings":
 			{
-				"buffer_size": 924,
+				"buffer_size": 955,
 				"line_ending": "Unix"
 			}
 		},
@@ -598,9 +600,33 @@
 			"file": "src/com/aleclofabbro/dom/ctl/bind.js",
 			"settings":
 			{
-				"buffer_size": 96,
+				"buffer_size": 221,
 				"line_ending": "Unix",
 				"name": "define(['com/aleclofabbro/dom/cpl/compiler']"
+			}
+		},
+		{
+			"file": "builder/Gruntfile.js",
+			"settings":
+			{
+				"buffer_size": 2402,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/com/aleclofabbro/reflux/ctl/bind-html.js",
+			"settings":
+			{
+				"buffer_size": 221,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/com/aleclofabbro/reflux/requirejs/plugins/compile-template.js",
+			"settings":
+			{
+				"buffer_size": 526,
+				"line_ending": "Unix"
 			}
 		}
 	],
@@ -716,13 +742,13 @@
 	},
 	"file_history":
 	[
+		"/home/alec/My_Projects/builder/Gruntfile.js",
 		"/home/alec/My_Projects/src/com/aleclofabbro/dom/compiler.js",
 		"/home/alec/My_Projects/src/lib/bootstrap-css-only/css/bootstrap.css",
 		"/home/alec/My_Projects/src/com/aleclofabbro/dom/compile.js",
 		"/home/alec/My_Projects/src/test/com/aleclofabbro/requirejs/plugins/templ.js",
 		"/home/alec/My_Projects/src/test/index.html",
 		"/home/alec/My_Projects/builder/package.json",
-		"/home/alec/My_Projects/builder/Gruntfile.js",
 		"/home/alec/PTV-SISTEMA/WGL2.0/trunk/web/ptv/ptv-bootstrap.js",
 		"/home/alec/My_Projects/src/com/aleclofabbro/platform/browser-mock/_use.js",
 		"/home/alec/My_Projects/Cordova/CustomPlugins/Android/src/com/alec/cordova/ssh/Client.js",
@@ -851,9 +877,12 @@
 	},
 	"find_in_files":
 	{
-		"height": 0.0,
+		"height": 93.0,
 		"where_history":
 		[
+			"/home/alec/My_Projects/src,<open files>",
+			"/home/alec/My_Projects",
+			"/home/alec/My_Projects/src",
 			"/home/alec/Cordova/ubnt-app/src/",
 			"/home/alec/Cordova/ubnt-app/src/tpls",
 			"/home/alec/Cordova/ubnt-app/src",
@@ -978,10 +1007,7 @@
 			"/home/alec/workspace/PCCUBE/Geiat/GEIAT/GeiatFrontEnd/src",
 			"/home/alec/workspace/PCCUBE/Geiat/GEIAT/GeiatFrontEnd/libs/bootstrap/js",
 			"/home/alec/workspace/PCCUBE/Geiat/GEIAT/GeiatFrontEnd/libs/bootstrap",
-			"/home/alec/workspace/PCCUBE/Geiat/GEIAT/GeiatFrontEnd/libs/underscore",
-			"/home/alec/workspace/PCCUBE/Geiat/GEIAT/GeiatFrontEnd/libs/jquery",
-			"/home/alec/workspace/PCCUBE/Geiat/GEIAT/GeiatFrontEnd/libs/angular-route",
-			"/home/alec/workspace/PCCUBE/Geiat/GEIAT/GeiatFrontEnd/libs/angular-resource"
+			"/home/alec/workspace/PCCUBE/Geiat/GEIAT/GeiatFrontEnd/libs/underscore"
 		]
 	},
 	"find_state":
@@ -989,6 +1015,8 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"com/aleclofabbro/requirejs/",
+			"com/aleclofabbro/dom/",
 			"col-",
 			"icon-",
 			"req",
@@ -1114,9 +1142,7 @@
 			"serv",
 			"spes",
 			"multi_test",
-			"qbUiFgTextSearch",
-			"'{{nome}}-{{cognome}}'",
-			"qbUiTextSearch"
+			"qbUiFgTextSearch"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1124,6 +1150,8 @@
 		"regex": false,
 		"replace_history":
 		[
+			"com/aleclofabbro/reflux/requirejs/",
+			"com/aleclofabbro/reflux/",
 			"ubnt-services",
 			"col-xs",
 			"conne",
@@ -1249,9 +1277,7 @@
 			"Anagrafiche",
 			"Anagrafica",
 			"Anagrafiche",
-			"anagrafiche",
-			"Anagrafica",
-			"anagrafica"
+			"anagrafiche"
 		],
 		"reverse": false,
 		"show_context": true,
@@ -1262,7 +1288,7 @@
 	"groups":
 	[
 		{
-			"selected": 9,
+			"selected": 11,
 			"sheets":
 			[
 				{
@@ -1367,15 +1393,15 @@
 					"file": "src/com/aleclofabbro/requirejs/plugins/template.js",
 					"settings":
 					{
-						"buffer_size": 1697,
+						"buffer_size": 1555,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1647,
-								1647
+								528,
+								528
 							]
 						],
 						"settings":
@@ -1385,7 +1411,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 663.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1395,15 +1421,15 @@
 					"file": "src/com/aleclofabbro/requirejs/plugins/compile-template.js",
 					"settings":
 					{
-						"buffer_size": 531,
+						"buffer_size": 526,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								208,
-								208
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1421,28 +1447,87 @@
 				},
 				{
 					"buffer": 5,
-					"file": "builder/Gruntfile.js",
 					"settings":
 					{
-						"buffer_size": 2314,
+						"buffer_size": 2995,
 						"regions":
 						{
+							"match":
+							{
+								"flags": 112,
+								"regions":
+								[
+									[
+										155,
+										176
+									],
+									[
+										437,
+										458
+									],
+									[
+										602,
+										623
+									],
+									[
+										884,
+										905
+									],
+									[
+										1154,
+										1175
+									],
+									[
+										1436,
+										1457
+									],
+									[
+										1601,
+										1622
+									],
+									[
+										1883,
+										1904
+									],
+									[
+										2153,
+										2174
+									],
+									[
+										2435,
+										2456
+									],
+									[
+										2600,
+										2621
+									],
+									[
+										2882,
+										2903
+									]
+								],
+								"scope": ""
+							}
 						},
 						"selection":
 						[
 							[
-								1099,
-								1099
+								1998,
+								1998
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"detect_indentation": false,
+							"output_tag": 3,
+							"result_base_dir": "",
+							"result_file_regex": "^([A-Za-z\\\\/<].*):$",
+							"result_line_regex": "^ +([0-9]+):",
+							"scroll_past_end": true,
+							"syntax": "Packages/Default/Find Results.hidden-tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 51.0,
+						"translation.y": 833.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1452,15 +1537,15 @@
 					"file": "src/test/index.html",
 					"settings":
 					{
-						"buffer_size": 1573,
+						"buffer_size": 1585,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								332,
-								332
+								297,
+								297
 							]
 						],
 						"settings":
@@ -1487,8 +1572,8 @@
 						"selection":
 						[
 							[
-								62,
-								62
+								60,
+								60
 							]
 						],
 						"settings":
@@ -1507,15 +1592,98 @@
 					"file": "src/com/aleclofabbro/dom/cpl/compiler.js",
 					"settings":
 					{
-						"buffer_size": 924,
+						"buffer_size": 955,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								318,
-								318
+								50,
+								50
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "src/com/aleclofabbro/dom/ctl/bind.js",
+					"settings":
+					{
+						"buffer_size": 221,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								221,
+								221
+							]
+						],
+						"settings":
+						{
+							"auto_name": "define(['com/aleclofabbro/dom/cpl/compiler']",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "builder/Gruntfile.js",
+					"settings":
+					{
+						"buffer_size": 2402,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1201,
+								1201
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 255.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "src/com/aleclofabbro/reflux/ctl/bind-html.js",
+					"settings":
+					{
+						"buffer_size": 221,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								221,
+								221
 							]
 						],
 						"settings":
@@ -1529,25 +1697,26 @@
 					"type": "text"
 				},
 				{
-					"buffer": 9,
-					"file": "src/com/aleclofabbro/dom/ctl/bind.js",
+					"buffer": 12,
+					"file": "src/com/aleclofabbro/reflux/requirejs/plugins/compile-template.js",
 					"settings":
 					{
-						"buffer_size": 96,
+						"buffer_size": 526,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								96,
-								96
+								9,
+								9
 							]
 						],
 						"settings":
 						{
-							"auto_name": "define(['com/aleclofabbro/dom/cpl/compiler']",
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,

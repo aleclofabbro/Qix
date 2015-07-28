@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:ctl="http://reflux.com/xmlns/ctl">
 
 <head>
   <title>Test</title>
@@ -8,10 +8,12 @@
   require.config({
     baseUrl: '/',
     paths: {
+      "reflux": "com/aleclofabbro/reflux/reflux",
       "tpl": "com/aleclofabbro/reflux/requirejs/plugins/template",
       "cpl": "com/aleclofabbro/reflux/requirejs/plugins/compile-template",
 
       // EXTERNALS
+      "_": "lib/underscore/underscore.min",
       "stomp": "lib/stomp/stomp",
       "ol3": "lib/ol3/ol",
 

@@ -48,11 +48,10 @@ define(function() {
     return xmlhttp;
   }
   return {
-    load: function(name, parentRequire, onload, config) {
-      var url = parentRequire.toUrl(name);
+    loadElem: function(url, cb) {
       sendRequest(url, function(doc) {
         var elem = doc.body.children[0];
-        onload({
+        cb({
           get: function() {
             return elem.cloneNode(true);
           },
@@ -61,6 +60,10 @@ define(function() {
           }
         });
       });
+    },
+    load: function(name, parentRequire, onload, config) {
+      var url = parentRequire.toUrl(name);
+      this.loadElem(url, onload);
     }
   }
 });
