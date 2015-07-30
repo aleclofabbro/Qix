@@ -1,31 +1,39 @@
-define(function() {
-  var controllers = [];
-  var temp_el = document.createElement('div');
+define([
+
+], function() {
+  var _compilers = [];
+  var _tmp_elem_cont = document.createElement('div');
   return {
-    compile: function(root_elem, ctx) {
-      controllers.forEach(function(ctl_def) {
-        temp_el.appendChild(root_elem);
-        var q_elems = temp_el
-          .querySelectorAll(ctl_def.selector);
-        temp_el.remove(root_elem);
-        for (var i = 0; i < q_elems.length; i++) {
-          var sub_elem = q_elems.item(i);
-          sub_elem.$ctls = sub_elem.$ctls || [];
-          var ctl = ctl_def.controller(sub_elem, ctx, root_elem);
-          if ('object' === typeof ctl)
-            sub_elem.$ctls.push(ctl);
-        };
-      });
+    precompile: function(master_element) {
+      _tmp_elem_cont.appendChild(master_element);
+      var registered_compilers = [];
+      _compilers
+        .forEach(function(compiler) {
+          compiler.precompile(_tmp_elem_cont, function() {
+            registered_compilers.push(compiler);
+          });
+        });
+      master_element.$compilers = function() {
+        return registered_compilers;
+      };
+      _tmp_elem_cont.remove(master_element);
     },
-    register: function(selector, controller, pri) {
-      controllers.push({
-        selector: selector,
-        controller: controller,
-        pri: arguments.length === 3 ? pri : 100
-      });
-      controllers
+    compile: function(master_element, ctx) {
+      var registered_compilers = master_element.$compilers ? master_element.$compilers() : _compilers;
+      var compiled_elem = master_element.cloneNode(true);
+      _tmp_elem_cont.appendChild(compiled_elem);
+      registered_compilers
+        .forEach(function(compiler) {
+          compiler.compile(_tmp_elem_cont, ctx);
+        });
+      _tmp_elem_cont.remove(compiled_elem);
+      return compiled_elem;
+    },
+    register: function(compiler) {
+      _compilers.push(compiler);
+      _compilers
         .sort(function(a, b) {
-          return a.pri > b.pri;
+          return ('pri' in a ? a.pri : 100) > ('pri' in b ? b.pri : 100);
         });
     }
   };
