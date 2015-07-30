@@ -1,4 +1,8 @@
 define([
-  //'com/aleclofabbro/reflux/requirejs/plugins/compile-template',
+  'com/aleclofabbro/reflux/cpl/compiler',
   'com/aleclofabbro/reflux/ctl/bind-html'
-]);
+], function(cpl) {
+  return {
+    cpl: cpl
+  };
+});

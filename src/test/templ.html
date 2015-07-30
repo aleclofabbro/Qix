@@ -1,12 +1,15 @@
-<span ctl:bind="">
-  <%for(ix in ctx){ var el=ctx[ix];%>
-    <li>
-      <span>
-        <%=el.nome%>
-      </span>
-      <span>
-        <%=el.cognome%>
-      </span>
-    </li>
-    <%}%>
+<span ctl:bind-html>
+  <ul>
+    <%for(ix in ctx){%>
+      <%var el=ctx[ix];%>
+        <li>
+          <span>
+            <%=el.nome%>
+          </span>
+          <span>
+            <%=el.cognome%>
+          </span>
+        </li>
+        <%}%>
+  </ul>
 </span>

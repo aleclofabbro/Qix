@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:ctl="http://reflux.com/xmlns/ctl">
+
+<head>
+  <title>Test</title>
+  <script type="text/javascript" src="/lib/requirejs/require.js"></script>
+  <script type="text/javascript">
+  require.config({
+    baseUrl: '/',
+    paths: {
+      "tpl": "com/aleclofabbro/reflux/requirejs/plugins/template",
+      "cpl": "com/aleclofabbro/reflux/requirejs/plugins/compile-template",
+
+      // EXTERNALS
+      "_": "lib/underscore/underscore.min",
+      "stomp": "lib/stomp/stomp",
+      "ol3": "lib/ol3/ol",
+
+      "rx": "lib/rxjs/dist/rx",
+      "rx.all": "lib/rxjs/dist/rx.all",
+      "rx.async": "lib/rxjs/dist/rx.async",
+      "rx.time": "lib/rxjs/dist/rx.time",
+      "rx.backpressure": "lib/rxjs/dist/rx.backpressure",
+      "rx.binding": "lib/rxjs/dist/rx.binding",
+      "rx.aggregates": "lib/rxjs/dist/rx.aggregates",
+      "rx.joinpatterns": "lib/rxjs/dist/rx.joinpatterns",
+      "rx.coincidence": "lib/rxjs/dist/rx.coincidence",
+      "rx.experimental": "lib/rxjs/dist/rx.experimental",
+      "rx.dom": "lib/rx-dom/dist/rx.dom",
+
+      "ramda": "lib/ramda/dist/ramda"
+    }
+  });
+  require(['cpl!test/templ.html', 'rx.all'], function(elcpl, Rx) {
+    ctxsubj = new Rx.Subject();
+    var el = elcpl.get(ctxsubj);
+    document.body.appendChild(el);
+    ctxsubj.onNext([{
+      nome: 'alec',
+      cognome: 'gians'
+    }, {
+      nome: 'gion',
+      cognome: 'ping'
+    }]);
+  });
+  </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
