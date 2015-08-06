@@ -1,5 +1,5 @@
 define([
-    'com/aleclofabbro/reflux/cpl/compiler',
+    'com/aleclofabbro/qix/cpl/compiler',
     'rx',
     'ramda',
     '_'
