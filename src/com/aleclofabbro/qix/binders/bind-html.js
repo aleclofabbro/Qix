@@ -1,8 +1,6 @@
 define([
     'com/aleclofabbro/qix/cpl/compiler',
-    'rx',
-    'ramda',
-    '_'
+    'rx'
   ],
   function(compiler, Rx, R) {
     _.templateSettings = {
