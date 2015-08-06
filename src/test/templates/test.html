@@ -31,17 +31,27 @@
       "ramda": "lib/ramda/dist/ramda"
     }
   });
-  require(['cpl!test/templ.html', 'rx.all'], function(elcpl, Rx) {
+  require(['cpl!test/templ.html', 'rx'], function(elcpl, Rx) {
     ctxsubj = new Rx.Subject();
-    var el = elcpl.get(ctxsubj);
-    document.body.appendChild(el);
+    nodelist = elcpl.compile(ctxsubj, document.body);
     ctxsubj.onNext([{
-      nome: 'alec',
-      cognome: 'gians'
+      nome: 'adad',
+      cognome: 'saddas'
     }, {
-      nome: 'gion',
-      cognome: 'ping'
+      nome: 'dssd',
+      cognome: 'aea'
+    }, {
+      nome: 'qwewqe',
+      cognome: 'vcbbv'
     }]);
+    setTimeout(
+      ctxsubj.onNext.bind(ctxsubj, [{
+        nome: 'alec',
+        cognome: 'gians'
+      }, {
+        nome: 'gion',
+        cognome: 'ping'
+      }]), 1000);
   });
   </script>
 </head>

@@ -49,14 +49,17 @@ define(function() {
   }
   return {
     loadElem: function(url, cb) {
-      sendRequest(url, function(doc) {
-        var elem = doc.body.children[0];
+      sendRequest(url, function(_doc) {
+        var _body = _doc.body;
         cb({
-          get: function() {
-            return elem.cloneNode(true);
+          clone: function() {
+            return _body.cloneNode(true);
           },
-          elem: function() {
-            return elem;
+          master: function() {
+            return _body;
+          },
+          doc: function() {
+            return _doc;
           }
         });
       });

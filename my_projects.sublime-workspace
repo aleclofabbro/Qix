@@ -4,6 +4,22 @@
 		"selected_items":
 		[
 			[
+				"append",
+				"appendChildrenTo"
+			],
+			[
+				"appendC",
+				"appendChildrenTo"
+			],
+			[
+				"appe",
+				"appendChildrenTo"
+			],
+			[
+				"compi",
+				"compiled"
+			],
+			[
 				"maste",
 				"master_element"
 			],
@@ -82,10 +98,6 @@
 			[
 				"err",
 				"error"
-			],
-			[
-				"appendC",
-				"appendChild(parent, child)	ol.js"
 			],
 			[
 				"onCom",
@@ -502,36 +514,16 @@
 			[
 				"map",
 				"mapdiv"
-			],
-			[
-				"inst",
-				"instanceof"
-			],
-			[
-				"idDoc",
-				"idDocumento"
-			],
-			[
-				"res",
-				"resource"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "src/com/aleclofabbro/reflux/ctl/bind-html.js",
-			"settings":
-			{
-				"buffer_size": 1171,
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "src/com/aleclofabbro/reflux/reflux.js",
 			"settings":
 			{
-				"buffer_size": 54,
+				"buffer_size": 144,
 				"line_ending": "Unix",
 				"name": "define(["
 			}
@@ -540,15 +532,7 @@
 			"file": "src/com/aleclofabbro/reflux/requirejs/plugins/compile-template.js",
 			"settings":
 			{
-				"buffer_size": 758,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/test/index.html",
-			"settings":
-			{
-				"buffer_size": 1719,
+				"buffer_size": 966,
 				"line_ending": "Unix"
 			}
 		},
@@ -556,15 +540,7 @@
 			"file": "src/com/aleclofabbro/reflux/requirejs/plugins/template.js",
 			"settings":
 			{
-				"buffer_size": 1626,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/test/templ.html",
-			"settings":
-			{
-				"buffer_size": 197,
+				"buffer_size": 1689,
 				"line_ending": "Unix"
 			}
 		},
@@ -572,7 +548,31 @@
 			"file": "src/com/aleclofabbro/reflux/cpl/compiler.js",
 			"settings":
 			{
-				"buffer_size": 1081,
+				"buffer_size": 1068,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/com/aleclofabbro/reflux/ctl/bind-html.js",
+			"settings":
+			{
+				"buffer_size": 1686,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/test/templ.html",
+			"settings":
+			{
+				"buffer_size": 838,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/test/templates/test.html",
+			"settings":
+			{
+				"buffer_size": 1658,
 				"line_ending": "Unix"
 			}
 		}
@@ -580,15 +580,15 @@
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 75.0,
+		"height": 54.0,
 		"selected_items":
 		[
 			[
-				"Package Control: in",
+				"Package Control: ins",
 				"Package Control: Install Package"
 			],
 			[
-				"Package Control: ins",
+				"Package Control: in",
 				"Package Control: Install Package"
 			],
 			[
@@ -672,7 +672,7 @@
 				"Package Control: Install Package"
 			]
 		],
-		"width": 467.0
+		"width": 575.0
 	},
 	"console":
 	{
@@ -689,6 +689,7 @@
 	},
 	"file_history":
 	[
+		"/home/alec/.config/sublime-text-2/Packages/HTML-CSS-JS Prettify/HTMLPrettify.sublime-settings",
 		"/home/alec/My_Projects/src/lib/underscore/underscore-min.map",
 		"/home/alec/My_Projects/src/com/aleclofabbro/requirejs/plugins/compile-template.js",
 		"/home/alec/My_Projects/src/test/index.html",
@@ -741,7 +742,6 @@
 		"/home/alec/Cordova/ubnt-app/src/tpls/survey.html",
 		"/home/alec/Eclipse/AndroidPlugins/src/com/alec/cordova/ssh/BrowserAlecSSHProxy.js",
 		"/home/alec/.config/sublime-text-2/Packages/HTML-CSS-JS Prettify/.jsbeautifyrc",
-		"/home/alec/.config/sublime-text-2/Packages/HTML-CSS-JS Prettify/HTMLPrettify.sublime-settings",
 		"/home/alec/Eclipse/AndroidPlugins/src/com/alec/cordova/ssh/Client.js",
 		"/home/alec/Cordova/ubnt-app/src/js/ui/link.js",
 		"/home/alec/Cordova/ubnt-app/www/css/index.css",
@@ -962,6 +962,9 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"_template_compiler",
+			"this",
+			"            var compiled = _.template(elem.innerText);\n            elem.innerHTML = '';\n",
 			"compiler_def",
 			"ctl",
 			"controller",
@@ -1086,10 +1089,7 @@
 			"_search_input_elem",
 			"ready",
 			"_eq_check_expr",
-			"_desc_expr",
-			"_items_expr",
-			"_items_parsed",
-			"_items"
+			"_desc_expr"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1229,57 +1229,29 @@
 		"reverse": false,
 		"show_context": true,
 		"use_buffer2": true,
-		"whole_word": true,
+		"whole_word": false,
 		"wrap": true
 	},
 	"groups":
 	[
 		{
-			"selected": 6,
+			"selected": 3,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "src/com/aleclofabbro/reflux/ctl/bind-html.js",
-					"settings":
-					{
-						"buffer_size": 1171,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								553,
-								553
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
 					"file": "src/com/aleclofabbro/reflux/reflux.js",
 					"settings":
 					{
-						"buffer_size": 54,
+						"buffer_size": 144,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								9,
-								9
+								140,
+								140
 							]
 						],
 						"settings":
@@ -1294,19 +1266,75 @@
 					"type": "text"
 				},
 				{
-					"buffer": 2,
+					"buffer": 1,
 					"file": "src/com/aleclofabbro/reflux/requirejs/plugins/compile-template.js",
 					"settings":
 					{
-						"buffer_size": 758,
+						"buffer_size": 966,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								53,
-								53
+								347,
+								347
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 66.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/com/aleclofabbro/reflux/requirejs/plugins/template.js",
+					"settings":
+					{
+						"buffer_size": 1689,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1170,
+								1681
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 765.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/com/aleclofabbro/reflux/cpl/compiler.js",
+					"settings":
+					{
+						"buffer_size": 1068,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								421,
+								421
 							]
 						],
 						"settings":
@@ -1320,49 +1348,27 @@
 						"zoom_level": 1.0
 					},
 					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "src/test/index.html",
-					"settings":
-					{
-						"buffer_size": 1719,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								507,
-								507
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 17.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
+				}
+			]
+		},
+		{
+			"selected": 2,
+			"sheets":
+			[
 				{
 					"buffer": 4,
-					"file": "src/com/aleclofabbro/reflux/requirejs/plugins/template.js",
+					"file": "src/com/aleclofabbro/reflux/ctl/bind-html.js",
 					"settings":
 					{
-						"buffer_size": 1626,
+						"buffer_size": 1686,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1570,
-								1570
+								463,
+								463
 							]
 						],
 						"settings":
@@ -1372,7 +1378,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 666.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1382,15 +1388,15 @@
 					"file": "src/test/templ.html",
 					"settings":
 					{
-						"buffer_size": 197,
+						"buffer_size": 838,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								19,
-								19
+								420,
+								420
 							]
 						],
 						"settings":
@@ -1400,35 +1406,35 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 255.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 6,
-					"file": "src/com/aleclofabbro/reflux/cpl/compiler.js",
+					"file": "src/test/templates/test.html",
 					"settings":
 					{
-						"buffer_size": 1081,
+						"buffer_size": 1658,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								50,
-								50
+								657,
+								657
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"syntax": "Packages/HTML/HTML.tmLanguage",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 68.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1453,11 +1459,18 @@
 				0,
 				1,
 				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
 			]
 		],
 		"cols":
 		[
 			0.0,
+			0.632816091343,
 			1.0
 		],
 		"rows":
@@ -1544,6 +1557,6 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 278.0,
+	"side_bar_width": 242.0,
 	"status_bar_visible": true
 }

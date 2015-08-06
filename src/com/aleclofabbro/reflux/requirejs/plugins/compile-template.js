@@ -3,18 +3,21 @@ define([
     'com/aleclofabbro/reflux/requirejs/plugins/template'
   ],
   function(reflux, tpl) {
-    var compiler = reflux.cpl;
     return {
       load: function(name, parentRequire, onload, config) {
         var url = parentRequire.toUrl(name);
-        // require(['tpl!' + url], function(tpl) {
         tpl.loadElem(url,
           function(tpl) {
-            var master_elem = tpl.get();
-            compiler.precompile(master_elem);
+            var master_elem = tpl.clone();
+            reflux.cpl.precompile(master_elem);
             onload({
-              get: function(ctx) {
-                return compiler.compile(master_elem, ctx);
+              compile: function(ctx, appendChildrenTo) {
+                var compiled_elem = reflux.cpl.compile(master_elem, ctx);
+                if (appendChildrenTo)
+                  while (compiled_elem.children.length)
+                    appendChildrenTo.appendChild(compiled_elem.children[0]);
+                else
+                  return compiled_elem.children;
               }
             });
           },
@@ -22,7 +25,6 @@ define([
             console.error('reflux compile-template err:', err);
           }
         );
-        // });
       }
     }
   });
