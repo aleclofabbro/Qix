@@ -6,17 +6,28 @@ define([
   function(compiler, bind, Rx) {
     var _attr_name = 'qix:bind';
     var _selector = '[' + _attr_name.replace(':', '\\:') + ']';
+
+    var _master = function(master) {
+      if (!master.element.querySelector(_selector))
+        return;
+      master.instantiate
+        .subscribe(_instantiate);
+    };
+
     var _instantiate = function(element) {
-      var binder = bind(element);
-      (binder.r_value);
+      var elems = element.querySelector(_selector);
+      Array.prototype
+        .forEach.call(elems,
+          function(e) {
+            var binder = bind(element);
+            binder.r_value;
+          });
     };
     compiler.masterElements
-      .subscribe(function(master) {
-        if (!master.element.querySelector(_selector))
-          return;
-        master.instantiate
-          .subscribe(_instantiate);
-      });
+      .subscribe(_master);
+
+
+
 
 
     compiler.register({
