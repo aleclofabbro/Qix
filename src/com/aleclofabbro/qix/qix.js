@@ -1,8 +1,9 @@
 define([
-  'com/aleclofabbro/qix/cpl/compiler',
-  'com/aleclofabbro/qix/ctl/bind-html'
-], function(cpl) {
+  './compiler',
+  './loaders/qix-loader'
+], function(cpl, loader) {
   return {
-    cpl: cpl
+    compile: cpl,
+    load: loader.load
   };
 });
