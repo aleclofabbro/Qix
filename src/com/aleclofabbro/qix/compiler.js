@@ -23,6 +23,7 @@ define([
       elem.$qix = qix;
       return qix;
     };
+
   _master_elems_obs.master = _master_qix;
   return _master_elems_obs;
 });
