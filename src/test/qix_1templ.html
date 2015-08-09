@@ -1,0 +1,41 @@
+<!-- <div> -->
+<span ctl:bind-html>
+  <ul>
+    ||for(var ix in $value){var el=$value[ix];||
+    <li>
+      <span>
+        {{el.nome}}
+      </span>
+      <span>
+        {{el.cognome}}
+      </span>
+    </li>
+    ||}||
+  </ul>
+</span>
+<span ctl:bind-html>
+  {{$value.reduce(function(str,el,ix){ return str+ix+ ':'+el.nome+ ',' + el.cognome+ ' ** '; },'')}}
+</span>
+<span ctl:bind-html>
+  <ul>
+    ||for(var ix in $value){var el=$value[ix];||
+    <li>
+      <span>
+        {{el.nome}}
+      </span>
+      <span>
+        {{el.cognome}}
+      </span>
+    </li>
+    ||}||
+  </ul>
+</span>
+<span style="color:red;" ctl:bind-html="0.nome">
+</span>
+<span style="color:blue;" ctl:bind-html="0.cognome">
+</span>
+<span style="color:green;" ctl:bind-html="1.nome">
+</span>
+<span style="color:purple;" ctl:bind-html="1.cognome">
+</span>
+<!-- </div> -->

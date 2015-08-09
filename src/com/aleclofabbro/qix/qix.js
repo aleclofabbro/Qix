@@ -1,4 +1,4 @@
-define([
+define('qix', [
   './compiler',
   './loaders/qix-loader'
 ], function(cpl, loader) {
