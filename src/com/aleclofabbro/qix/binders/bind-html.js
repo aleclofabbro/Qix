@@ -1,8 +1,6 @@
 define([
-    'com/aleclofabbro/reflux/cpl/compiler',
-    'rx',
-    'ramda',
-    '_'
+    'com/aleclofabbro/qix/cpl/compiler',
+    'rx'
   ],
   function(compiler, Rx, R) {
     _.templateSettings = {
