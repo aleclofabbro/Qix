@@ -4,7 +4,7 @@ define([
   'rx.async',
   'rx.experimental',
   'rx.aggregates'
-], function(require, Rx) {
+], function(local_require, Rx) {
   var _qix_regexp = /^qix(?:-*).*(?=:)/;
   var _interpolator = function(textNode, qix) {
     if (textNode.textContent.trim() === '*')
@@ -13,6 +13,7 @@ define([
       });
   };
   var Qix = function(elem, parent) {
+    this.id = Qix.count++;
     this.broadcast = new Rx.Subject();
     this.emit = new Rx.Subject();
     if (parent) {
@@ -31,6 +32,7 @@ define([
     this.parent = parent;
     this.element = elem;
   };
+  Qix.count = 0;
   Qix.prototype = {
     spawn: function(elem) {
       var _sub_qix = new Qix(elem, this);
@@ -42,8 +44,7 @@ define([
   };
   var rootQix = new Qix(document);
 
-  var _require_obs = Rx.Observable.fromCallback(require);
-  var _compile = function(elem, parent_qix) {
+  var _compile = function(elem, parent_qix, cb) {
     // compila elem
     // se !parent_qix allora è root 
     // se elem.$qix allora è già compilato 
@@ -62,7 +63,7 @@ define([
     // ["qix"]
     // 'qix-sloe:asdsa'.match(/^qix(?:-*).*(?=:)/)
     // ["qix-sloe"]
-    var _filtered_defs =
+    var _filtered__attr_defs =
       _attr_list
       .map(function(_attr) { // mappa gli attributi con delle def di binder_provider oppure false 
         var match = _attr.name.match(_qix_regexp);
@@ -90,51 +91,62 @@ define([
       parent_qix = rootQix;
 
     var _current_qix; // il qix
-    if (_filtered_defs.length) // se ci sono qix allora spawn
+    if (_filtered__attr_defs.length) // se ci sono qix allora spawn
       _current_qix = parent_qix.spawn(elem);
     else
       _current_qix = parent_qix // se non ci sono allora il qix è il parent
       // -- IL QIX
 
-    var _binders_reqs_obs_arr =
-      _filtered_defs
-      .map(function(binder_def) { // mappa i binder_def con binders observers 
-        return _require_obs([binder_def.path]) // require_2_observer
-          .map(function(binder_provider) {
-            return binder_provider.bind(elem, binder_def); // binder
-          });
+    var _binders_paths =
+      _filtered__attr_defs
+      .map(function(binder_def) { // mappa i binder_def con binders  
+        return binder_def.path;
       });
+    local_require(_binders_paths, function() {
+      var _binders = Array.prototype.slice.call(arguments);
+      _binders.forEach(function(binder, index) {
+        binder.bind(elem, _filtered__attr_defs[index]);
+      });
+      _continue_crawl();
+    });
 
 
-    return Rx.Observable.forkJoin(_binders_reqs_obs_arr)
-      .lastOrDefault(null, [])
-      .flatMap(function(all_curr_binders_array) {
-        var _child_nodes_arr = Array.prototype.slice.call(elem.childNodes);
-        var _children_compile_obs_arr =
-          _child_nodes_arr
-          .filter(function(_child) {
-            if (_child.nodeType === 3)
-              _interpolator(_child, _current_qix)
-            return _child.nodeType === 1;
-          })
-          .map(function(_child) {
-            return _compile(_child, _current_qix);
-          });
-        return Rx.Observable.forkJoin(_children_compile_obs_arr)
-          .lastOrDefault(null, [])
-          .map(function(_all_children_qix_array) {
-            return _current_qix;
-          });
+
+    var _child_nodes_arr = Array.prototype.slice.call(elem.childNodes);
+    var _children_to_compile_arr =
+      _child_nodes_arr
+      .filter(function(_child) {
+        if (_child.nodeType === 3) {
+          _interpolator(_child, _current_qix)
+          return false;
+        }
+        return _child.nodeType === 1;
       });
+
+    var _children_to_compile_number = _children_to_compile_arr.length;
+    var _children_to_compile_results = [];
+    var _continue_crawl = function() {
+      if (!_children_to_compile_number)
+        cb(_current_qix);
+      else
+        _children_to_compile_arr
+        .forEach(function(_child, index) {
+          return _compile(_child, _current_qix, function(compile_result) {
+            _children_to_compile_number--;
+            _children_to_compile_results[index] = compile_result;
+            if (!_children_to_compile_number)
+              cb(_current_qix);
+          });
+        });
+    };
   };
 
-  var _export = function(elem, parent_qix) {
+  var _export = function(elem, parent_qix, cb) {
     var _elem_clone = document.cloneNode(elem, true).body.children[0];
-    return _compile(_elem_clone, parent_qix)
-      .map(function(qix) {
-        _elem_clone.$qix = qix;
-        return _elem_clone;
-      });
+    return _compile(_elem_clone, parent_qix, function(qix) {
+      _elem_clone.$qix = qix;
+      cb(_elem_clone);
+    });
   };
   _export.rootQix = function() {
     return rootQix;

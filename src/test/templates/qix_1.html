@@ -38,12 +38,11 @@
     Rx.config.longStackSupport = true;
     var el = document.body.children[0];
     xx = function(cb) {
-      qix.compile(el)
-        .subscribe(function(el) {
-          cb();
-          document.body.children[0].remove();
-          document.body.appendChild(el);
-        });
+      qix.compile(el, null, function(el) {
+        cb();
+        document.body.children[0].remove();
+        document.body.appendChild(el);
+      });
     }
   });
   </script>
@@ -91,109 +90,7 @@
         </span>
       </span>
     </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-      <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-      </span>
-    </span>
-    <span qix:bind="bb">bbb
-    </span>
-    <span qix:bind="cc">ccc
-      <span qix:bind="dd">ddd
-      </span>
-    </span>
-  </span>
+
 </body>
 
 </html>
