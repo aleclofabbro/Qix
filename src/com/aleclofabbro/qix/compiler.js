@@ -124,17 +124,16 @@ define([
       });
 
     var _children_to_compile_number = _children_to_compile_arr.length;
-    var _children_to_compile_results = [];
+    // var _children_qixs = [];
     var _continue_crawl = function() {
       if (!_children_to_compile_number)
         cb(_current_qix);
       else
         _children_to_compile_arr
         .forEach(function(_child, index) {
-          return _compile(_child, _current_qix, function(compile_result) {
-            _children_to_compile_number--;
-            _children_to_compile_results[index] = compile_result;
-            if (!_children_to_compile_number)
+          return _compile(_child, _current_qix, function(_child_qix) {
+            // _children_qixs[index] = _child_qix;
+            if (!--_children_to_compile_number)
               cb(_current_qix);
           });
         });
