@@ -1,4 +1,5 @@
 define([], function() {
+  "use strict";
   return function(elem) {
     var s_value = new Rx.Subject();
     var r_value = Rx.Observer.create(

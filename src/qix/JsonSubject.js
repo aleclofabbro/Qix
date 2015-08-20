@@ -1,6 +1,6 @@
 define(['rx', 'ramda'],
   function(Rx, R) {
-    window.R = R;
+    "use strict";
     var lens = function(path) {
       var root = this;
       var _lens_setter = R.assocPath(path);

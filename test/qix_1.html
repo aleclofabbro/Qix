@@ -10,16 +10,17 @@
     Rx.config.longStackSupport = true;
     qix.bootstrap(document.body.children[0], function(el) {
 
-      Rx.Observable.interval(1000)
+      dsp = Rx.Observable.interval(1000)
         .map(function(i) {
           return 'upd:' + i;
         })
-        .subscribe(el.$qix.broadcast);
+        .subscribe(el.$qix.$broadcaster);
 
     });
   });
   // i text-node con "*" interpolano i dati dal qix-scope 
   // mentre i qix:bind assegnano all'elemento il valore dal qix-scope
+  // nella console `dsp.dispose();` per fermare
   </script>
 </head>
 

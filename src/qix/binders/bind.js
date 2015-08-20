@@ -2,11 +2,11 @@ define([
     'rx'
   ],
   function(Rx) {
-
+    "use strict";
     return {
       bind: function(el) {
         // console.log('bind:', el);
-        el.$qix.broadcast.subscribe(function(v) {
+        el.$qix.$broadcaster.subscribe(function(v) {
           el.innerText = v;
           // console.log('bound', v, el);
         })

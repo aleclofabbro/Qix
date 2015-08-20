@@ -3,6 +3,7 @@ define([
     './element'
   ],
   function(qix, tpl) {
+    "use strict";
     return {
       load: function(name, parentRequire, onload, config) {
         var url = parentRequire.toUrl(name);

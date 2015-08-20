@@ -1,4 +1,6 @@
 define(function() {
+  "use strict";
+
   function sendRequest(url, callback) {
     var xhr = createXMLHTTPObject();
     if (!xhr)
