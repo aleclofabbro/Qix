@@ -3,37 +3,9 @@
 
 <head>
   <title>Test</title>
-  <script type="text/javascript" src="/lib/requirejs/require.js"></script>
+  <script type="text/javascript" src="../node_modules/requirejs/require.js"></script>
+  <script type="text/javascript" src="require-config.js"></script>
   <script type="text/javascript">
-  require.config({
-    baseUrl: '/',
-    packages: [{
-      name: 'qix',
-      location: 'com/aleclofabbro/qix', // default 'packagename'
-      main: 'qix' // default 'main' 
-    }],
-    paths: {
-      // "qix": "com/aleclofabbro/qix/qix",
-      // EXTERNALS
-
-      "rx": "lib/rxjs/dist/rx",
-      //      "rx.all": "lib/rxjs/dist/rx.all",
-      "rx.async": "lib/rxjs/dist/rx.async",
-      "rx.time": "lib/rxjs/dist/rx.time",
-      "rx.backpressure": "lib/rxjs/dist/rx.backpressure",
-      "rx.binding": "lib/rxjs/dist/rx.binding",
-      "rx.aggregates": "lib/rxjs/dist/rx.aggregates",
-      "rx.joinpatterns": "lib/rxjs/dist/rx.joinpatterns",
-      "rx.coincidence": "lib/rxjs/dist/rx.coincidence",
-      "rx.experimental": "lib/rxjs/dist/rx.experimental",
-      "rx.dom": "lib/rx-dom/dist/rx.dom",
-
-      "ramda": "lib/ramda/dist/ramda"
-    }
-  });
-  requirejs.onError = function(err) {
-    console.error(err);
-  };
   require(['qix'], function(qix) {
     Rx.config.longStackSupport = true;
     qix.bootstrap(document.body.children[0], function(el) {
