@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:ctl="http://qix.com/xmlns/ctl">
+
+<head>
+  <title>Test</title>
+  <script type="text/javascript" src="../lib/requirejs/require.js"></script>
+  <script type="text/javascript">
+  require.config({
+    baseUrl: '/',
+    packages: [{
+      name: 'qix',
+      location: 'com/aleclofabbro/qix', // default 'packagename'
+      main: 'qix' // default 'main' 
+    }],
+    paths: {
+
+      // EXTERNALS
+      "_": "lib/underscore/underscore.min",
+      "stomp": "lib/stomp/stomp",
+      "ol3": "lib/ol3/ol",
+
+      "rx": "lib/rxjs/dist/rx",
+      "rx.all": "lib/rxjs/dist/rx.all",
+      "rx.async": "lib/rxjs/dist/rx.async",
+      "rx.time": "lib/rxjs/dist/rx.time",
+      "rx.backpressure": "lib/rxjs/dist/rx.backpressure",
+      "rx.binding": "lib/rxjs/dist/rx.binding",
+      "rx.aggregates": "lib/rxjs/dist/rx.aggregates",
+      "rx.joinpatterns": "lib/rxjs/dist/rx.joinpatterns",
+      "rx.coincidence": "lib/rxjs/dist/rx.coincidence",
+      "rx.experimental": "lib/rxjs/dist/rx.experimental",
+      "rx.dom": "lib/rx-dom/dist/rx.dom",
+
+      "ramda": "lib/ramda/dist/ramda"
+    }
+  });
+  var dbg_obs = function(obs, opts) {
+    opts = opts || {};
+    if (typeof opts === 'string')
+      opts = {
+        tag: opts
+      };
+    obs[opts.no_subs ? 'do' : 'subscribe'](
+      function(v) {
+        console.log('Next:', opts.tag || '', v);
+        if (opts.set)
+          opts[opts.set] = v;
+      },
+      function(e) {
+        console.log('Err:', opts.tag || '', e);
+        if (opts.set)
+          opts[opts.set] = e;
+      },
+      function() {
+        console.log('Cpl:', opts.tag || '');
+      });
+  };
+  </script>
+</head>
+
+<body>
+</body>
+
+</html>
