@@ -10,7 +10,7 @@
     Rx.config.longStackSupport = true;
     qix.bootstrap(document.body.children[0], function(el) {
 
-      dsp = Rx.Observable.interval(1000)
+      dsp = Rx.Observable.timer(0, 1000)
         .map(function(i) {
           return 'upd:' + i;
         })
