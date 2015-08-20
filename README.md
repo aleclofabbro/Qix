@@ -1,3 +1,3 @@
-npm install,  
-http-server  
-/test/qix_1.html  
+npm install  
+./node_modules/http-server/bin/http-server 
+/test/qix_1.html
