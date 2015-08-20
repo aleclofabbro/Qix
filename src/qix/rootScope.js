@@ -30,6 +30,12 @@ define(['rx'],
       },
       $isRoot: function() {
         return this === _root_scope;
+      },
+      $emit: function(v) {
+        this.$emitter.onNext(v);
+      },
+      $broadcast: function(v) {
+        this.$broadcaster.onNext(v);
       }
     };
     _root_scope = Scope.prototype.$rootScope = Scope.rootScope = new Scope();
