@@ -1,3 +1,3 @@
 npm install,  
-http-server
-/test/qix_1.html
+http-server  
+/test/qix_1.html  
