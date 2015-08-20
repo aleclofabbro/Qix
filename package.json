@@ -2,6 +2,7 @@
   "name": "QixJs",
   "version": "0.1.0",
   "devDependencies": {
+    "http-server": "",
     "rx": "",
     "requirejs": "",
     "ramda": "",

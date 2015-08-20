@@ -6,58 +6,65 @@
   <script type="text/javascript" src="../node_modules/requirejs/require.js"></script>
   <script type="text/javascript" src="require-config.js"></script>
   <script type="text/javascript">
-  require(['qix'], function(qix) {
+  require(['qix','rx','rx.time'], function(qix,Rx) {
     Rx.config.longStackSupport = true;
     qix.bootstrap(document.body.children[0], function(el) {
-      qel = el;
-      console.log(el);
+
+      Rx.Observable.interval(1000)
+      .map(function(i){
+        return 'upd:'+i;
+      })
+      .subscribe(el.$qix.broadcast);
+
     });
   });
+// i text-node con "*" interpolano i dati dal qix-scope 
+// mentre i qix:bind assegnano all'elemento il valore dal qix-scope  
   </script>
 </head>
 
 <body>
-  <span>*
-    <span>*
-      <span qix:bind="bb">bbb
-      </span>
-  <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-  </span>
-  </span>
-  <span>*
-      <span qix:bind="bb">bbb
-      </span>
-  <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-  </span>
-  </span>
-  <span>*
-      <span qix:bind="bb">bbb
-      </span>
-  <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-  </span>
-  </span>
-  <span>*
-      <span qix:bind="bb">bbb
-      </span>
-  <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-  </span>
-  </span>
-  <span>*
-      <span qix:bind="bb">bbb
-      </span>
-  <span qix:bind="cc">ccc
-        <span qix:bind="dd">ddd
-        </span>
-  </span>
-  </span>
+  <div>*
+    <div>*
+      <div qix:bind="bb">bbb
+      </div>
+  <div qix:bind="cc">ccc
+        <div qix:bind="dd">ddd
+        </div>
+  </div>
+  </div>
+  <div>*
+      <div qix:bind="bb">bbb
+      </div>
+  <div qix:bind="cc">ccc
+        <div qix:bind="dd">ddd
+        </div>
+  </div>
+  </div>
+  <div>*
+      <div qix:bind="bb">bbb
+      </div>
+  <div qix:bind="cc">ccc
+        <div qix:bind="dd">ddd
+        </div>
+  </div>
+  </div>
+  <div>*
+      <div qix:bind="bb">bbb
+      </div>
+  <div qix:bind="cc">ccc
+        <div qix:bind="dd">ddd
+        </div>
+  </div>
+  </div>
+  <div>*
+      <div qix:bind="bb">bbb
+      </div>
+  <div qix:bind="cc">ccc
+        <div qix:bind="dd">ddd
+        </div>
+  </div>
+  </div>
 </body>
 
 </html>

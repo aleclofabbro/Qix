@@ -9,7 +9,7 @@ define([
   var _interpolator = function(textNode, qix) {
     if (textNode.textContent.trim() === '*')
       qix.broadcast.subscribe(function(v, qix) {
-        textNode.textContent = v;
+        textNode.textContent = 'interpolated:'+v;
       });
   };
   var Qix = function(elem, parent) {
