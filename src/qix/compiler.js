@@ -7,7 +7,12 @@ define([
   'rx.aggregates'
 ], function(local_require, Rx, rootScope) {
   "use strict";
-  var _scope_regexp = /^qix(?:-*).*(?=:)/;
+  var _arr_slice = function(_arr_like) {
+    return Array.prototype.slice.call(_arr_like);
+  };
+
+  var _qix_regexp = /^qix(?:-*).*(?=:)/;
+
   var _interpolator = function(textNode, scope) {
     if (textNode.textContent.trim() === '*')
       scope.$broadcaster.subscribe(function(v, scope) {
@@ -15,7 +20,7 @@ define([
       });
   };
 
-  var _compile = function(elem, parent_scope, cb) {
+  var _compile = function(elem, parent_scope, compiled_callback) {
     // compila elem
     // se !parent_scope allora è root 
     // se elem.$scope allora è già compilato 
@@ -25,19 +30,18 @@ define([
         elem: elem
       });
 
-    // array di attr
-    var _attr_list = Array.prototype.slice.call(elem.attributes);
 
-    // 'scopes-sloe:asdsa'.match(/^qix(?:-*).*(?=:)/)
-    // ["scopes-sloe"]
-    // 'qix:asdsa'.match(/^qix(?:-*).*(?=:)/)
-    // ["qix"]
-    // 'qix-sloe:asdsa'.match(/^qix(?:-*).*(?=:)/)
-    // ["qix-sloe"]
-    var _filtered_attr_defs =
-      _attr_list
-      .map(function(_attr) { // mappa gli attributi con delle def di binder_provider oppure false 
-        var match = _attr.name.match(_scope_regexp);
+    // BINDERS DEFS
+    var _qix_binder_defs_array =
+      _arr_slice(elem.attributes)
+      .map(function(_attr) { // mappa gli attributi matchati con delle definizioni di binder_provider oppure false 
+        // 'scopes-sloe:asdsa'.match(/^qix(?:-*).*(?=:)/)
+        // ["scopes-sloe"]
+        // 'qix:asdsa'.match(/^qix(?:-*).*(?=:)/)
+        // ["qix"]
+        // 'qix-sloe:asdsa'.match(/^qix(?:-*).*(?=:)/)
+        // ["qix-sloe"]        
+        var match = _attr.name.match(_qix_regexp);
         if (!match)
           return false;
         else {
@@ -52,68 +56,71 @@ define([
           }
         }
       })
-      .filter(function(binder_def) { // filtra quelli non  qix
+      .filter(function(binder_def) {
+        // filtra quelli non  qix (matchati -> binder_def !== false)
         return binder_def !== false;
       });
 
-    // IL SCOPE
 
-    if (!parent_scope) // se non c'è parent è root
+    // SCOPE
+    if (!parent_scope) // se non c'è parent_scope allora parent_scope è root
       parent_scope = rootScope;
 
     var _current_scope; // il scope
-    if (_filtered_attr_defs.length) // se ci sono scope allora spawn
+
+    if (_qix_binder_defs_array.length) // se ci sono binders allora spawn
       _current_scope = parent_scope.$spawn();
     else
-      _current_scope = parent_scope // se non ci sono allora il scope è il parent
-      // -- IL SCOPE
+      _current_scope = parent_scope // se non ci sono allora il _current_scope è il parent_scope
+
     elem.$qix = _current_scope;
 
-    var _binders_paths =
-      _filtered_attr_defs
-      .map(function(binder_def) { // mappa i binder_def con binders  
+
+    // REQUIRE BINDERS & BIND ALL
+    var _qix_binders_paths_array =
+      _qix_binder_defs_array
+      .map(function(binder_def) { // mappa i binder_def con i path 
         return binder_def.path;
       });
-    local_require(_binders_paths, function() {
-      var _binders = Array.prototype.slice.call(arguments);
-      _binders.forEach(function(binder, index) {
-        binder.bind(elem, _filtered_attr_defs[index]);
-      });
-      _continue_crawl();
-    });
+    local_require(_qix_binders_paths_array, function( /*arguments*/ ) { // argomenti : binders
+      _arr_slice(arguments)
+        .forEach(function(binder, index) {
+          binder.bind(elem, _qix_binder_defs_array[index]);
+        });
 
+      // var _children_scopes = [];
+      // ORA PREPARA I NODI FIGLI PER IL PROSSIMO GIRO DI COMPILE 
+      var _childNodes_to_compile_array =
+        _arr_slice(elem.childNodes)
+        .filter(function(_child) {
+          // se è un TEXT_NODE allora dallo a INTERPOLATOR e filtralo
+          if (_child.nodeType === 3) {
+            _interpolator(_child, _current_scope)
+            return false;
+          }
+          // se è un ELEMENT_NODE allora va in _childNodes_to_compile_array
+          return _child.nodeType === 1;
+        });
 
-
-    var _child_nodes_arr = Array.prototype.slice.call(elem.childNodes);
-    var _childNodes_to_compile_array =
-      _child_nodes_arr
-      .filter(function(_child) {
-        if (_child.nodeType === 3) {
-          _interpolator(_child, _current_scope)
-          return false;
-        }
-        return _child.nodeType === 1;
-      });
-
-    var _childNodes_to_compile_async_number = _childNodes_to_compile_array.length;
-    // var _children_scopes = [];
-    var _continue_crawl = function() {
-      if (!_childNodes_to_compile_async_number)
-        cb(_current_scope);
+      var _childNodes_wait_compile_left = _childNodes_to_compile_array.length; // async count dei compile dei figli 
+      if (!_childNodes_wait_compile_left) // se non ci sono childNodes da compilare allora abbiamo finito 
+        compiled_callback(_current_scope);
       else
         _childNodes_to_compile_array
         .forEach(function(_child, index) {
           return _compile(_child, _current_scope, function(_child_scope) {
             // _children_scopes[index] = _child_scope;
-            if (!--_childNodes_to_compile_async_number)
-              cb(_current_scope);
+            _childNodes_wait_compile_left--;
+            if (!_childNodes_wait_compile_left) // se non ci sono childNodes da attendeere allora abbiamo finito 
+              compiled_callback(_current_scope);
           });
         });
-    };
+    });
+
   };
 
   return function(elem, parent_scope, cb) {
-    return _compile(elem, parent_scope, function(scope) {
+    _compile(elem, parent_scope, function(scope) {
       cb(elem);
     });
   };
