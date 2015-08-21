@@ -6,11 +6,11 @@ define([
     return {
       bind: function(el) {
         // console.log('bind:', el);
-        el.innerHTML='';
+        el.innerHTML = '';
         el.$qix.$broadcaster.subscribe(function(v) {
-          el.innerText = 'bla - ciccio:'+v;
+          el.innerHTML = 'bla - ciccio:' + v;
           // console.log('bound', v, el);
-        })
+        });
         return {};
       }
     };
