@@ -5,11 +5,13 @@ define([
     "use strict";
     return {
       bind: function(el, my_def) {
-        // console.log('bind:', el);
-        el.innerHTML = '';
+        var b;
         el.$qix.$broadcaster.subscribe(function(v) {
-          el.innerHTML = v;
-          // console.log('bound', v, el);
+          if (b)
+            el.style.color = 'red';
+          else
+            el.style.color = 'blue';
+          b = !b;
         });
         return {};
       }

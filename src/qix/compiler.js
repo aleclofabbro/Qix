@@ -20,7 +20,7 @@ define([
   // ["qix-sloe"]        
 
   var _interpolator = function(textNode, scope) {
-    if (textNode.textContent.trim() === '*'){
+    if (textNode.textContent.trim() === '*') {
       textNode.textContent = '';
       scope.$broadcaster.subscribe(function(v, scope) {
         textNode.textContent = 'interpolated:' + v;
@@ -31,12 +31,12 @@ define([
   var _compile = function(elem, parent_scope, compiled_callback) {
     // compila elem
     // se !parent_scope allora è root 
-    // se elem.$scope allora è già compilato 
-    if (elem.$scope)
+    // se elem.$qix allora è già compilato 
+    if (elem.$qix) // forse si può compilare con elem.$qix come parent, e eventualmente clonando l'interno?
       throw new Error({
-        msg: 'scope : elem already compiled',
-        elem: elem
-      });
+      msg: 'qix : elem already compiled',
+      elem: elem
+    });
 
 
     // BINDERS DEFS
@@ -55,7 +55,7 @@ define([
             name: _binder_name,
             path: _binder_path,
             attr: _attr
-          }
+          };
         }
       })
       .filter(function(binder_def) {
@@ -65,15 +65,15 @@ define([
 
 
     // SCOPE
-    if (!parent_scope) // se non c'è parent_scope allora parent_scope è root
-      parent_scope = rootScope;
+    // if (!parent_scope) // se non c'è parent_scope allora parent_scope è root
+    //   parent_scope = rootScope;
 
     var _current_scope; // il scope
 
     if (_qix_binder_defs_array.length) // se ci sono binders allora spawn
       _current_scope = parent_scope.$spawn();
     else
-      _current_scope = parent_scope // se non ci sono allora il _current_scope è il parent_scope
+      _current_scope = parent_scope; // se non ci sono allora il _current_scope è il parent_scope
 
     elem.$qix = _current_scope;
 
@@ -84,7 +84,7 @@ define([
       .map(function(binder_def) { // mappa i binder_def con i path 
         return binder_def.path;
       });
-    local_require(_qix_binders_paths_array, function( /*arguments*/ ) { // argomenti : binders
+    local_require(_qix_binders_paths_array, function( /*arguments : binders*/ ) {
       _arr_slice(arguments)
         .forEach(function(binder, index) {
           binder.bind(elem, _qix_binder_defs_array[index]);
@@ -92,12 +92,11 @@ define([
 
       // var _children_scopes = [];
       // ORA PREPARA I NODI FIGLI PER IL PROSSIMO GIRO DI COMPILE 
-      var _childNodes_to_compile_array =
-        _arr_slice(elem.childNodes)
+      var _childNodes_to_compile_array = _arr_slice(elem.childNodes)
         .filter(function(_child) {
           // se è un TEXT_NODE allora dallo a INTERPOLATOR e filtralo
           if (_child.nodeType === 3) {
-            _interpolator(_child, _current_scope)
+            _interpolator(_child, _current_scope);
             return false;
           }
           // se è un ELEMENT_NODE allora va in _childNodes_to_compile_array
@@ -108,8 +107,7 @@ define([
       if (!_childNodes_wait_compile_left) // se non ci sono childNodes da compilare allora abbiamo finito 
         compiled_callback(_current_scope);
       else
-        _childNodes_to_compile_array
-        .forEach(function(_child, index) {
+        _childNodes_to_compile_array.forEach(function(_child, index) {
           return _compile(_child, _current_scope, function(_child_scope) {
             // _children_scopes[index] = _child_scope;
             _childNodes_wait_compile_left--;

@@ -1,16 +1,17 @@
 define('qix', [
+  './rootScope',
   './compiler',
-  './loaders/qix-loader',
-  './JsonSubject'
-], function(cpl, loader, JsonSubject) {
+  './JsonSubject',
+  'require',
+], function(rootScope, cpl, JsonSubject, _local_require) {
   "use strict";
   return {
     compile: cpl,
-    load: loader.load,
     JsonSubject: JsonSubject,
     bootstrap: function(elem, cb) {
-      this.compile(elem, null, function(qel) {
-        cb && cb(qel);
+      this.compile(elem, rootScope, function(qel) {
+        if (cb)
+          cb(qel);
       });
     }
   };

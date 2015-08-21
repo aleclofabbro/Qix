@@ -1,18 +1,17 @@
 define([
-    '../qix',
+    '../compiler',
     './element'
   ],
-  function(qix, tpl) {
+  function(compiler, tpl) {
     "use strict";
     return {
       load: function(name, parentRequire, onload, config) {
         var url = parentRequire.toUrl(name);
         tpl.loadElem(url,
           function(tpl) {
-            var master_elem = tpl.clone();
             onload({
-              get: function(parent_ctx) {
-                return qix.compile(master_elem, parent_ctx);
+              get: function(parent_ctx, cb) {
+                return compiler(tpl.clone(), parent_ctx, cb);
               }
             });
           },

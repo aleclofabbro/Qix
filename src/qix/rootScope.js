@@ -3,7 +3,7 @@ define(['rx'],
     "use strict";
     var _scope_count = 0;
     var _root_scope;
-    var Scope = function(parent) {
+    var _Scope_init = function(parent) {
       if (!!_root_scope && !parent)
         throw new Error('No parent for non-root scope');
       this.$id = _scope_count++;
@@ -23,9 +23,10 @@ define(['rx'],
         this.parent = parent;
       }
     };
-    Scope.prototype = {
-      $spawn: function() {
-        var _sub_scope = new Scope(this);
+    var _Scope_proto = {
+      $spawn: function(isolate) {
+        var _sub_scope = Object.create(isolate ? _Scope_proto : this);
+        _Scope_init.call(_sub_scope, this);
         return _sub_scope;
       },
       $isRoot: function() {
@@ -36,8 +37,13 @@ define(['rx'],
       },
       $broadcast: function(v) {
         this.$broadcaster.onNext(v);
+      },
+      $root: function() {
+        return _root_scope;
       }
     };
-    _root_scope = Scope.prototype.$rootScope = Scope.rootScope = new Scope();
+    var _tmp_root = Object.create(_Scope_proto);
+    _Scope_init.call(_tmp_root);
+    _root_scope = _tmp_root;
     return _root_scope;
   });
