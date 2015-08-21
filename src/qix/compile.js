@@ -37,11 +37,14 @@ define([
     // compila elem
     // se !parent_scope allora è root 
     // se elem.$qix allora è già compilato 
-    if (elem.$qix) // forse si può compilare con elem.$qix come parent, e eventualmente clonando l'interno?
+
+    // forse si può compilare con elem.$qix come parent, e eventualmente clonando l'interno?
+    // o forse se già compilato skippare?
+    if (elem.$qix)
       throw new Error({
-      msg: 'qix : elem already compiled',
-      elem: elem
-    });
+        msg: 'qix : elem already compiled',
+        elem: elem
+      });
 
 
     // BINDERS DEFS
