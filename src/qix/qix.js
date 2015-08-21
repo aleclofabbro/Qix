@@ -1,12 +1,12 @@
 define('qix', [
   './rootScope',
-  './compiler',
+  './compile',
   './JsonSubject',
   'require',
-], function(rootScope, cpl, JsonSubject, _local_require) {
+], function(rootScope, compile, JsonSubject, _local_require) {
   "use strict";
   return {
-    compile: cpl,
+    compile: compile,
     JsonSubject: JsonSubject,
     bootstrap: function(elem, cb) {
       this.compile(elem, rootScope, function(qel) {

@@ -1,8 +1,8 @@
 define([
-    '../compiler',
+    '../compile',
     './element'
   ],
-  function(compiler, tpl) {
+  function(compile, tpl) {
     "use strict";
     return {
       load: function(name, parentRequire, onload, config) {
@@ -11,7 +11,7 @@ define([
           function(tpl) {
             onload({
               get: function(parent_ctx, cb) {
-                return compiler(tpl.clone(), parent_ctx, cb);
+                return compile(tpl.clone(), parent_ctx, cb);
               }
             });
           },
@@ -20,5 +20,5 @@ define([
           }
         );
       }
-    }
+    };
   });

@@ -5,10 +5,12 @@ define([
   function(Rx, templ) {
     "use strict";
     return {
-      bind: function(el) {
+      bind: function(el, def) {
         // console.log('bind:', el);
+        var _inn = el.innerHTML;
         el.innerHTML = '';
         templ.get(el.$qix, function(cpl_el) {
+          cpl_el.childNodes[0].childNodes[0].nodeValue += '::::' + def.attr.value + '::::' + _inn;
           el.appendChild(cpl_el);
         });
         // el.$qix.$broadcaster.subscribe(function(v) {

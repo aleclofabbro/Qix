@@ -19,6 +19,11 @@ define([
   // 'qix-sloe:asdsa'.match(_qix_regexp)
   // ["qix-sloe"]        
 
+  // _.templateSettings = {
+  //   interpolate: /\{\{(.+?)\}\}/g,
+  //   evaluate: /\|\|([\s\S]+?)\|\|/g,
+  //   escape: /\|\|\*([\s\S]+?)\|\|/g
+  // };
   var _interpolator = function(textNode, scope) {
     if (textNode.textContent.trim() === '*') {
       textNode.textContent = '';
@@ -86,6 +91,7 @@ define([
       });
     local_require(_qix_binders_paths_array, function( /*arguments : binders*/ ) {
       _arr_slice(arguments)
+        // .sort(functon(binder){}) // can be sorted before call
         .forEach(function(binder, index) {
           binder.bind(elem, _qix_binder_defs_array[index]);
         });
@@ -105,23 +111,19 @@ define([
 
       var _childNodes_wait_compile_left = _childNodes_to_compile_array.length; // async count dei compile dei figli 
       if (!_childNodes_wait_compile_left) // se non ci sono childNodes da compilare allora abbiamo finito 
-        compiled_callback(_current_scope);
+        compiled_callback(elem);
       else
         _childNodes_to_compile_array.forEach(function(_child, index) {
           return _compile(_child, _current_scope, function(_child_scope) {
             // _children_scopes[index] = _child_scope;
             _childNodes_wait_compile_left--;
             if (!_childNodes_wait_compile_left) // se non ci sono childNodes da attendeere allora abbiamo finito 
-              compiled_callback(_current_scope);
+              compiled_callback(elem);
           });
         });
     });
 
   };
 
-  return function(elem, parent_scope, cb) {
-    _compile(elem, parent_scope, function(scope) {
-      cb(elem);
-    });
-  };
+  return _compile;
 });
