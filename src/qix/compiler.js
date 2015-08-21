@@ -20,10 +20,12 @@ define([
   // ["qix-sloe"]        
 
   var _interpolator = function(textNode, scope) {
-    if (textNode.textContent.trim() === '*')
+    if (textNode.textContent.trim() === '*'){
+      textNode.textContent = '';
       scope.$broadcaster.subscribe(function(v, scope) {
         textNode.textContent = 'interpolated:' + v;
       });
+    }
   };
 
   var _compile = function(elem, parent_scope, compiled_callback) {
