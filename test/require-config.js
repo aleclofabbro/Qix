@@ -1,5 +1,5 @@
 require.config({
-  baseUrl: '/',
+  // baseUrl: '/',
   packages: [{
     name: 'qix',
     location: '/src/qix', // default 'packagename'

@@ -12,6 +12,12 @@ define([
   };
 
   var _qix_regexp = /^qix(?:-*).*(?=:)/;
+  // 'qix-sloe:asdsa'.match(_qix_regexp)
+  // ["qix-sloe"]
+  // 'qix:asdsa'.match(_qix_regexp)
+  // ["qix"]
+  // 'qix-sloe:asdsa'.match(_qix_regexp)
+  // ["qix-sloe"]        
 
   var _interpolator = function(textNode, scope) {
     if (textNode.textContent.trim() === '*')
@@ -35,12 +41,6 @@ define([
     var _qix_binder_defs_array =
       _arr_slice(elem.attributes)
       .map(function(_attr) { // mappa gli attributi matchati con delle definizioni di binder_provider oppure false 
-        // 'qix-sloe:asdsa'.match(/^qix(?:-*).*(?=:)/)
-        // ["qix-sloe"]
-        // 'qix:asdsa'.match(/^qix(?:-*).*(?=:)/)
-        // ["qix"]
-        // 'qix-sloe:asdsa'.match(/^qix(?:-*).*(?=:)/)
-        // ["qix-sloe"]        
         var match = _attr.name.match(_qix_regexp);
         if (!match)
           return false;
