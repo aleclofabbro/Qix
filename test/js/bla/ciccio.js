@@ -1,0 +1,16 @@
+define([
+    'rx'
+  ],
+  function(Rx) {
+    "use strict";
+    return {
+      bind: function(el) {
+        // console.log('bind:', el);
+        el.$qix.$broadcaster.subscribe(function(v) {
+          el.innerText = 'bla - ciccio:'+v;
+          // console.log('bound', v, el);
+        })
+        return {};
+      }
+    };
+  });

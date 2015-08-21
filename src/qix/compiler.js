@@ -35,8 +35,8 @@ define([
     var _qix_binder_defs_array =
       _arr_slice(elem.attributes)
       .map(function(_attr) { // mappa gli attributi matchati con delle definizioni di binder_provider oppure false 
-        // 'scopes-sloe:asdsa'.match(/^qix(?:-*).*(?=:)/)
-        // ["scopes-sloe"]
+        // 'qix-sloe:asdsa'.match(/^qix(?:-*).*(?=:)/)
+        // ["qix-sloe"]
         // 'qix:asdsa'.match(/^qix(?:-*).*(?=:)/)
         // ["qix"]
         // 'qix-sloe:asdsa'.match(/^qix(?:-*).*(?=:)/)
