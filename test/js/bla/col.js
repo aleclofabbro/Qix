@@ -1,19 +1,19 @@
-define([
-    'rx'
-  ],
-  function(Rx) {
+define([],
+  function() {
     "use strict";
+    var _def_colors = ['red', 'blue'];
     return {
-      bind: function(el, my_def) {
-        var b;
+      control: function(el, my_def) {
+        var b = true,
+          _col_arr = _def_colors;
         el.$qix.$broadcaster.subscribe(function(v) {
-          if (b)
-            el.style.color = 'red';
-          else
-            el.style.color = 'blue';
-          b = !b;
+          el.style.color = _col_arr[Number(b = !b)];
         });
-        return {};
+        return {
+          set: function(arr) {
+            _col_arr = arr;
+          }
+        };
       }
     };
   });

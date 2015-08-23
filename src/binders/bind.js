@@ -1,10 +1,8 @@
-define([
-    'rx'
-  ],
-  function(Rx) {
+define([],
+  function() {
     "use strict";
     return {
-      bind: function(el, my_def) {
+      control: function(el, my_def) {
         // console.log('bind:', el);
         el.innerHTML = '';
         el.$qix.$broadcaster.subscribe(function(v) {

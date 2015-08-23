@@ -1,11 +1,6 @@
 define([
-  'require',
-  'rx',
-  './rootScope',
-  'rx.async',
-  'rx.experimental',
-  'rx.aggregates'
-], function(local_require, Rx, rootScope) {
+  'require'
+], function(local_require) {
   "use strict";
   var _arr_slice = function(_arr_like) {
     return Array.prototype.slice.call(_arr_like);
@@ -55,7 +50,7 @@ define([
         if (!match)
           return false;
         else {
-          var _binder_ns = match[0] === 'qix' ? './binders/' : match[0];
+          var _binder_ns = match[0] === 'qix' ? './binders' : match[0];
           var _binder_name = _attr.name.split(':')[1];
           var _binder_path = [_binder_ns, _binder_name].join('/');
           return {
@@ -71,10 +66,6 @@ define([
         return binder_def !== false;
       });
 
-
-    // SCOPE
-    // if (!parent_scope) // se non c'è parent_scope allora parent_scope è root
-    //   parent_scope = rootScope;
 
     var _current_scope; // il scope
 
@@ -96,7 +87,9 @@ define([
       _arr_slice(arguments)
         // .sort(functon(binder){}) // can be sorted before call
         .forEach(function(binder, index) {
-          binder.bind(elem, _qix_binder_defs_array[index]);
+          var _def = _qix_binder_defs_array[index];
+          var _ctrl = binder.control(elem, _def);
+          _def.attr.$qix = _ctrl;
         });
 
       // var _children_scopes = [];

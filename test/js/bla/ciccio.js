@@ -1,22 +1,21 @@
 define([
-    'rx',
-    'qix/loaders/qix-loader!../../templ.html'
+    'qix!templ.html'
   ],
-  function(Rx, templ) {
+  function(templ) {
     "use strict";
     return {
-      bind: function(el, def) {
+      control: function(el, def) {
         // console.log('bind:', el);
         var _inn = el.innerHTML;
         el.innerHTML = '';
-        templ.get(el.$qix, function(cpl_el) {
-          cpl_el.childNodes[0].childNodes[0].nodeValue += '::::' + def.attr.value + '::::' + _inn;
-          el.appendChild(cpl_el);
+        templ.compileTo(el, function() {
+          var text_node = document.createTextNode('');
+          el.$qix.$broadcaster.subscribe(function(v) {
+            text_node.textContent = '::::' + def.attr.value + '::' + v + '::' + _inn;
+          });
+
+          el.insertBefore(text_node, el.childNodes[0])
         });
-        // el.$qix.$broadcaster.subscribe(function(v) {
-        //   el.innerHTML = 'bla - ciccio:' + v;
-        //   // console.log('bound', v, el);
-        // });
         return {};
       }
     };
