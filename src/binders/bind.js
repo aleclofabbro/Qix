@@ -13,3 +13,18 @@ define([],
       }
     };
   });
+
+
+/*
+define([],
+  function() {
+    "use strict";
+    var ctrl = new Rx.Observer(function(v) {
+      //v={
+      //  deps: Observable,
+      //  exports: Observer
+      //};
+    });
+    return ctrl;
+  });
+*/

@@ -14,8 +14,8 @@ define('qix', [
       elem_loader.loadElem(url, function(master_element) {
           onload({
             master: master_element,
-            compileTo: function(to_elem, cb) {
-              return compile(master_element.clone(), to_elem.$qix, function(_q_elem) {
+            compileTo: function(to_elem, scope, cb) {
+              return compile(master_element.clone(), scope, function(_q_elem) {
                 Array.prototype.slice.call(_q_elem.childNodes)
                   .forEach(function(ch) {
                     to_elem.appendChild(ch);
@@ -23,8 +23,8 @@ define('qix', [
                 cb(_q_elem);
               });
             },
-            compile: function(parent_qix, cb) {
-              return compile(master_element.clone(), parent_qix, cb);
+            compile: function(scope, cb) {
+              return compile(master_element.clone(), scope, cb);
             }
           });
         },
@@ -34,7 +34,8 @@ define('qix', [
       );
     },
     bootstrap: function(elem, cb) {
-      this.compile(elem, rootScope, function(qel) {
+      var _scope = rootScope.$spawn();
+      this.compile(elem, _scope, function(qel) {
         if (cb)
           cb(qel);
       });

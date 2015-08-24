@@ -28,9 +28,8 @@ define([
     }
   };
 
-  var _compile = function(elem, parent_scope, compiled_callback) {
+  var _compile = function(elem, _scope, compiled_callback) {
     // compila elem
-    // se !parent_scope allora è root 
     // se elem.$qix allora è già compilato 
 
     // forse si può compilare con elem.$qix come parent, e eventualmente clonando l'interno?
@@ -53,10 +52,17 @@ define([
           var _binder_ns = match[0] === 'qix' ? './binders' : match[0];
           var _binder_name = _attr.name.split(':')[1];
           var _binder_path = [_binder_ns, _binder_name].join('/');
+
+          // qix-ns:attr='frctl:prp#ctlname'
+          var _attr_val_arr = _attr.value.split('#');
+          var _ctrlname = _attr_val_arr[1];
+          var _deps = _attr_val_arr[0].split(':');
           return {
             ns: _binder_ns,
             name: _binder_name,
             path: _binder_path,
+            ctrlname: _ctrlname,
+            deps: _deps,
             attr: _attr
           };
         }
@@ -70,11 +76,11 @@ define([
     var _current_scope; // il scope
 
     if (_qix_binder_defs_array.length) // se ci sono binders allora spawn
-      _current_scope = parent_scope.$spawn();
+      _current_scope = _scope.$spawn();
     else
-      _current_scope = parent_scope; // se non ci sono allora il _current_scope è il parent_scope
+      _current_scope = _scope; // se non ci sono allora il _current_scope è il _scope
 
-    elem.$qix = _current_scope;
+    elem.$qix = _scope;
 
 
     // REQUIRE BINDERS & BIND ALL
@@ -90,6 +96,7 @@ define([
           var _def = _qix_binder_defs_array[index];
           var _ctrl = binder.control(elem, _def);
           _def.attr.$qix = _ctrl;
+          _current_scope[_def.ctrlname] = _ctrl;
         });
 
       // var _children_scopes = [];

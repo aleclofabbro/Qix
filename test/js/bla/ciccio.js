@@ -8,7 +8,7 @@ define([
         // console.log('bind:', el);
         var _inn = el.innerHTML;
         el.innerHTML = '';
-        templ.compileTo(el, function() {
+        templ.compileTo(el, el.$qix.$spawn(true), function() {
           var text_node = document.createTextNode('');
           el.$qix.$broadcaster.subscribe(function(v) {
             text_node.textContent = '::::' + def.attr.value + '::' + v + '::' + _inn;
