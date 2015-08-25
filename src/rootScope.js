@@ -6,6 +6,7 @@ define(['rx'],
     var _Scope_init = function(parent) {
       if (!!_root_scope && !parent)
         throw new Error('No parent for non-root scope');
+      this.$ctrls = {};
       this.$id = _scope_count++;
       this.$broadcaster = new Rx.Subject();
       this.$emitter = new Rx.Subject();

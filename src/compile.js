@@ -56,13 +56,15 @@ define([
           // qix-ns:attr='frctl:prp#ctlname'
           var _attr_val_arr = _attr.value.split('#');
           var _ctrlname = _attr_val_arr[1];
-          var _deps = _attr_val_arr[0].split(':');
+          var _dep_path = _attr_val_arr[0].split('.');
           return {
+            input: new Rx.Subject(),
+            output: new Rx.Subject(),
             ns: _binder_ns,
             name: _binder_name,
             path: _binder_path,
             ctrlname: _ctrlname,
-            deps: _deps,
+            dep: _dep_path,
             attr: _attr
           };
         }
@@ -71,8 +73,11 @@ define([
         // filtra quelli non  qix (matchati -> binder_def !== false)
         return binder_def !== false;
       });
+    // ^ BINDERS DEFS
 
+    //////////////////////////
 
+    // SCOPE
     var _current_scope; // il scope
 
     if (_qix_binder_defs_array.length) // se ci sono binders allora spawn
@@ -81,7 +86,9 @@ define([
       _current_scope = _scope; // se non ci sono allora il _current_scope è il _scope
 
     elem.$qix = _scope;
+    // ^ SCOPE
 
+    //////////////////////////
 
     // REQUIRE BINDERS & BIND ALL
     var _qix_binders_paths_array =
@@ -94,11 +101,15 @@ define([
         // .sort(functon(binder){}) // can be sorted before call
         .forEach(function(binder, index) {
           var _def = _qix_binder_defs_array[index];
-          var _ctrl = binder.control(elem, _def);
+          binder.control(_def.input.asObservable(), _def.output.asObserver());
           _def.attr.$qix = _ctrl;
-          _current_scope[_def.ctrlname] = _ctrl;
+          _current_scope.$ctrls[_def.ctrlname] = _ctrl;
         });
+      // ^ REQUIRE BINDERS & BIND ALL
 
+      //////////////////////////
+
+      // FILTER CHILDNODES -> CHILD ELEMENTS [TEXTNODES -> INTERPOLATE]
       // var _children_scopes = [];
       // ORA PREPARA I NODI FIGLI PER IL PROSSIMO GIRO DI COMPILE 
       var _childNodes_to_compile_array = _arr_slice(elem.childNodes)
@@ -111,7 +122,11 @@ define([
           // se è un ELEMENT_NODE allora va in _childNodes_to_compile_array
           return _child.nodeType === 1;
         });
+      // ^ FILTER CHILDNODES -> CHILD ELEMENTS [TEXTNODES -> INTERPOLATE]
 
+      //////////////////////////
+
+      // COMPILE CHILDNODES 
       var _childNodes_wait_compile_left = _childNodes_to_compile_array.length; // async count dei compile dei figli 
       if (!_childNodes_wait_compile_left) // se non ci sono childNodes da compilare allora abbiamo finito 
         compiled_callback(elem);
@@ -124,7 +139,10 @@ define([
               compiled_callback(elem);
           });
         });
+      // COMPILE CHILDNODES 
+      //////////////////////////
     });
+
 
   };
 
