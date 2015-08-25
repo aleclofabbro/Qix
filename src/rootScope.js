@@ -1,50 +1,56 @@
-define(['rx'],
-  function(Rx) {
+define([
+    'event',
+    'rx'
+  ],
+  function(_event, Rx) {
     "use strict";
     var _scope_count = 0;
     var _root_scope;
-    var _Scope_init = function(parent) {
-      if (!!_root_scope && !parent)
-        throw new Error('No parent for non-root scope');
-      this.$ctrls = {};
-      this.$id = _scope_count++;
-      this.$broadcaster = new Rx.Subject();
-      this.$emitter = new Rx.Subject();
-      if (!!_root_scope) {
-        parent.$broadcaster
-          .map(function(ev) {
-            return ev;
-          })
-          .subscribe(this.$broadcaster);
-        this.$emitter
-          .map(function(ev) {
-            return ev;
-          })
-          .subscribe(parent.$emitter);
-        this.parent = parent;
-      }
+    var _filter_up = function(ev) {
+      return ev.channel.startsWith('<');
     };
-    var _Scope_proto = {
-      $spawn: function(isolate) {
-        var _sub_scope = Object.create(isolate ? _Scope_proto : this);
-        _Scope_init.call(_sub_scope, this);
-        return _sub_scope;
-      },
-      $isRoot: function() {
-        return this === _root_scope;
-      },
-      $emit: function(v) {
-        this.$emitter.onNext(v);
-      },
-      $broadcast: function(v) {
-        this.$broadcaster.onNext(v);
-      },
-      $root: function() {
-        return _root_scope;
-      }
+    var _filter_down = function(ev) {
+      return ev.channel.startsWith('>');
     };
-    var _tmp_root = Object.create(_Scope_proto);
-    _Scope_init.call(_tmp_root);
-    _root_scope = _tmp_root;
+
+    var _init = function(_scope) {
+      Rx.Subject.call(_scope);
+      _scope.id = _scope_count++;
+      this.upstream = _scope.filter(_filter_up);
+      this.downstream = _scope.filter(_filter_down);
+      return _scope;
+    };
+
+    var _proto = Object.create(Rx.Subject.prototype);
+    _proto.spawn = function() {
+      var _sub_scope = Object.create(_proto);
+      _sub_scope.parent = this;
+      _init(_sub_scope);
+
+      this.downstream
+        .map(_event.bind(null, _sub_scope))
+        .subscribe(_sub_scope);
+
+      _sub_scope.upstream
+        .map(_event.bind(null, this))
+        .subscribe(this);
+
+      return _sub_scope;
+    };
+
+    _proto.push = function(channel, payload) {
+      this.onNext(_event(this, channel, payload));
+    };
+
+    _proto.isRoot = function() {
+      return this === _root_scope;
+    };
+
+    _proto.root = function() {
+      return _root_scope;
+    };
+
+    var _root_scope = _init(Object.create(_proto));
+
     return _root_scope;
   });

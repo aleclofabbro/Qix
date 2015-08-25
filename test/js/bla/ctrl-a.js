@@ -2,14 +2,23 @@ define(['rx'],
   function(Rx) {
     "use strict";
     return {
-      control: function(el, def) {
-        var flux = Rx.Observable.interval(1000)
-          .map(function(v) {
-            return 'ctlaa:' + v;
+      control: function foo(el, i, o) {
+        i.filter(R.path(['val']))
+          .subscribe(function(val) {
+            el.html = val;
+
           });
-        return {
-          flux1: flux
-        };
+        i.filter(R.path(['class']))
+          .subscribe(function(cls) {
+            el.class = cls;
+          });
+
+        var move_disp = Rx.dom.fromEvent(el, 'onmouseover')
+          .map('mouse-over')
+          .subscribe(o);
+
+        i.subscribe(null, move_disp.dispose, move_disp.dispose);
       }
+
     };
   });

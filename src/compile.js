@@ -1,6 +1,7 @@
 define([
+  'event'
   'require'
-], function(local_require) {
+], function(_event, local_require) {
   "use strict";
   var _arr_slice = function(_arr_like) {
     return Array.prototype.slice.call(_arr_like);
@@ -22,7 +23,7 @@ define([
   var _interpolator = function(textNode, scope) {
     if (textNode.textContent.trim() === '*') {
       textNode.textContent = '';
-      scope.$broadcaster.subscribe(function(v, scope) {
+      scope.subscribe(function(v, scope) {
         textNode.textContent = 'interpolated:' + v;
       });
     }
@@ -53,20 +54,29 @@ define([
           var _binder_name = _attr.name.split(':')[1];
           var _binder_path = [_binder_ns, _binder_name].join('/');
 
-          // qix-ns:attr='frctl:prp#ctlname'
           var _attr_val_arr = _attr.value.split('#');
-          var _ctrlname = _attr_val_arr[1];
-          var _dep_path = _attr_val_arr[0].split('.');
-          return {
-            input: new Rx.Subject(),
-            output: new Rx.Subject(),
+          var _in_chann = _attr_val_arr[0] && new RegExp(_attr_val_arr[0]);
+          var _out_chann = _attr_val_arr[1];
+          var _input = _scope
+            .filter(function(ev) {
+              return _in_chann && _in_chann.test(ev.channel);
+            });
+          var _output = new Rx.Subject();
+          _output
+            .map(_event.bind(null, _scope, _out_chann))
+            .subscribe(_scope);
+
+          var _def = {
+            i: _input,
+            o: _output,
             ns: _binder_ns,
             name: _binder_name,
             path: _binder_path,
-            ctrlname: _ctrlname,
-            dep: _dep_path,
-            attr: _attr
+            attr: _attr,
+            scope: _scope
           };
+          _attr.$qix = _def;
+          return _def;
         }
       })
       .filter(function(binder_def) {
@@ -78,14 +88,14 @@ define([
     //////////////////////////
 
     // SCOPE
-    var _current_scope; // il scope
+    // var _current_scope; // il scope
 
-    if (_qix_binder_defs_array.length) // se ci sono binders allora spawn
-      _current_scope = _scope.$spawn();
-    else
-      _current_scope = _scope; // se non ci sono allora il _current_scope è il _scope
+    // if (_qix_binder_defs_array.length) // se ci sono binders allora spawn
+    //   _current_scope = _scope.spawn();
+    // else
+    //   _current_scope = _scope; // se non ci sono allora il _current_scope è il _scope
 
-    elem.$qix = _scope;
+    // elem.$qix = _current_scope;
     // ^ SCOPE
 
     //////////////////////////
@@ -96,14 +106,20 @@ define([
       .map(function(binder_def) { // mappa i binder_def con i path 
         return binder_def.path;
       });
+
+    var _next_sub_scope = _scope;
+    var _new_sub_scope = function() {
+      if (_next_sub_scope === _scope)
+        _next_sub_scope = _sc.spawn();
+      // else throw ?
+      return _next_sub_scope;
+    };
+
     local_require(_qix_binders_paths_array, function( /*arguments : binders*/ ) {
       _arr_slice(arguments)
-        // .sort(functon(binder){}) // can be sorted before call
         .forEach(function(binder, index) {
           var _def = _qix_binder_defs_array[index];
-          binder.control(_def.input.asObservable(), _def.output.asObserver());
-          _def.attr.$qix = _ctrl;
-          _current_scope.$ctrls[_def.ctrlname] = _ctrl;
+          binder.control(_def, _new_sub_scope);
         });
       // ^ REQUIRE BINDERS & BIND ALL
 
@@ -116,7 +132,7 @@ define([
         .filter(function(_child) {
           // se è un TEXT_NODE allora dallo a INTERPOLATOR e filtralo
           if (_child.nodeType === 3) {
-            _interpolator(_child, _current_scope);
+            _interpolator(_child, _scope);
             return false;
           }
           // se è un ELEMENT_NODE allora va in _childNodes_to_compile_array
@@ -131,19 +147,17 @@ define([
       if (!_childNodes_wait_compile_left) // se non ci sono childNodes da compilare allora abbiamo finito 
         compiled_callback(elem);
       else
-        _childNodes_to_compile_array.forEach(function(_child, index) {
-          return _compile(_child, _current_scope, function(_child_scope) {
-            // _children_scopes[index] = _child_scope;
+        _childNodes_to_compile_array
+        .forEach(function(_child, index) {
+          _compile(_child, _next_sub_scope, function(_sub_elem) {
             _childNodes_wait_compile_left--;
             if (!_childNodes_wait_compile_left) // se non ci sono childNodes da attendeere allora abbiamo finito 
-              compiled_callback(elem);
+              compiled_callback(_sub_elem);
           });
         });
       // COMPILE CHILDNODES 
       //////////////////////////
     });
-
-
   };
 
   return _compile;
