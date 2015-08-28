@@ -19,6 +19,9 @@
       _disposable = Rx.Observable.timer(0, 1000)
         .subscribe(rootCtx.downstreamer());
 
+      _disposable_1 = Rx.Observable.timer(0, 1000)
+        .subscribe(rootCtx.emitterTo('cicc'));
+
       rootCtx.upstream
         .subscribe(function(v) {
           console.log(v);
@@ -31,19 +34,8 @@
 <body>
   <div qix-bla:ctrl-a="ctlx">
   </div>
+  <div qix-bla:ciccio="cicc">
+  </div>
 </body>
 
 </html>
-<!-- 
-
->eve
-<eve
-
-#eve
-
-~eve
-:eve
-@eve
-
-§eve
--->
