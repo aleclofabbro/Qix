@@ -6,33 +6,24 @@ define([
   function(Rx) {
     "use strict";
     return {
-      control: function foo(def, spawn) {
-        var receiver = def.receiver();
-        var emitter = def.emitter();
-        def.ctx.subscribe(function(v){
-          console.log('*****',v);
-        });
-        receiver.pluck('val')
-          .subscribe(function(val) {
-            el.html = val;
-
+      control: function foo(_ctx, spawn) {
+        var upstreamer = _ctx.myUpstreamer();
+        var receiver = _ctx.myReceiver();
+        // var emitter = _ctx.myEmitter();
+        
+        _ctx.downstream
+          .pluck('load')
+          .subscribe(function(v) {
+            _ctx.elem.innerHTML = v;
           });
-        receiver.pluck('class')
-          .subscribe(function(cls) {
-            el.class = cls;
-          });
-
-        var move_disp = Rx.DOM.fromEvent(def.elem, 'onmouseover')
+        
+        var move_disp = Rx.DOM.fromEvent(_ctx.elem, 'mouseover')
           .map('mouse-over')
-          .subscribe(emitter);
+          .subscribe(upstreamer);
 
-        receiver.subscribe(undefined, move_disp.dispose, move_disp.dispose);
+        return move_disp.dispose;
       }
 
     };
   });
 
-// signal('vai', {}) {
-//   signal: 'pippo>vai',
-//   payload: {}
-// }

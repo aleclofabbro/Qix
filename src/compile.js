@@ -42,7 +42,7 @@ define([
       });
 
 
-    // BINDERS DEFS
+    // CTRL CONTEXTS
     var _qix_ctrl_defs_array =
       _arr_slice(elem.attributes)
       .map(function(_attr) { // mappa gli attributi matchati con delle definizioni di binder_provider oppure false 
@@ -57,52 +57,40 @@ define([
           var _ctrl_ch_name = _attr.value;
           var _emitter_getter = _ctx.emitter.bind(_ctx, _ctrl_ch_name);
           var _receiver_getter = _ctx.receiver.bind(_ctx, _ctrl_ch_name);
+          var _upstreamer_getter = _ctx.upstreamer.bind(_ctx, _ctrl_ch_name);
+          var _downstreamer_getter = _ctx.downstreamer.bind(_ctx, _ctrl_ch_name);
 
-          var _def = {
-            binder: {
+          var _ctrl_ctx = Object.create(_ctx);
+            _ctrl_ctx.binder= {
               ns: _binder_ns,
               name: _binder_name,
               path: _binder_path
-            },
+            };
 
-            channel: _ctrl_ch_name,
-            emitter: _emitter_getter,
-            receiver: _receiver_getter,
+            _ctrl_ctx.channel= _ctrl_ch_name;
+            _ctrl_ctx.myEmitter= _emitter_getter;
+            _ctrl_ctx.myReceiver= _receiver_getter;
+            _ctrl_ctx.myUpstreamer= _upstreamer_getter;
+            _ctrl_ctx.myDownstreamer= _downstreamer_getter;
 
-            elem: elem,
-            attr: _attr,
-            ctx: _ctx
-          };
-          _attr.$qix = _def;
-          return _def;
+            _ctrl_ctx.elem= elem;
+            _ctrl_ctx.attr= _attr;
+
+          _attr.$qix = _ctrl_ctx;
+          return _ctrl_ctx;
         }
       })
-      .filter(function(ctrl_def) {
+      .filter(function(_ctrl_ctx) {
         // filtra quelli non  qix (matchati -> binder_def !== false)
-        return ctrl_def !== false;
+        return _ctrl_ctx !== false;
       });
-    // ^ BINDERS DEFS
-
-    //////////////////////////
-
-    // SCOPE
-    // var _current_ctx; // il ctx
-
-    // if (_qix_ctrl_defs_array.length) // se ci sono binders allora spawn
-    //   _current_ctx = _ctx.spawn();
-    // else
-    //   _current_ctx = _ctx; // se non ci sono allora il _current_ctx è il _ctx
-
-    // elem.$qix = _current_ctx;
-    // ^ SCOPE
-
-    //////////////////////////
+    // ^ CTRL CONTEXTS
 
     // REQUIRE BINDERS & BIND ALL
     var _qix_binders_paths_array =
       _qix_ctrl_defs_array
-      .map(function(_def) { // mappa i binder_def con i path 
-        return _def.binder.path;
+      .map(function(_ctrl_ctx) { // mappa i binder_def con i path 
+        return _ctrl_ctx.binder.path;
       });
 
     var _next_sub_ctx = _ctx;
@@ -116,8 +104,8 @@ define([
     local_require(_qix_binders_paths_array, function( /*arguments : binders*/ ) {
       _arr_slice(arguments)
         .forEach(function(binder, index) {
-          var _def = _qix_ctrl_defs_array[index];
-          binder.control(_def, _spawn_ctx);
+          var _ctrl_ctx = _qix_ctrl_defs_array[index];
+          binder.control(_ctrl_ctx, _spawn_ctx);
         });
       // ^ REQUIRE BINDERS & BIND ALL
 
