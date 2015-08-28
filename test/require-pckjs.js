@@ -10,6 +10,7 @@ require.config({
     main: 'rx'
   }],
   paths: {
-    "ramda": "/node_modules/ramda/dist/ramda"
+    "ramda": "/node_modules/ramda/dist/ramda",
+    "rx-dom": "/node_modules/rx-dom/dist/rx.dom.min"
   }
 });

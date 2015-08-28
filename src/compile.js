@@ -1,5 +1,5 @@
 define([
-  'signal'
+  './signal',
   'require'
 ], function(_signal, local_require) {
   "use strict";
@@ -69,6 +69,7 @@ define([
             emitter: _emitter_getter,
             receiver: _receiver_getter,
 
+            elem: elem,
             attr: _attr,
             ctx: _ctx
           };

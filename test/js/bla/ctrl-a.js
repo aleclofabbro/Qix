@@ -1,29 +1,38 @@
-define(['rx'],
+define([
+    'rx',
+    'rx/rx.binding',
+    'rx-dom'
+  ],
   function(Rx) {
     "use strict";
     return {
-      control: function foo(el, i, o) {
-        i.filter(R.path(['val']))
+      control: function foo(def, spawn) {
+        var receiver = def.receiver();
+        var emitter = def.emitter();
+        def.ctx.subscribe(function(v){
+          console.log('*****',v);
+        });
+        receiver.pluck('val')
           .subscribe(function(val) {
             el.html = val;
 
           });
-        i.filter(R.path(['class']))
+        receiver.pluck('class')
           .subscribe(function(cls) {
             el.class = cls;
           });
 
-        var move_disp = Rx.dom.fromEvent(el, 'onmouseover')
+        var move_disp = Rx.DOM.fromEvent(def.elem, 'onmouseover')
           .map('mouse-over')
-          .subscribe(o);
+          .subscribe(emitter);
 
-        i.subscribe(null, move_disp.dispose, move_disp.dispose);
+        receiver.subscribe(undefined, move_disp.dispose, move_disp.dispose);
       }
 
     };
   });
 
-signal('vai', {}) {
-  signal: 'pippo>vai',
-  payload: {}
-}
+// signal('vai', {}) {
+//   signal: 'pippo>vai',
+//   payload: {}
+// }

@@ -1,5 +1,5 @@
 define([
-    'signal',
+    './signal',
     'rx'
   ],
   function(_signal, Rx) {
@@ -16,8 +16,8 @@ define([
     var _init = function(_ctx) {
       Rx.Subject.call(_ctx);
       _ctx.id = _ctx_count++;
-      this.upstream = _ctx.filter(_filter_up);
-      this.downstream = _ctx.filter(_filter_down);
+      _ctx.upstream = _ctx.filter(_filter_up);
+      _ctx.downstream = _ctx.filter(_filter_down);
       return _ctx;
     };
 
@@ -56,6 +56,17 @@ define([
           return (emitter_ch === false || emitter_ch === sign.emitter) && (receiver_ch === false || receiver_ch === sign.receiver);
         });
     };
+
+    _proto.downstreamer = function(emitter_ch) {
+      emitter_ch = emitter_ch || '';
+      return this.emit.bind(this, emitter_ch, '@downstream');
+    };
+
+    _proto.upstreamer = function(emitter_ch) {
+      emitter_ch = emitter_ch || '';
+      return this.emit.bind(this, emitter_ch, '@upstream');
+    };
+
 
     _proto.isRoot = function() {
       return this === _root_ctx;

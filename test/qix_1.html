@@ -14,13 +14,13 @@
   require(['qix', 'rx/rx.time'], function(qix, Rx) {
     Rx.config.longStackSupport = true;
     var el = document.body;
-    qix.bootstrap(el, function(q_el) {
+    qix.bootstrap(el, function(rootCtx,q_el) {
 
       dsp = Rx.Observable.timer(0, 1000)
         .map(function(i) {
           return 'upd:' + i;
         })
-        .subscribe(q_el.$qix.$broadcaster);
+        .subscribe(rootCtx.downstreamer());
 
     });
   });

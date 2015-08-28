@@ -4,6 +4,7 @@
   "devDependencies": {
     "http-server": "",
     "rx": "",
+    "rx-dom": "",
     "requirejs": "",
     "ramda": "",
     "underscore": ""

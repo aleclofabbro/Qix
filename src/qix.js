@@ -34,10 +34,9 @@ define('qix', [
       );
     },
     bootstrap: function(elem, cb) {
-      var _ctx = rootCtx.$spawn();
-      this.compile(elem, _ctx, function(qel) {
+      this.compile(elem, rootCtx, function(qel) {
         if (cb)
-          cb(qel);
+          cb(rootCtx, qel);
       });
     }
   };
