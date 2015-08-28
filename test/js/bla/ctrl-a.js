@@ -22,3 +22,8 @@ define(['rx'],
 
     };
   });
+
+signal('vai', {}) {
+  signal: 'pippo>vai',
+  payload: {}
+}
