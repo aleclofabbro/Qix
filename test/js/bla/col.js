@@ -7,7 +7,7 @@ define([],
         var b = true,
           _col_arr = _def_colors;
         ctx.myReceiver().subscribe(function() {
-          el.style.color = _col_arr[Number(b = !b)];
+          ctx.elem.style.color = _col_arr[Number(b = !b)];
         });
       }
     };

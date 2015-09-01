@@ -10,13 +10,13 @@ define([
         var upstreamer = _ctx.myUpstreamer();
         var receiver = _ctx.myReceiver();
         // var emitter = _ctx.myEmitter();
-        
-        _ctx.downstream
+
+        receiver
           .pluck('load')
           .subscribe(function(v) {
             _ctx.elem.innerHTML = v;
           });
-        
+
         var move_disp = Rx.DOM.fromEvent(_ctx.elem, 'mouseover')
           .map('mouse-over')
           .subscribe(upstreamer);
@@ -26,4 +26,3 @@ define([
 
     };
   });
-

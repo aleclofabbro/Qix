@@ -13,15 +13,15 @@ define([
       return ev.receiver === '@downstream';
     };
 
-    var _signal_bouncer = function(ctx,ev){
-      return ev.bounce(ctx);
+    var _signal_bouncer = function(ctx, signal) {
+      return signal.bounce(ctx);
     };
     var _init = function(_ctx) {
       Rx.Subject.call(_ctx);
       _ctx.id = _ctx_count++;
       _ctx.upstream = _ctx.filter(_filter_up);
       _ctx.downstream = _ctx.filter(_filter_down);
-      _ctx.signalBouncer = _signal_bouncer.bind(null,this);
+      _ctx.signalBouncer = _signal_bouncer.bind(null, this);
       return _ctx;
     };
     var _proto = Object.create(Rx.Subject.prototype);

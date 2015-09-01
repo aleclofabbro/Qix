@@ -40,7 +40,7 @@ define([
         msg: 'qix : elem already compiled',
         elem: elem
       });
-
+    elem.$qix = _ctx;
 
     // CTRL CONTEXTS
     var _qix_ctrl_defs_array =
@@ -55,26 +55,26 @@ define([
           var _binder_path = [_binder_ns, _binder_name].join('/');
 
           var _ctrl_ch_name = _attr.value;
-          var _emitter_getter = _ctx.emitter.bind(_ctx, _ctrl_ch_name);
-          var _receiver_getter = _ctx.receiver.bind(_ctx, _ctrl_ch_name);
-          var _upstreamer_getter = _ctx.upstreamer.bind(_ctx, _ctrl_ch_name);
-          var _downstreamer_getter = _ctx.downstreamer.bind(_ctx, _ctrl_ch_name);
+          var _my_emitter_getter = _ctx.emitter.bind(_ctx, _ctrl_ch_name);
+          var _my_receiver_getter = _ctx.receiver.bind(_ctx, _ctrl_ch_name);
+          var _my_upstreamer_getter = _ctx.upstreamer.bind(_ctx, _ctrl_ch_name);
+          var _my_downstreamer_getter = _ctx.downstreamer.bind(_ctx, _ctrl_ch_name);
 
           var _ctrl_ctx = Object.create(_ctx);
-            _ctrl_ctx.binder= {
-              ns: _binder_ns,
-              name: _binder_name,
-              path: _binder_path
-            };
+          _ctrl_ctx.binder = {
+            ns: _binder_ns,
+            name: _binder_name,
+            path: _binder_path
+          };
 
-            _ctrl_ctx.channel= _ctrl_ch_name;
-            _ctrl_ctx.myEmitter= _emitter_getter;
-            _ctrl_ctx.myReceiver= _receiver_getter;
-            _ctrl_ctx.myUpstreamer= _upstreamer_getter;
-            _ctrl_ctx.myDownstreamer= _downstreamer_getter;
+          _ctrl_ctx.channel = _ctrl_ch_name;
+          _ctrl_ctx.myEmitter = _my_emitter_getter;
+          _ctrl_ctx.myReceiver = _my_receiver_getter;
+          _ctrl_ctx.myUpstreamer = _my_upstreamer_getter;
+          _ctrl_ctx.myDownstreamer = _my_downstreamer_getter;
 
-            _ctrl_ctx.elem= elem;
-            _ctrl_ctx.attr= _attr;
+          _ctrl_ctx.elem = elem;
+          _ctrl_ctx.attr = _attr;
 
           _attr.$qix = _ctrl_ctx;
           return _ctrl_ctx;
@@ -96,7 +96,7 @@ define([
     var _next_sub_ctx = _ctx;
     var _spawn_ctx = function() {
       if (_next_sub_ctx === _ctx)
-        _next_sub_ctx = _sc.spawn();
+        _next_sub_ctx = _ctx.spawn();
       // else throw ?
       return _next_sub_ctx;
     };
@@ -138,7 +138,7 @@ define([
           _compile(_child, _next_sub_ctx, function(_sub_elem) {
             _childNodes_wait_compile_left--;
             if (!_childNodes_wait_compile_left) // se non ci sono childNodes da attendeere allora abbiamo finito 
-              compiled_callback(_sub_elem);
+              compiled_callback(elem);
           });
         });
       // COMPILE CHILDNODES 
