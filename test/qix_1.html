@@ -14,27 +14,24 @@
   require(['qix', 'rx/rx.time'], function(qix, Rx) {
     Rx.config.longStackSupport = true;
     var el = document.body;
-    qix.bootstrap(el, function(rootCtx, q_el) {
-
-      _disposable_1 = Rx.Observable.timer(0, 1000)
-        .subscribe(rootCtx.emitter('', 'ctlx'));
-
-      _disposable_2 = Rx.Observable.timer(0, 111).subscribe(rootCtx.emitter('', 'cicc'));
-
-      rootCtx.upstream
-        .subscribe(function(v) {
-          console.log(v);
-        });
+    ctx = {
+      ctlx: {
+        mover: function(xx) {
+          console.log('ssaseso!', xx);
+        }
+      }
+    };
+    qix.compile(el, ctx, function() {
+      console.log(ctx);
     });
   });
   </script>
 </head>
 
 <body>
-  <div qix-bla:ctrl-a="ctlx">
-  </div>
-  <div qix-bla:ciccio="cicc">
-  </div>
+  <div qix-bla:ctrl-a="ctlx">dddd</div>
+  <div qix-bla:ciccio="cicc"></div>
+  <div qix:html="ppap" qix:tpl="templ.html"></div>
 </body>
 
 </html>

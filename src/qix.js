@@ -1,10 +1,8 @@
 define('qix', [
-  './rootCtx',
   './compile',
   './JsonSubject',
   './require-plugins/element-loader',
-  'require',
-], function(rootCtx, compile, JsonSubject, elem_loader, _local_require) {
+], function(compile, JsonSubject, elem_loader) {
   "use strict";
   return {
     compile: compile,
@@ -32,12 +30,6 @@ define('qix', [
           console.error('qix loader err:', err);
         }
       );
-    },
-    bootstrap: function(elem, cb) {
-      this.compile(elem, rootCtx, function(qel) {
-        if (cb)
-          cb(rootCtx, qel);
-      });
     }
   };
 });

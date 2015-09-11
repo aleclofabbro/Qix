@@ -4,19 +4,23 @@ define([
   function(templ) {
     "use strict";
     return {
-      control: function(ctx, spawn) {
-        var subctx = spawn();
-        var _inn = ctx.elem.innerHTML;
-        ctx.elem.innerHTML = '';
-        templ.compileTo(ctx.elem, subctx, function(sub_elem) {
-          //debugger;
-          ctx.myReceiver()
-            .pluck('load')
-            .subscribe(subctx.emitter('', 'ctlx'));
 
-          ctx.downstream
-            .subscribe(subctx.emitter('', 'col'));
+      control: function(exports, elem, opts, _ctx, _binder_def) {
+        var _export = {
+          ctlx: {
+            mover: function(xx) {
+              console.log('pèreso!', xx);
+            }
+          }
+        };
+        var _inn = elem.innerHTML;
+        elem.innerHTML = '';
+        templ.compileTo(elem, _export, function(sub_elem) {
+          exports(_export, true);
         });
+        return function() {
+          console.log('ciccio!!');
+        };
       }
     };
   });
