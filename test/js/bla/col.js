@@ -2,7 +2,7 @@ define([],
   function() {
     "use strict";
     var _def_colors = ['red', 'blue'];
-    return function(exports, elem, opts, _ctx, _binder_def) {
+    return function(resolve, reject, opts, elem, all_done, _ctx, _binder_def) {
       var b = true,
         _col_arr = _def_colors;
       var _export = {
@@ -14,9 +14,10 @@ define([],
         }
       };
       _export.swap();
-      exports(_export);
-      return function() {
-        console.log('col !!');
-      };
+      resolve(_export);
+      all_done
+        .then(function() {
+          console.log('col !!');
+        });
     };
   });

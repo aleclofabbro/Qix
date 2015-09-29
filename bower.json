@@ -1,7 +1,9 @@
 {
   "name": "qix",
   "description": "qix",
-  "dependencies": {},
+  "dependencies": {
+    "bluebird": ""
+  },
   "devDependencies": {
     "requirejs": ""
   },

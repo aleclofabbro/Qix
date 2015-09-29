@@ -3,7 +3,7 @@ define([
   ],
   function(templ) {
     "use strict";
-    return function(exports, elem, opts, _ctx, _binder_def) {
+    return function(resolve, reject, opts, elem, all_done, _ctx, _binder_def) {
       var _export = {
         ctlx: {
           mover: function(xx) {
@@ -13,11 +13,12 @@ define([
       };
       var _inn = elem.innerHTML;
       elem.innerHTML = '';
-      templ.compileTo(elem, _export, function(sub_elem) {
-        exports(_export, true);
-      });
-      return function() {
-        console.log('ciccio!!');
-      };
+      templ.compileTo(elem, _export)
+        .then(function(sub_elem) {});
+      resolve(_export);
+      all_done
+        .then(function() {
+          console.log('ciccio!!');
+        });
     };
   });

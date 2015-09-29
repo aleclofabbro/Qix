@@ -1,15 +1,16 @@
 define([],
   function() {
     "use strict";
-    return function(exports, el, opts, _ctx, _binder_def) {
+    return function(resolve, reject, opts, el, all_done, _ctx, _binder_def) {
       // console.log('bind:', el);
       el.innerHTML = '';
-      exports(function(str) {
+      resolve(function(str) {
         if (el.innerHTML !== str)
           el.innerHTML = str;
       });
-      return function() {
-        console.log('dind !!');
-      };
+      all_done
+        .then(function() {
+          console.log('dind !!');
+        });
     };
   });

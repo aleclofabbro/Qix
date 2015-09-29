@@ -15,9 +15,10 @@
         }
       }
     };
-    qix.compile(el, ctx, function() {
-      console.log(ctx);
-    });
+    qix.compile(el, ctx)
+      .then(function() {
+        console.log(ctx);
+      });
   });
   </script>
 </head>
