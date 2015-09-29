@@ -2,6 +2,7 @@
   "name": "Qix",
   "version": "0.1.0",
   "devDependencies": {
-    "http-server": ""
+    "http-server": "",
+    "requirejs": ""
   }
 }

@@ -11,8 +11,7 @@
       "qix-bla": "./js/bla"
     }
   });
-  require(['qix', 'rx/rx.time'], function(qix, Rx) {
-    Rx.config.longStackSupport = true;
+  require(['qix'], function(qix) {
     var el = document.body;
     ctx = {
       ctlx: {
