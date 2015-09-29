@@ -2,11 +2,6 @@
   "name": "Qix",
   "version": "0.1.0",
   "devDependencies": {
-    "http-server": "",
-    "rx": "",
-    "rx-dom": "",
-    "requirejs": "",
-    "ramda": "",
-    "underscore": ""
+    "http-server": ""
   }
 }

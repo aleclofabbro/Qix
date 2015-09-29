@@ -1,12 +1,10 @@
 define('qix', [
   './compile',
-  './JsonSubject',
   './require-plugins/element-loader',
-], function(compile, JsonSubject, elem_loader) {
+], function(compile, elem_loader) {
   "use strict";
   return {
     compile: compile,
-    JsonSubject: JsonSubject,
     load: function(name, parentRequire, onload, config) {
       var url = parentRequire.toUrl(name);
       elem_loader.loadElem(url, function(master_element) {
