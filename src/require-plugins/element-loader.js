@@ -55,6 +55,9 @@ define(function() {
         var _body = _doc.body;
         cb({
           clone: function() {
+            return this.cloneBody().childNodes;
+          },
+          cloneBody: function() {
             return _body.cloneNode(true);
           },
           master: function() {
