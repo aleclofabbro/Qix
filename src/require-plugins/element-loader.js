@@ -5,7 +5,7 @@ define(function() {
     var xhr = createXMLHTTPObject();
     if (!xhr)
       throw new Error('NO XHR!');
-    xhr.responseType = "document";
+    xhr.responseType = "text";
     xhr.open('GET', url, true);
     // xhr.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
     xhr.onreadystatechange = function() {
@@ -15,7 +15,7 @@ define(function() {
         //          alert('HTTP error ' + xhr.status);
         return;
       }
-      callback(xhr.responseXML);
+      callback(xhr.responseText);
     }
     if (xhr.readyState == 4)
       return;
@@ -51,8 +51,9 @@ define(function() {
   }
   return {
     loadElem: function(url, cb) {
-      sendRequest(url, function(_doc) {
-        var _body = _doc.body;
+      sendRequest(url, function(text) {
+        var _body = document.createElement('div');
+        _body.innerHTML = text;
         cb({
           clone: function() {
             return this.cloneBody().childNodes;
@@ -63,8 +64,8 @@ define(function() {
           master: function() {
             return _body;
           },
-          doc: function() {
-            return _doc;
+          text: function() {
+            return text;
           }
         });
       });
