@@ -1,4 +1,4 @@
-define([], function() {
+define(function() {
   "use strict";
   var _arr_slice = function(_arr_like) {
     return Array.prototype.slice.call(_arr_like);
@@ -36,7 +36,7 @@ define([], function() {
         if (!match)
           return false;
         else {
-          var _binder_ns = match[0] === 'qix' ? 'qix/core' : match[0];
+          var _binder_ns = match[0] === 'qix' ? 'qix/core' : match[0].replace('qix-', '').replace(/-/g, '/');
           var _binder_name = _attr.name.split(':')[1];
           var _binder_path = [_binder_ns, _binder_name].join('/');
 
@@ -83,7 +83,7 @@ define([], function() {
                 _continue(_when_elem_done_fns, _stop_compile);
             });
           };
-          var when_all_done = binder.control(_done, elem, _ctx[_binder_def.ctx_prop], _ctx, _binder_def);
+          var when_all_done = binder(_done, elem, _ctx[_binder_def.ctx_prop], _ctx, _binder_def);
           _when_elem_done_fns.push(when_all_done);
         });
     });

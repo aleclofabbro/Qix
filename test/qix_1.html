@@ -3,14 +3,9 @@
 
 <head>
   <title>Test</title>
-  <script type="text/javascript" src="../node_modules/requirejs/require.js"></script>
+  <script type="text/javascript" src="../lib/requirejs/require.js"></script>
   <script type="text/javascript" src="require-pckjs.js"></script>
   <script type="text/javascript">
-  require.config({
-    paths: {
-      "qix-bla": "./js/bla"
-    }
-  });
   require(['qix'], function(qix) {
     var el = document.body;
     ctx = {
@@ -28,8 +23,8 @@
 </head>
 
 <body>
-  <div qix-bla:ctrl-a="ctlx">dddd</div>
-  <div qix-bla:ciccio="cicc"></div>
+  <div qix-js-bla:ctrl-a="ctlx">dddd</div>
+  <div qix-js-bla:ciccio="cicc"></div>
   <div qix:html="ppap" qix:tpl="templ.html"></div>
 </body>
 

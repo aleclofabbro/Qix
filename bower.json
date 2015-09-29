@@ -1,0 +1,23 @@
+{
+  "name": "qix",
+  "description": "qix",
+  "dependencies": {},
+  "devDependencies": {
+    "requirejs": ""
+  },
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "authors": [
+    "alec <alec@example.com>"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
