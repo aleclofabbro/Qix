@@ -26,43 +26,63 @@ define(['bluebird'], function(Promise) {
        });
      }
    };*/
+  var _make_ctrl_defs_list = function(elem) {
+    return _arr_slice(elem.attributes)
+      .map(function(_attr) { // mappa gli attributi matchati con delle definizioni di binder_provider oppure false 
+        var match = _attr.name.match(_qix_regexp);
+        if (!match)
+          return false;
+        else {
+          var _binder_ns = match[0].replace('qix-', '').replace(/-/g, '/');
+          var _binder_name = _attr.name.split(':')[1];
+          var _binder_path = [_binder_ns, _binder_name].join('/');
 
-  var _compile = function(elem, _ctx, compiled_callback) {
+          var _ctrl_prop_name = _attr.value;
+          var binder_def = {
+            attr: _attr,
+            ns: _binder_ns,
+            name: _binder_name,
+            path: _binder_path,
+            ctx_prop: _ctrl_prop_name
+          };
+          return binder_def;
+        }
+      })
+      .filter(function(binder_def) {
+        // filtra quelli non  qix (matchati -> binder_def !== false)
+        return binder_def !== false;
+      });
+  };
+
+  var _bind_all = function(binders, _qix_binder_defs_array, elem, _ctx, _sub_ctx, all_bound_promise) {
+    return binders
+      .map(function(binder, binder_index) {
+        var _binder_def = _qix_binder_defs_array[binder_index];
+        return new Promise(function(binder_resolve, binder_reject) {
+          var _binder_resolve_assign = function(ctrl) {
+            _ctx[_binder_def.ctx_prop] = ctrl;
+            binder_resolve(ctrl);
+          };
+          binder(
+            _binder_resolve_assign,
+            binder_reject,
+            _ctx[_binder_def.ctx_prop],
+            elem,
+            all_bound_promise,
+            _sub_ctx,
+            _binder_def);
+        });
+      });
+  };
+  var _compile = function(elem, _ctx) {
     var _ELEMENT_STACK = [];
     return new Promise(function(compile_resolve, compile_reject) {
 
-        // CTRL CONTEXTS
-        var _qix_binder_defs_array =
-          _arr_slice(elem.attributes)
-          .map(function(_attr) { // mappa gli attributi matchati con delle definizioni di binder_provider oppure false 
-            var match = _attr.name.match(_qix_regexp);
-            if (!match)
-              return false;
-            else {
-              var _binder_ns = match[0].replace('qix-', '').replace(/-/g, '/');
-              var _binder_name = _attr.name.split(':')[1];
-              var _binder_path = [_binder_ns, _binder_name].join('/');
+        var _qix_binder_defs_array = _make_ctrl_defs_list(elem);
 
-              var _ctrl_prop_name = _attr.value;
-              var binder_def = {
-                attr: _attr,
-                ns: _binder_ns,
-                name: _binder_name,
-                path: _binder_path,
-                ctx_prop: _ctrl_prop_name
-              };
-              return binder_def;
-            }
-          })
-          .filter(function(binder_def) {
-            // filtra quelli non  qix (matchati -> binder_def !== false)
-            return binder_def !== false;
-          });
-        // ^ CTRL CONTEXTS
 
         // REQUIRE BINDERS & BIND ALL
-        var _qix_binders_paths_array =
-          _qix_binder_defs_array
+        var _qix_binders_paths_array = _qix_binder_defs_array
           .map(function(binder_def) { // mappa i binder_def con i path 
             return binder_def.path;
           });
@@ -74,23 +94,7 @@ define(['bluebird'], function(Promise) {
           elem.$qix = _sub_ctx;
           all_bound_promise = new Promise(function(all_bound_resolve, all_bound_reject) {
             require(_qix_binders_paths_array, function( /*arguments : binders*/ ) {
-              var all_binders_promises = _arr_slice(arguments)
-                .map(function(binder, binder_index) {
-                  return new Promise(function(binder_resolve, binder_reject) {
-                    var _binder_def = _qix_binder_defs_array[binder_index];
-                    binder(
-                      function(ctrl) {
-                        _ctx[_binder_def.ctx_prop] = ctrl;
-                        binder_resolve(ctrl);
-                      },
-                      binder_reject,
-                      _ctx[_binder_def.ctx_prop],
-                      elem,
-                      all_bound_promise,
-                      _sub_ctx,
-                      _binder_def);
-                  });
-                });
+              var all_binders_promises = _bind_all(_arr_slice(arguments), _qix_binder_defs_array, elem, _ctx, _sub_ctx, all_bound_promise);
               Promise.all(all_binders_promises)
                 .then(all_bound_resolve, all_bound_reject);
             });
@@ -125,14 +129,14 @@ define(['bluebird'], function(Promise) {
                       //////////////////////////
                       */
 
-            var _childNodes_to_compile_array = _arr_slice(elem.children);
 
             // COMPILE CHILDNODES 
             var children_compile_promise_array =
-              _childNodes_to_compile_array
+              _arr_slice(elem.children)
               .map(function(_child, index) {
                 return _compile(_child, _sub_ctx);
               });
+
             Promise.all(children_compile_promise_array)
               .then(function() {
                 compile_resolve(elem);
@@ -142,9 +146,9 @@ define(['bluebird'], function(Promise) {
           }, compile_reject);
       })
       .timeout(_TIMEOUT_MS, 'Qix Compile timeout ms:' + _TIMEOUT_MS)
-      .catch(function() {
+      .catch(function(err) {
         window.Qix_elemet_stack = _ELEMENT_STACK;
-        console.error('Qix compile ELEMENT_STACK:', _ELEMENT_STACK);
+        console.error('Qix compile ELEMENT_STACK:', err, _ELEMENT_STACK);
       });
 
   };
