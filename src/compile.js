@@ -3,7 +3,7 @@ define(['bluebird'], function(Promise) {
   var _arr_slice = function(_arr_like) {
     return Array.prototype.slice.call(_arr_like);
   };
-
+  //var _qix_regexp = /^qix-.*(?=:)/;  
   var _qix_regexp = /^qix(?:-*).*(?=:)/;
   // 'qix-sloe:asdsa'.match(_qix_regexp)
   // ["qix-sloe"]
@@ -37,7 +37,7 @@ define(['bluebird'], function(Promise) {
           if (!match)
             return false;
           else {
-            var _binder_ns = match[0] === 'qix' ? 'qix/core' : match[0].replace('qix-', '').replace(/-/g, '/');
+            var _binder_ns = match[0].replace('qix-', '').replace(/-/g, '/');
             var _binder_name = _attr.name.split(':')[1];
             var _binder_path = [_binder_ns, _binder_name].join('/');
 
@@ -92,22 +92,27 @@ define(['bluebird'], function(Promise) {
       all_bound_promise
         .then(function(ctrls) {
 
-          // FILTER CHILDNODES -> CHILD ELEMENTS [TEXTNODES -> INTERPOLATE]
-          // var _children_ctxs = [];
-          // ORA PREPARA I NODI FIGLI PER IL PROSSIMO GIRO DI COMPILE 
-          var _childNodes_to_compile_array = _arr_slice(elem.childNodes)
-            .filter(function(_child) {
-              // se è un TEXT_NODE allora dallo a INTERPOLATOR e filtralo
-              if (_child.nodeType === 3) {
-                _interpolator(_child, _ctx);
-                return false;
-              }
-              // se è un ELEMENT_NODE allora va in _childNodes_to_compile_array
-              return _child.nodeType === 1;
-            });
-          // ^ FILTER CHILDNODES -> CHILD ELEMENTS [TEXTNODES -> INTERPOLATE]
+          /* SEZIONE SOSTITUITA CON I SOLI CHILDREN NON CALCOLO I TEXT NODE FINO A PROSSIMO ORDINE !!
 
-          //////////////////////////
+                    // FILTER CHILDNODES -> CHILD ELEMENTS [TEXTNODES -> INTERPOLATE]
+                    // var _children_ctxs = [];
+                    // ORA PREPARA I NODI FIGLI PER IL PROSSIMO GIRO DI COMPILE 
+                    var _childNodes_to_compile_array = _arr_slice(elem.childNodes)
+                      .filter(function(_child) {
+                        // se è un TEXT_NODE allora dallo a INTERPOLATOR e filtralo
+                        if (_child.nodeType === 3) {
+                          _interpolator(_child, _ctx);
+                          return false;
+                        }
+                        // se è un ELEMENT_NODE allora va in _childNodes_to_compile_array
+                        return _child.nodeType === 1;
+                      });
+                    // ^ FILTER CHILDNODES -> CHILD ELEMENTS [TEXTNODES -> INTERPOLATE]
+
+                    //////////////////////////
+                    */
+
+          var _childNodes_to_compile_array = _arr_slice(elem.children)
 
           // COMPILE CHILDNODES 
           var children_compile_promise_array =
