@@ -54,3 +54,22 @@ function Promise() {
 
 	return promise;
 };
+Promise.all=function(arr){
+	var _count = arr.length;
+	var promise = Promise();
+	if(arr.length){
+		var _responses = [];
+		arr.forEach(function(_p,_i){
+			_p.then(function(_resp){
+				_responses[_i] = _resp;
+				_count--;
+				if(!_count)
+					promise.resolve(_responses);
+			},promise.reject);
+		});
+	}else
+		setTimeout(function(){
+			promise.resolve([]);
+		});
+	return promise;
+};

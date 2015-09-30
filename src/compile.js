@@ -1,5 +1,83 @@
-define(['bluebird'], function(Promise) {
+define([], function() {
   "use strict";
+
+  function Promise() {
+    var callbacks = [],
+      promise = {
+        resolve: resolve,
+        reject: reject,
+        then: then,
+        safe: {
+          then: function safeThen(resolve, reject) {
+            promise.then(resolve, reject);
+          }
+        }
+      };
+
+    function complete(type, result) {
+      promise.then = type === 'reject' ? function(resolve, reject) {
+        reject(result);
+      } : function(resolve) {
+        resolve(result);
+      };
+
+      promise.resolve = promise.reject = function() {
+        throw new Error("Promise already completed");
+      };
+
+      var i = 0,
+        cb;
+      while (cb = callbacks[i++]) {
+        cb[type] && cb[type](result);
+      }
+
+      callbacks = null;
+    }
+
+    function resolve(result) {
+      complete('resolve', result);
+    }
+
+    function reject(err) {
+      complete('reject', err);
+    }
+
+    function then(resolve, reject) {
+      var _sub_promise = Promise();
+      callbacks.push({
+        resolve: function(x){
+          _sub_promise.resolve(resolve(x));
+        },
+        reject: function(x){
+          _sub_promise.reject(reject(x));
+        }
+      });
+      return _sub_promise;
+    }
+
+    return promise;
+  };
+  Promise.all = function(arr) {
+    var _count = arr.length;
+    var promise = Promise();
+    if (arr.length) {
+      var _responses = [];
+      arr.forEach(function(_p, _i) {
+        _p.then(function(_resp) {
+          _responses[_i] = _resp;
+          _count--;
+          if (!_count)
+            promise.resolve(_responses);
+        }, promise.reject);
+      });
+    } else
+      setTimeout(function() {
+        promise.resolve([]);
+      });
+    return promise;
+  };
+
+
   var _TIMEOUT_MS = 5000;
   var _arr_slice = function(_arr_like) {
     return Array.prototype.slice.call(_arr_like);
@@ -58,7 +136,7 @@ define(['bluebird'], function(Promise) {
     return binders
       .map(function(binder, binder_index) {
         var _binder_def = _qix_binder_defs_array[binder_index];
-        return new Promise(function(binder_resolve, binder_reject) {
+        return Promise(function(binder_resolve, binder_reject) {
           var _binder_resolve_assign = function(ctrl) {
             _ctx[_binder_def.ctx_prop] = ctrl;
             binder_resolve(ctrl);
@@ -76,7 +154,7 @@ define(['bluebird'], function(Promise) {
   };
   var _compile = function(elem, _ctx) {
     var _ELEMENT_STACK = [];
-    return new Promise(function(compile_resolve, compile_reject) {
+    return Promise(function(compile_resolve, compile_reject) {
 
         var _qix_binder_defs_array = _make_ctrl_defs_list(elem);
 
@@ -92,7 +170,7 @@ define(['bluebird'], function(Promise) {
         if (_qix_binders_paths_array.length) {
           _sub_ctx = Object.create(_ctx);
           elem.$qix = _sub_ctx;
-          all_bound_promise = new Promise(function(all_bound_resolve, all_bound_reject) {
+          all_bound_promise = Promise(function(all_bound_resolve, all_bound_reject) {
             require(_qix_binders_paths_array, function( /*arguments : binders*/ ) {
               var all_binders_promises = _bind_all(_arr_slice(arguments), _qix_binder_defs_array, elem, _ctx, _sub_ctx, all_bound_promise);
               Promise.all(all_binders_promises)
@@ -145,8 +223,10 @@ define(['bluebird'], function(Promise) {
             //////////////////////////
           }, compile_reject);
       })
-      .timeout(_TIMEOUT_MS, 'Qix Compile timeout ms:' + _TIMEOUT_MS)
-      .catch(function(err) {
+      // .timeout(_TIMEOUT_MS, 'Qix Compile timeout ms:' + _TIMEOUT_MS)
+      .then(function(v){
+        return v;
+      },function(err) {
         window.Qix_elemet_stack = _ELEMENT_STACK;
         console.error('Qix compile ELEMENT_STACK:', err, _ELEMENT_STACK);
       });
