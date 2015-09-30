@@ -15,7 +15,10 @@ define([
       elem.innerHTML = '';
       templ.compileTo(elem, _export)
         .then(function(sub_elem) {});
+      // setTimeout(function() {
       resolve(_export);
+
+      // }, 100)
       all_done
         .then(function() {
           console.log('ciccio!!');

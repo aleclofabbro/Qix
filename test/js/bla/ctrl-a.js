@@ -3,9 +3,8 @@ define([],
     "use strict";
     return function foo(resolve, reject, opts, elem, all_done, _ctx, _binder_def) {
 
-      elem.addEventListener('mouseover', function() {
-        opts && opts.mover && opts.mover(elem);
-      });
+      if (opts && opts.mover)
+        elem.addEventListener('mouseover', opts.mover);
       resolve({});
       all_done
         .then(function() {

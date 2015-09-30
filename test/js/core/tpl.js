@@ -4,9 +4,10 @@ define(function() {
     var tpl_path = _binder_def.attr.value;
     var _exp = {};
     require(['qix!' + tpl_path], function(tpl) {
-      tpl.compileTo(el, _exp, function() {
-        resolve(_exp);
-      });
+      tpl.compileTo(el, _exp)
+        .then(function() {
+          resolve(_exp);
+        });
     });
 
     all_done
