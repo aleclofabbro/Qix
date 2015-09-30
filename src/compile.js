@@ -67,8 +67,11 @@ define(['bluebird'], function(Promise) {
             return binder_def.path;
           });
 
-        var all_bound_promise;
-        if (_qix_binders_paths_array.length)
+        var all_bound_promise,
+          _sub_ctx = _ctx;
+        if (_qix_binders_paths_array.length) {
+          _sub_ctx = Object.create(_ctx);
+          elem.$qix = _sub_ctx;
           all_bound_promise = new Promise(function(all_bound_resolve, all_bound_reject) {
             require(_qix_binders_paths_array, function( /*arguments : binders*/ ) {
               var all_binders_promises = _arr_slice(arguments)
@@ -84,7 +87,7 @@ define(['bluebird'], function(Promise) {
                       _ctx[_binder_def.ctx_prop],
                       elem,
                       all_bound_promise,
-                      _ctx,
+                      _sub_ctx,
                       _binder_def);
                   });
                 });
@@ -92,7 +95,7 @@ define(['bluebird'], function(Promise) {
                 .then(all_bound_resolve, all_bound_reject);
             });
           }, compile_reject);
-        else
+        } else
           all_bound_promise = Promise.resolve([]);
 
         _ELEMENT_STACK.push(elem);
@@ -128,7 +131,7 @@ define(['bluebird'], function(Promise) {
             var children_compile_promise_array =
               _childNodes_to_compile_array
               .map(function(_child, index) {
-                return _compile(_child, _ctx);
+                return _compile(_child, _sub_ctx);
               });
             Promise.all(children_compile_promise_array)
               .then(function() {
