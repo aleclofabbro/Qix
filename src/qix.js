@@ -9,7 +9,7 @@ define('qix', [
       var url = parentRequire.toUrl(name);
       elem_loader.loadElem(url, function(master_element) {
           var qix_elem = Object.create(master_element);
-          qix_elem.compileTo = function(to_elem, ctx, cb) {
+          qix_elem.compileTo = function(to_elem, ctx) {
             return compile(master_element.cloneBody(), ctx)
               .then(function(_q_elem) {
                 Array.prototype.slice.call(_q_elem.childNodes)
@@ -19,7 +19,7 @@ define('qix', [
                 return _q_elem.childNodes;
               });
           };
-          qix_elem.compile = function(ctx, cb) {
+          qix_elem.compile = function(ctx) {
             return compile(master_element.cloneBody(), ctx)
               .then(function(_q_elem) {
                 return _q_elem.childNodes;
