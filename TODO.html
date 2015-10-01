@@ -860,14 +860,22 @@ body .markdown-body
   float: left;
   margin: 0.3em 0 0.25em -1.6em;
   vertical-align: middle;
-}</style><title>TODO,md</title></head><body><article class="markdown-body"><h2 id="compiler">
+}</style><title>TODO</title></head><body><article class="markdown-body"><h2 id="general">
+<a id="user-content-general" class="anchor" href="#general" aria-hidden="true"><span class="octicon octicon-link"></span></a>General:</h2>
+
+<ul>
+<li>utility qix.requireP -&gt; requirePromise </li>
+</ul>
+
+<h2 id="compiler">
 <a id="user-content-compiler" class="anchor" href="#compiler" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compiler:</h2>
 
 <ul>
 <li>permettere ai binder dell'elemento di aumentare il ctx .. 
 probabilmente per ogni elemento bisogna passare un nuovo obj con proto il ctx superiore 
 invece che il ctx stesso.</li>
-<li>valutare l'opzione elem.$qix </li>
+<li>valutare l'opzione elem.$qix per il context</li>
 <li>valutare l'opzione «stop compile» nella fase di binding</li>
+<li>refactor (anche con qix.requireP) per maggiore linearità e leggibilità</li>
 </ul>
 </article></body></html>

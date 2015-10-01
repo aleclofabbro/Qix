@@ -1,7 +1,0 @@
-Compiler:
----------
-* permettere ai binder dell'elemento di aumentare il ctx .. 
-	probabilmente per ogni elemento bisogna passare un nuovo obj con proto il ctx superiore 
-	invece che il ctx stesso.
-* valutare l'opzione elem.$qix 
-* valutare l'opzione «stop compile» nella fase di binding
