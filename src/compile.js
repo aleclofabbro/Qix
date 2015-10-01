@@ -98,7 +98,7 @@ define(['./Promise'], function(Promise) {
               var all_binders_promises = _bind_all(_arr_slice(arguments), _qix_binder_defs_array, elem, _ctx, _sub_ctx, all_bound_promise);
               Promise.all(all_binders_promises)
                 .then(all_bound_resolve, all_bound_reject);
-            });
+            }, all_bound_reject);
           }, compile_reject);
         } else
           all_bound_promise = Promise.resolve([]);
