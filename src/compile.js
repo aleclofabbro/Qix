@@ -1,7 +1,7 @@
 define(['./Promise'], function(Promise) {
   "use strict";
 
-  var _TIMEOUT_MS = 200;
+  var _TIMEOUT_MS = 2000;
   var _arr_slice = function(_arr_like) {
     return Array.prototype.slice.call(_arr_like);
   };
