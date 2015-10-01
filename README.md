@@ -1,5 +1,4 @@
 ```
-npm install  
-./node_modules/http-server/bin/http-server  
+bower install  
 /test/qix_1.html
 ```
