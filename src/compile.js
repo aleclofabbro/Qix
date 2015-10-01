@@ -1,84 +1,7 @@
-define([], function() {
+define(['./Promise'], function(Promise) {
   "use strict";
 
-  function Promise() {
-    var callbacks = [],
-      promise = {
-        resolve: resolve,
-        reject: reject,
-        then: then,
-        safe: {
-          then: function safeThen(resolve, reject) {
-            promise.then(resolve, reject);
-          }
-        }
-      };
-
-    function complete(type, result) {
-      promise.then = type === 'reject' ? function(resolve, reject) {
-        reject(result);
-      } : function(resolve) {
-        resolve(result);
-      };
-
-      promise.resolve = promise.reject = function() {
-        throw new Error("Promise already completed");
-      };
-
-      var i = 0,
-        cb;
-      while (cb = callbacks[i++]) {
-        cb[type] && cb[type](result);
-      }
-
-      callbacks = null;
-    }
-
-    function resolve(result) {
-      complete('resolve', result);
-    }
-
-    function reject(err) {
-      complete('reject', err);
-    }
-
-    function then(resolve, reject) {
-      var _sub_promise = Promise();
-      callbacks.push({
-        resolve: function(x){
-          _sub_promise.resolve(resolve(x));
-        },
-        reject: function(x){
-          _sub_promise.reject(reject(x));
-        }
-      });
-      return _sub_promise;
-    }
-
-    return promise;
-  };
-  Promise.all = function(arr) {
-    var _count = arr.length;
-    var promise = Promise();
-    if (arr.length) {
-      var _responses = [];
-      arr.forEach(function(_p, _i) {
-        _p.then(function(_resp) {
-          _responses[_i] = _resp;
-          _count--;
-          if (!_count)
-            promise.resolve(_responses);
-        }, promise.reject);
-      });
-    } else
-      setTimeout(function() {
-        promise.resolve([]);
-      });
-    return promise;
-  };
-
-
-  var _TIMEOUT_MS = 5000;
+  var _TIMEOUT_MS = 200;
   var _arr_slice = function(_arr_like) {
     return Array.prototype.slice.call(_arr_like);
   };
@@ -223,10 +146,10 @@ define([], function() {
             //////////////////////////
           }, compile_reject);
       })
-      // .timeout(_TIMEOUT_MS, 'Qix Compile timeout ms:' + _TIMEOUT_MS)
-      .then(function(v){
+      .timeout(_TIMEOUT_MS, 'Qix Compile timeout ms:' + _TIMEOUT_MS)
+      .then(function(v) {
         return v;
-      },function(err) {
+      }, function(err) {
         window.Qix_elemet_stack = _ELEMENT_STACK;
         console.error('Qix compile ELEMENT_STACK:', err, _ELEMENT_STACK);
       });

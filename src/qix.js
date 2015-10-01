@@ -1,6 +1,6 @@
 define('qix', [
   './compile',
-  './require-plugins/element-loader',
+  './require-plugins/element-loader'
 ], function(compile, elem_loader) {
   "use strict";
   return {
