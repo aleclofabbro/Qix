@@ -4,7 +4,7 @@ define([
   function(templ) {
     "use strict";
     return function(resolve, reject, opts, elem, all_done, _ctx, _binder_def) {
-      var _export = {
+      var sub_ctx = {
         ctlx: {
           mover: function(xx) {
             console.log('pèreso!', xx);
@@ -13,12 +13,14 @@ define([
       };
       var _inn = elem.innerHTML;
       elem.innerHTML = '';
-      templ.compileTo(elem, _export)
-        .then(function(sub_elem) {});
-      // setTimeout(function() {
-      resolve(_export);
+      templ.compileTo(elem, sub_ctx)
+        .then(function(sub_elem) {
+          resolve({
+            text: sub_ctx.text,
+            col: sub_ctx.col.swap
+          });
+        });
 
-      // }, 100)
       all_done
         .then(function() {
           console.log('ciccio!!');

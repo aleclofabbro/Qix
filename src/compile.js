@@ -91,7 +91,7 @@ define(['./Promise'], function(Promise) {
         var all_bound_promise,
           _sub_ctx = _ctx;
         if (_qix_binders_paths_array.length) {
-          _sub_ctx = Object.create(_ctx);
+          // _sub_ctx = Object.create(_ctx);
           elem.$qix = _sub_ctx;
           all_bound_promise = Promise(function(all_bound_resolve, all_bound_reject) {
             require(_qix_binders_paths_array, function( /*arguments : binders*/ ) {
