@@ -1,14 +1,13 @@
 define([],
   function() {
     "use strict";
-    return function foo(resolve, reject, opts, elem, all_done, _ctx, _binder_def) {
+    return function $qix(ctrlctx, resolve, reject) {
 
-      if (opts && opts.mover)
-        elem.addEventListener('mouseover', opts.mover);
-      resolve({});
-      all_done
-        .then(function() {
-          console.log('ctrl-a!!');
+      if (ctrlctx.opts())
+        ctrlctx.elem.addEventListener('mouseover', function() {
+          var mover = ctrlctx.opts().mover;
+          mover && mover;
         });
+      resolve();
     };
   });

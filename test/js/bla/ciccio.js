@@ -3,7 +3,7 @@ define([
   ],
   function(templ) {
     "use strict";
-    return function(resolve, reject, opts, elem, all_done, _ctx, _binder_def) {
+    return function $qix(ctrlctx, resolve, reject) {
       var sub_ctx = {
         ctlx: {
           mover: function(xx) {
@@ -11,19 +11,15 @@ define([
           }
         }
       };
-      var _inn = elem.innerHTML;
-      elem.innerHTML = '';
-      templ.compileTo(elem, sub_ctx)
+      var _inn = ctrlctx.elem.innerHTML;
+      ctrlctx.elem.innerHTML = '';
+      templ.compileTo(ctrlctx.elem, sub_ctx)
         .then(function(sub_elem) {
           resolve({
-            text: sub_ctx.text,
-            col: sub_ctx.col.swap
+            setText: sub_ctx.text,
+            swapCol: sub_ctx.col.swap
           });
         });
 
-      all_done
-        .then(function() {
-          console.log('ciccio!!');
-        });
     };
   });

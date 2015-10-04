@@ -18,17 +18,17 @@
     qix.compile(el, ctx)
       .then(function(comp) {
         console.log(ctx);
-        ctx.cicc.text(4234)
-        ctx.cicc.col()
+        ctx.cicc.setText(4234);
+        ctx.cicc.swapCol();
       });
   });
   </script>
 </head>
 
 <body>
-  <div qix:ctlx="js/bla/ctrl-a">ctlx[ctrl-a]</div>
-  <div qix:cicc="js/bla/ciccio">cicc[ciccio]</div>
-  <div qix:ppap="js/core/html" ppap:color='purlple' qix:templ="js/core/tpl">ppap[html]</div>
+  <!--  <div qix:ctlx="js/bla/ctrl-a">ctlx[ctrl-a]</div>
+  <div qix:cicc="js/bla/ciccio">cicc[ciccio]</div> -->
+  <div sqix:ppap="js/core/html" qix:templ="js/core/tpl" templ:url="templ.html">ppap[html]</div>
 </body>
 
 </html>

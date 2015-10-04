@@ -34,6 +34,13 @@ define('qix', [
                 return _q_elem.childNodes;
               });
           };
+          qix_elem.appendTo = function(to_elem) {
+            var clone = master_element.cloneBody();
+            Array.prototype.slice.call(clone.childNodes)
+              .forEach(function(ch) {
+                to_elem.appendChild(ch);
+              });
+          };
           onload(qix_elem);
         },
         function(err) {

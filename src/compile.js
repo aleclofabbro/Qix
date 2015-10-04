@@ -10,10 +10,14 @@ define([
     return Array.prototype.slice.call(_arr_like);
   };
 
+  function is_array_like(o) {
+    return !!o && 'number' === typeof o.length;
+  };
+
   function compile(_nodes, _ctx) {
     var compile_result = {};
     var nodes;
-    if ('number' === typeof _nodes.length)
+    if (is_array_like(_nodes))
       nodes = _arr_slice(_nodes);
     else
       nodes = [_nodes];
@@ -22,10 +26,10 @@ define([
       .map(function(curr_node) {
         var node_compilers_promises = compile.compilers
           .map(function(compiler) {
-            var _compiler_stack_elem = {
-              compiler: compiler,
-              node: curr_node
-            };
+            // var _compiler_stack_elem = {
+            //   compiler: compiler,
+            //   node: curr_node
+            // };
             var compiler_promise = Plite(function(resolve, reject) {
                 compiler(curr_node, _ctx, resolve, reject);
               })
@@ -39,10 +43,10 @@ define([
           });
         return Plite.all(node_compilers_promises)
           .then(function(results) {
-            return compile(curr_node.childNodes, _ctx)
-              // .then(function(subs) {
-              //   return results.push(subs);
-              // });
+            return compile(curr_node.childNodes, _ctx);
+            // .then(function(subs) {
+            //   return results.push(subs);
+            // });
           });
       });
 
@@ -52,6 +56,9 @@ define([
       .catch(function(err) {
         console.error('Qix compile error:', err);
         return err;
+      })
+      .then(function() { //return now is an Array of Arrays of undefineds
+        return _nodes;
       });
 
   };
