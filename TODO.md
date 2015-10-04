@@ -1,22 +1,24 @@
 #TODO
 
-##qix:
-* ~~utility qix.requireP -> requirePromise~~ *fatto ma vedi punto ext-plugin*
-* diversificare il qix![dep] plugin (template, requireP, template+binder) **( ?? dico bene? forse sono i binder ? .. e vedi punto ext-plugin)**
-* valutare l'utilizzo direttamente in qix di plugin esterni https://github.com/jrburke/requirejs/wiki/Plugins
+##New Syntax
 
-##compile:
-* ~~permettere ai binder dell'elemento di aumentare il ctx .. 
-	probabilmente per ogni elemento bisogna passare un nuovo obj con proto il ctx superiore 
-	invece che il ctx stesso.~~
-* il compile prende opzioni e ritorna il ctx (nuovo oggetto con eventuali azzi e mazzi), 
-  al binder vengono passate le sue opzioni(o un wrap), compile assegna il binder export al ctx[nome_binder]    
-* *fatto.. da valutare* ~~valutare l'opzione elem.$qix per il context~~
-* valutare l'opzione «stop compile» nella fase di binding
-* refactor (anche con qix.requireP) per maggiore linearità e leggibilità
-* vedere punto2 ~~riflettere su cosa deve tornare il compile (ctx ? elem ?  ?? ??)~~
-* ~~eliminare bluebird e metterci un Promise minimalista integrato :)~~
-	.... **usata versione modificata di https://gist.github.com/briancavalier/814318**
-	* ~~https://gist.github.com/unscriptable/814052~~
-	* ~~https://gist.github.com/briancavalier/814318~~
-	* ~~https://github.com/RubenVerborgh/promiscuous/blob/master/promiscuous.js~~
++ qix-engine dispatch nodes to compilers to compile them in differt ways
+	+ builtin compilers are
+		+ `element controller compiler`: `<elem qix:prop="/path/to/module" qix:other-prop="/path/to/module" prop:option="option for binder named prop"></elem>` returns a promise for `ctrl` object with all controllers assigned 
+      + loads modules, and assign them to `ctrl.prop` 
+      + each module elaboration specifies a `binder-object` 
+        + elem
+        + `prop:options` object from attributes
+        + ctx
+        + controller-ctx (`ctx[binderdef.name]`)
+        + promise|sub for the fullfilled `ctrl` 
+        + binder definition
+          + name
+          + path
+          + attr
+      + if module defines `module.$qix = ['dep1','dep2',function (injected1,injected2 ){ ... return controller;}]` it will be called with `injections` and the return value assigned to `ctrl.prop` instead of the module itself
+        + `injectors` will be invoked with a `binder-object` expexcting as return the injection of dep for `$qix`
+        + builtin `injector` are:
+          + `binder-object` , it delivers the `binder-object`
+
+##getters per namespaced [opzioni, attributi, elementi(?)]   (invece di oggetti come ora)

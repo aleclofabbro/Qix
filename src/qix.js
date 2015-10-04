@@ -1,17 +1,17 @@
 define('qix', [
   './compile',
-  './Promise',
+  './plite',
   './require-plugins/element-loader'
-], function(compile, Promise, elem_loader) {
+], function(compile, promise, elem_loader) {
   "use strict";
   return {
     requireP: function(modules, localRequire) {
-      return Promise(function(res, rej) {
-        (localRequire || require)(modules,
-          function() {
-            res([].slice.call(arguments));
-          }, rej);
-      });
+      var pr = promise.Promise();
+      (localRequire || require)(modules,
+        function() {
+          return (res([].slice.call(arguments)));
+        }, rej);
+      return pr;
     },
     compile: compile,
     load: function(name, parentRequire, onload, config) {

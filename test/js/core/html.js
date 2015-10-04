@@ -1,16 +1,15 @@
 define([],
   function() {
     "use strict";
-    return function(resolve, reject, opts, el, all_done, _ctx, _binder_def) {
-      // console.log('bind:', el);
-      el.innerHTML = '';
+    return function $qix(ctrlctx, resolve, reject) {
+      ctrlctx.elem.innerHTML = '';
       resolve(function(str) {
-        if (el.innerHTML !== str)
-          el.innerHTML = str;
-      });
-      all_done
-        .then(function() {
-          console.log('dind !!');
-        });
+  if (ctrlctx.elem.innerHTML !== str)
+    ctrlctx.elem.innerHTML = str;
+});
+      // all_done
+      //   .then(function() {
+      //     console.log('dind !!');
+      // });
     };
   });

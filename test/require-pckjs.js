@@ -1,7 +1,7 @@
 require.config({
   packages: [{
     name: 'qix',
-    location: '/src',
+    location: '../src',
     main: 'qix'
   }]
 });

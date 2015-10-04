@@ -3,7 +3,7 @@
 
 <head>
   <title>Test</title>
-  <script type="text/javascript" src="../lib/requirejs/require.min.js"></script>
+  <script type="text/javascript" src="../lib/requirejs/require.js"></script>
   <script type="text/javascript" src="require-pckjs.js"></script>
   <script type="text/javascript">
   require(['qix'], function(qix) {
@@ -16,7 +16,7 @@
       }
     };
     qix.compile(el, ctx)
-      .then(function() {
+      .then(function(comp) {
         console.log(ctx);
         ctx.cicc.text(4234)
         ctx.cicc.col()
@@ -26,9 +26,9 @@
 </head>
 
 <body>
-  <div qix-js-bla:ctrl-a="ctlx">ctlx[ctrl-a]</div>
-  <div qix-js-bla:ciccio="cicc">cicc[ciccio]</div>
-  <div qix-js-core:html="ppap" qix-js-core:tpl="templ.html">ppap[html]</div>
+  <div qix:ctlx="js/bla/ctrl-a">ctlx[ctrl-a]</div>
+  <div qix:cicc="js/bla/ciccio">cicc[ciccio]</div>
+  <div qix:ppap="js/core/html" ppap:color='purlple' qix:templ="js/core/tpl">ppap[html]</div>
 </body>
 
 </html>

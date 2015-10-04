@@ -2,6 +2,7 @@
   "name": "qix",
   "description": "qix",
   "dependencies": {
+    "plite": ""
   },
   "devDependencies": {
     "requirejs": ""
