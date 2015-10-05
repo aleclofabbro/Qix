@@ -42,43 +42,48 @@ define([
       });
   };
 
+  function retrieve_controller(ctrl_def, resolve_controller, reject_controller) {
+    return function(ctrl) {
+      var ctrl_args = [ctrl_def, resolve_controller, reject_controller];
+      if ('function' === typeof ctrl && ctrl.name === '$qix') {
+        ctrl.apply(null, ctrl_args);
+      } else if (ctrl && 'function' === typeof ctrl.$qix) {
+        ctrl.$qix.apply(ctrl, ctrl_args);
+      } else
+        resolve_controller(ctrl);
+    };
+  }
+
   ctrls.TIMEOUT = 3000;
 
-  function ctrls(node, _ctx, resolve_elem_compile, reject_elem_compile) {
+  function ctrls(node, result_controls, _ctx, resolve_elem_compile, reject_elem_compile) {
     if (node.nodeType !== 1)
       return resolve_elem_compile();
     var ctrl_defs = _make_ctrl_defs_list(node, _ctx);
     if (!ctrl_defs.length) {
       resolve_elem_compile();
     } else {
-      var controllers_promises = ctrl_defs
+      var controllers_defs_promises = ctrl_defs
         .map(function(ctrl_def) {
-          var controller_promise = Plite(function(resolve_controller, reject_controller) {
-            require([ctrl_def.path],
-              function(ctrl) {
-                var ctrl_args = [ctrl_def, resolve_controller, reject_controller];
-                if ('function' === typeof ctrl && ctrl.name === '$qix') {
-                  ctrl.apply(null, ctrl_args);
-                } else if (ctrl && 'function' === typeof ctrl.$qix) {
-                  ctrl.$qix.apply(ctrl, ctrl_args);
-                } else
-                  resolve_controller(ctrl);
-              }, reject_controller);
-          });
-          return controller_promise
-            .then(function(controller) {
-              //ctrl_def.controller = controller;
-              _ctx[ctrl_def.prop] = controller;
-              return controller;
+          return Plite(function(resolve_controller, reject_controller) {
+              require([ctrl_def.path], retrieve_controller(ctrl_def, resolve_controller, reject_controller), reject_controller);
             })
-            .timeout(ctrls.TIMEOUT, {
+            .then(function(controller) {
+              ctrl_def.controller = controller;
+              result_controls[ctrl_def.prop] = ctrl_def;
+              return ctrl_def;
+            })
+            /*.timeout(ctrls.TIMEOUT, {
               msg: 'Qix elem controller timeout ms:' + ctrls.TIMEOUT,
               ctrl: ctrl_def
-            });
+            })*/
+          ;
         });
 
-      Plite.all(controllers_promises)
-        .then(resolve_elem_compile)
+      Plite.all(controllers_defs_promises)
+        .then(function(ctrls_array) {
+          resolve_elem_compile(result_controls);
+        })
         .catch(function(err) {
           console.error('Qix elem controller error:', err);
           reject_elem_compile(err);

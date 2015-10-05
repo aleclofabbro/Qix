@@ -26,39 +26,35 @@ define([
       .map(function(curr_node) {
         var node_compilers_promises = compile.compilers
           .map(function(compiler) {
+            var compiler_result = compile_result[compiler.name] = {};
+
             // var _compiler_stack_elem = {
             //   compiler: compiler,
             //   node: curr_node
             // };
-            var compiler_promise = Plite(function(resolve, reject) {
+            return Plite(function(resolve, reject) {
                 compiler(curr_node, _ctx, resolve, reject);
               })
-              .then(function(result) {
-                compile_result[compiler.name] = result;
+              .then(function(comp_result) {
+                compile_result[compiler.name] = comp_result;
+                return comp_result;
               });
-            return compiler_promise
-              .then(function(comp_res) {
-                return comp_res;
-              });;
           });
         return Plite.all(node_compilers_promises)
-          .then(function(results) {
-            return compile(curr_node.childNodes, _ctx);
-            // .then(function(subs) {
-            //   return results.push(subs);
-            // });
+          .then(function(comp_results_array) {
+            return compile(curr_node.childNodes,compile_result);
           });
       });
 
     return Plite
       .all(nodes_promises)
-      .timeout(compile.TIMEOUT, 'Qix Compile timeout ms:' + compile.TIMEOUT)
+      //.timeout(compile.TIMEOUT, 'Qix Compile timeout ms:' + compile.TIMEOUT)
       .catch(function(err) {
         console.error('Qix compile error:', err);
         return err;
       })
       .then(function() { //return now is an Array of Arrays of undefineds
-        return _nodes;
+        return compile_result;
       });
 
   };
