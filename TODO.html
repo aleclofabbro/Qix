@@ -863,45 +863,44 @@ body .markdown-body
 }</style><title>TODO</title></head><body><article class="markdown-body"><h1 id="todo">
 <a id="user-content-todo" class="anchor" href="#todo" aria-hidden="true"><span class="octicon octicon-link"></span></a>TODO</h1>
 
-<h2 id="qix">
-<a id="user-content-qix" class="anchor" href="#qix" aria-hidden="true"><span class="octicon octicon-link"></span></a>qix:</h2>
+<h2 id="new-syntax">
+<a id="user-content-new-syntax" class="anchor" href="#new-syntax" aria-hidden="true"><span class="octicon octicon-link"></span></a>New Syntax</h2>
+
+<ul>
+<li>qix-engine dispatch nodes to compilers to compile them in differt ways
+
+<ul>
+<li>builtin compilers are
 
 <ul>
 <li>
-<del>utility qix.requireP -&gt; requirePromise</del> <em>fatto ma vedi punto ext-plugin</em>
+<code>element controller compiler</code>: <code>&lt;elem qix:prop="/path/to/module" prop:option="option for binder named prop" qix:other-prop="/path/to/module"&gt;&lt;/elem&gt;</code> </li>
+<li>
+<strong>(TODO)</strong> <code>text node compiler</code>: template engine per i text node</li>
+</ul>
 </li>
-<li>diversificare il qix![dep] plugin (template, requireP, template+binder) <strong>( ?? dico bene? forse sono i binder ? .. e vedi punto ext-plugin)</strong>
-</li>
-<li>valutare l'utilizzo direttamente in qix di plugin esterni <a href="https://github.com/jrburke/requirejs/wiki/Plugins">https://github.com/jrburke/requirejs/wiki/Plugins</a>
+</ul>
 </li>
 </ul>
 
-<h2 id="compile">
-<a id="user-content-compile" class="anchor" href="#compile" aria-hidden="true"><span class="octicon octicon-link"></span></a>compile:</h2>
+<h3 id="todo-1">
+<a id="user-content-todo-1" class="anchor" href="#todo-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Todo:</h3>
 
 <ul>
-<li><del>permettere ai binder dell'elemento di aumentare il ctx .. 
-probabilmente per ogni elemento bisogna passare un nuovo obj con proto il ctx superiore 
-invece che il ctx stesso.</del></li>
-<li>il compile prende opzioni e ritorna il ctx (nuovo oggetto con eventuali azzi e mazzi), 
-al binder vengono passate le sue opzioni(o un wrap), compile assegna il binder export al ctx[nome_binder]<br>
-</li>
-<li>
-<em>fatto.. da valutare</em> <del>valutare l'opzione elem.$qix per il context</del>
-</li>
-<li>valutare l'opzione «stop compile» nella fase di binding</li>
-<li>refactor (anche con qix.requireP) per maggiore linearità e leggibilità</li>
-<li>vedere punto2 <del>riflettere su cosa deve tornare il compile (ctx ? elem ?  ?? ??)</del>
-</li>
-<li>
-<del>eliminare bluebird e metterci un Promise minimalista integrato :)</del>
-.... <strong>usata versione modificata di <a href="https://gist.github.com/briancavalier/814318">https://gist.github.com/briancavalier/814318</a></strong>
+<li>getter per options: 
 
 <ul>
-<li><del><a href="https://gist.github.com/unscriptable/814052">https://gist.github.com/unscriptable/814052</a></del></li>
-<li><del><a href="https://gist.github.com/briancavalier/814318">https://gist.github.com/briancavalier/814318</a></del></li>
-<li><del><a href="https://github.com/RubenVerborgh/promiscuous/blob/master/promiscuous.js">https://github.com/RubenVerborgh/promiscuous/blob/master/promiscuous.js</a></del></li>
+<li>
+<code>nsctx</code>: <code>ctx[prop-ns]</code>
+</li>
+<li>
+<code>attrs</code>: object for <code>&lt; prop-ns-attributes &gt;</code>
+</li>
+<li>
+<code>opts</code>: <code>Object.create(nsctx).mixin(attrs)</code> così le opzioni programmatiche overridano gli attributi xml </li>
 </ul>
 </li>
+<li>il ritorno dell'engine deve essere un oggetto distinto da <code>ctx</code> ( <code>Object.create(ctx)</code> oppure <code>{}</code> ) ... </li>
+<li>attr.name tipo <code>my-prop</code> si trasformano in <code>my_prop</code> </li>
 </ul>
 </article></body></html>
