@@ -4,34 +4,39 @@
   'use strict';
 
   function _apply(args, fn) {
-    fn.apply(null, args);
-    return args;
+    try {
+      return fn.apply(null, args);
+    } catch (err) {
+      return [err];
+    }
   }
 
   function Promise(resolver) {
-    setTimeout(resolver.bind(null, resolution));
+    setTimeout(resolver.bind(null, resolution_fn));
 
     var _resolution_args,
       my_resolve_down;
 
-    function resolution() {
+    function resolution_fn() {
       _resolution_args = arguments;
       my_resolve_down.apply()
       _listeners.forEach(_apply.bind(null, arguments));
     }
 
     function then(callback) {
+      if (_resolution_args)
+        setTimeout(_apply.bind(null, _resolution_args, resolution));
 
-      var _sub_promise = Promise(function(sub_resolver) {
-        if (_resolution_args)
-          setTimeout(_apply.bind(null, _resolution_args, callback));
-        _listeners.push(function() {
-          try {
-            _resolveall();
-          } catch (err) {
-            sub_resolver(err);
-          }
-        });
+
+      function sub_resolver() {}
+      var _sub_promise = Promise(sub_resolver);
+
+      _listeners.push(function() {
+        try {
+          _resolveall();
+        } catch (err) {
+          sub_resolver(err);
+        }
       });
       return _sub_promise;
     }
