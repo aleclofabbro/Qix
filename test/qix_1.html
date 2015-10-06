@@ -15,7 +15,7 @@
         }
       }
     };
-    qix.compile(el, ctx)
+    qix.compile(el, Object.create(ctx))
       .then(function(_comp) {
         comp = _comp;
         console.log(ctx);

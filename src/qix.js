@@ -1,7 +1,7 @@
 define('qix', [
   './compile',
   './plite',
-  './require-plugins/element-loader'
+  './template-loader'
 ], function(compile, promise, elem_loader) {
   "use strict";
   return {
@@ -17,25 +17,22 @@ define('qix', [
     load: function(name, parentRequire, onload, config) {
       var url = parentRequire.toUrl(name);
       elem_loader.loadElem(url, function(master_element) {
-          var qix_elem = Object.create(master_element);
-          qix_elem.compileTo = function(to_elem, ctx) {
+          function qix_compileTo(to_elem, ctx) {
             this.appendTo(to_elem);
             return compile(to_elem.childNodes, ctx);
-          };
-          qix_elem.compile = function(ctx) {
+          }
+
+          function qix_compile(ctx) {
             var _clone = master_element.cloneBody();
             return compile(_clone, ctx)
               .then(function() {
                 return _clone.childNodes;
               });
-          };
-          qix_elem.appendTo = function(to_elem) {
-            var clone = master_element.cloneBody();
-            Array.prototype.slice.call(clone.childNodes)
-              .forEach(function(ch) {
-                to_elem.appendChild(ch);
-              });
-          };
+          }
+
+          var qix_elem = Object.create(master_element);
+          qix_elem.compileTo = qix_compileTo;
+          qix_elem.compile = qix_compile;
           onload(qix_elem);
         },
         function(err) {

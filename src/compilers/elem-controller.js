@@ -2,18 +2,21 @@ define([
   '../plite'
 ], function(Plite) {
   "use strict";
-  var _arr_slice = function(_arr_like) {
+
+  function _arr_slice(_arr_like) {
     return Array.prototype.slice.call(_arr_like);
-  };
-  var _make_ctrl_defs_list = function(elem, _ctx) {
+  }
+  function _make_ctrl_defs_list(elem, _ctx) {
     return _arr_slice(elem.attributes)
       .filter(function(attr) {
         return attr.name.startsWith('qix:');
       })
       .map(function(_attr) {
         var ctx_prop = _attr.name.split(':')[1];
+        var _ns_ctx = _ctx[ctx_prop];
         var path = _attr.value;
-        var ns_attrs_getter = function() {
+
+        function ns_attrs_getter() {
           return _arr_slice(elem.attributes)
             .filter(function(att) {
               return att.name.split(':')[0] === ctx_prop;
@@ -22,15 +25,16 @@ define([
               args_obj[att.name.split(':')[1]] = att.value;
               return args_obj;
             }, {});
-        };
-        var _ns_ctx = _ctx[ctx_prop];
-        var nsctx_getter = function() {
+        }
+        
+        function nsctx_getter() {
           if ('function' === typeof _ns_ctx) {
             return _ns_ctx();
           } else
             return _ns_ctx;
-        };
-        var opts_getter = function() {
+        }
+
+        function opts_getter() {
           var opts = Object.create(ns_attrs_getter() || null);
           var nsctx = nsctx_getter();
           if (nsctx)
@@ -39,7 +43,8 @@ define([
               acc[k] = nsctx[k];
             }, opts);
           return opts;
-        };
+        }
+        
         return {
           attr: _attr,
           nsctx: nsctx_getter,
@@ -51,7 +56,7 @@ define([
           ctx: _ctx
         };
       });
-  };
+  }
 
   function retrieve_controller(ctrl_def, resolve_controller, reject_controller) {
     return function(ctrl) {
@@ -80,11 +85,11 @@ define([
               require([ctrl_def.path], retrieve_controller(ctrl_def, resolve_controller, reject_controller), reject_controller);
             })
             .then(function(controller) {
-              // ctrl_def.controller = controller;
+              // ctrl_def.ctrl = controller;
               // _ctx[ctrl_def.prop] = ctrl_def;
               // return ctrl_def;
               _ctx[ctrl_def.prop] = controller;
-              return controller;
+              return ctrl_def;
             })
             /*.timeout(ctrls.TIMEOUT, {
               msg: 'Qix elem controller timeout ms:' + ctrls.TIMEOUT,

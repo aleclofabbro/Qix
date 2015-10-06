@@ -6,21 +6,16 @@ define([
   compile.TIMEOUT = 5000;
   compile.compilers = [elemCtrlComp];
 
-  var _arr_slice = function(_arr_like) {
+  function _arr_slice(_arr_like) {
     return Array.prototype.slice.call(_arr_like);
-  };
+  }
 
   function is_array_like(o) {
     return !!o && 'number' === typeof o.length;
-  };
+  }
 
   function compile(_nodes, _ctx) {
-    var nodes;
-    if (is_array_like(_nodes))
-      nodes = _arr_slice(_nodes);
-    else
-      nodes = [_nodes];
-
+    var nodes = _arr_slice(_nodes);
     var nodes_promises = nodes
       .map(function(curr_node) {
         var node_compilers_promises = compile.compilers
@@ -34,7 +29,10 @@ define([
           });
         return Plite.all(node_compilers_promises)
           .then(function(comp_results_array) {
-            return compile(curr_node.childNodes, _ctx);
+            if (curr_node.childNodes.length)
+              return compile(curr_node.childNodes, _ctx);
+            else
+              return _ctx;
           });
       });
 
@@ -45,11 +43,19 @@ define([
         console.error('Qix compile error:', err);
         return err;
       })
-      .then(function() { //return now is an Array of Arrays of undefineds
+      .then(function() {
         return _ctx;
       });
 
-  };
+  }
 
-  return compile;
+  return function(_nodes, ctx) {
+    var nodes = _nodes;
+    if (!is_array_like(_nodes))
+      nodes = [_nodes];
+    return compile(nodes, ctx)
+      .then(function(ctx) {
+        return ctx;
+      });
+  };
 });

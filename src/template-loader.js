@@ -66,6 +66,13 @@ define(function() {
           },
           text: function() {
             return text;
+          },
+          appendTo: function(to_elem) {
+            var children = this.clone();
+            Array.prototype.slice.call(children)
+              .forEach(function(ch) {
+                to_elem.appendChild(ch);
+              });
           }
         });
       });
@@ -74,5 +81,5 @@ define(function() {
       var url = parentRequire.toUrl(name);
       this.loadElem(url, onload);
     }
-  }
+  };
 });
