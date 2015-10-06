@@ -49,37 +49,53 @@ define(function() {
     }
     return xmlhttp;
   }
-  return {
-    loadElem: function(url, cb) {
-      sendRequest(url, function(text) {
-        var _body = document.createElement('div');
-        _body.innerHTML = text;
-        cb({
-          clone: function() {
-            return this.cloneBody().childNodes;
-          },
-          cloneBody: function() {
-            return _body.cloneNode(true);
-          },
-          master: function() {
-            return _body;
-          },
-          text: function() {
-            return text;
-          },
-          appendTo: function(to_elem) {
-            var children = this.clone();
-            Array.prototype.slice.call(children)
-              .forEach(function(ch) {
-                to_elem.appendChild(ch);
-              });
-          }
-        });
+
+  function loadElem(url, cb) {
+    sendRequest(url, function(templ_text) {
+      var _body = document.createElement('div');
+      _body.innerHTML = templ_text;
+
+      function clone() {
+        return cloneBody().childNodes;
+      }
+
+      function cloneBody() {
+        return _body.cloneNode(true);
+      }
+
+      function master() {
+        return _body;
+      }
+
+      function text() {
+        return templ_text;
+      }
+
+      function appendTo(to_elem) {
+        var children = clone();
+        Array.prototype.slice.call(children)
+          .forEach(function(ch) {
+            to_elem.appendChild(ch);
+          });
+      }
+
+      cb({
+        clone: clone,
+        cloneBody: cloneBody,
+        master: master,
+        text: text,
+        appendTo: appendTo,
       });
-    },
-    load: function(name, parentRequire, onload, config) {
-      var url = parentRequire.toUrl(name);
-      this.loadElem(url, onload);
-    }
+    });
+  }
+
+  function load(name, parentRequire, onload, config) {
+    var url = parentRequire.toUrl(name);
+    loadElem(url, onload);
+  }
+
+  return {
+    loadElem: loadElem,
+    load: load
   };
 });

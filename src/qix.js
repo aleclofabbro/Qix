@@ -2,23 +2,26 @@ define('qix', [
   './compile',
   './plite',
   './template-loader'
-], function(compile, promise, elem_loader) {
+], function(compile, plite, elem_loader) {
   "use strict";
-  return {
-    requireP: function(modules, localRequire) {
-      var pr = promise.Promise();
+
+  function _arr_slice(_arr_like) {
+    return Array.prototype.slice.call(_arr_like);
+  }
+
+  function requireP(modules, localRequire) {
+    return plite(function(resolve, reject) {
       (localRequire || require)(modules,
         function() {
-          return (res([].slice.call(arguments)));
-        }, rej);
-      return pr;
-    },
-    compile: compile,
-    load: function(name, parentRequire, onload, config) {
+          resolve(_arr_slice(arguments));
+        }, reject);
+    });
+  }
+  function load(name, parentRequire, onload, config) {
       var url = parentRequire.toUrl(name);
       elem_loader.loadElem(url, function(master_element) {
           function qix_compileTo(to_elem, ctx) {
-            this.appendTo(to_elem);
+            master_element.appendTo(to_elem);
             return compile(to_elem.childNodes, ctx);
           }
 
@@ -40,5 +43,9 @@ define('qix', [
         }
       );
     }
+  return {
+    requireP: requireP,
+    compile: compile,
+    load: load
   };
 });

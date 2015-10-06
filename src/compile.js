@@ -1,9 +1,9 @@
 define([
   './plite',
   './compilers/elem-controller'
-], function(Plite, elemCtrlComp) {
+], function(P, elemCtrlComp) {
   "use strict";
-  compile.TIMEOUT = 5000;
+  compile.TIMEOUT = 60000;
   compile.compilers = [elemCtrlComp];
 
   function _arr_slice(_arr_like) {
@@ -19,15 +19,16 @@ define([
     var nodes_promises = nodes
       .map(function(curr_node) {
         var node_compilers_promises = compile.compilers
-          .map(function(compiler) { // var _compiler_stack_elem = {
+          .map(function(compiler) {
+            // var _compiler_stack_elem = {
             //   compiler: compiler,
             //   node: curr_node
             // };
-            return Plite(function(resolve, reject) {
+            return P(function(resolve, reject) {
               compiler(curr_node, _ctx, resolve, reject);
             });
           });
-        return Plite.all(node_compilers_promises)
+        return P.all(node_compilers_promises)
           .then(function(comp_results_array) {
             if (curr_node.childNodes.length)
               return compile(curr_node.childNodes, _ctx);
@@ -36,13 +37,9 @@ define([
           });
       });
 
-    return Plite
+    return P
       .all(nodes_promises)
-      //.timeout(compile.TIMEOUT, 'Qix Compile timeout ms:' + compile.TIMEOUT)
-      .catch(function(err) {
-        console.error('Qix compile error:', err);
-        return err;
-      })
+      .timeout(compile.TIMEOUT, 'Qix Compile timeout ms:' + compile.TIMEOUT)
       .then(function() {
         return _ctx;
       });
@@ -54,6 +51,10 @@ define([
     if (!is_array_like(_nodes))
       nodes = [_nodes];
     return compile(nodes, ctx)
+      .catch(function(err) {
+        console.error('Qix compile error:', err);
+        return err;
+      })
       .then(function(ctx) {
         return ctx;
       });
