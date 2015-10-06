@@ -15,7 +15,6 @@ define([
   };
 
   function compile(_nodes, _ctx) {
-    var compile_result = {};
     var nodes;
     if (is_array_like(_nodes))
       nodes = _arr_slice(_nodes);
@@ -25,24 +24,17 @@ define([
     var nodes_promises = nodes
       .map(function(curr_node) {
         var node_compilers_promises = compile.compilers
-          .map(function(compiler) {
-            var compiler_result = compile_result[compiler.name] = {};
-
-            // var _compiler_stack_elem = {
+          .map(function(compiler) { // var _compiler_stack_elem = {
             //   compiler: compiler,
             //   node: curr_node
             // };
             return Plite(function(resolve, reject) {
-                compiler(curr_node, _ctx, resolve, reject);
-              })
-              .then(function(comp_result) {
-                compile_result[compiler.name] = comp_result;
-                return comp_result;
-              });
+              compiler(curr_node, _ctx, resolve, reject);
+            });
           });
         return Plite.all(node_compilers_promises)
           .then(function(comp_results_array) {
-            return compile(curr_node.childNodes,compile_result);
+            return compile(curr_node.childNodes, _ctx);
           });
       });
 
@@ -54,7 +46,7 @@ define([
         return err;
       })
       .then(function() { //return now is an Array of Arrays of undefineds
-        return compile_result;
+        return _ctx;
       });
 
   };

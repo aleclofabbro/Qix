@@ -10,10 +10,10 @@ define([
       .filter(function(attr) {
         return attr.name.startsWith('qix:');
       })
-      .map(function(_attr) { // mappa gli attributi matchati con delle definizioni di binder_provider oppure false 
+      .map(function(_attr) {
         var ctx_prop = _attr.name.split(':')[1];
         var path = _attr.value;
-        var ns_args_getter = function() {
+        var ns_attrs_getter = function() {
           return _arr_slice(elem.attributes)
             .filter(function(att) {
               return att.name.split(':')[0] === ctx_prop;
@@ -23,18 +23,29 @@ define([
               return args_obj;
             }, {});
         };
-        var opts_getter = function() {
-          var ctx_opts = _ctx[ctx_prop];
-          if ('function' === typeof ctx_opts) {
-            return ctx_opts();
+        var _ns_ctx = _ctx[ctx_prop];
+        var nsctx_getter = function() {
+          if ('function' === typeof _ns_ctx) {
+            return _ns_ctx();
           } else
-            return ctx_opts;
+            return _ns_ctx;
+        };
+        var opts_getter = function() {
+          var opts = Object.create(ns_attrs_getter() || null);
+          var nsctx = nsctx_getter();
+          if (nsctx)
+            Object.keys(nsctx)
+            .reduce(function(acc, k) {
+              acc[k] = nsctx[k];
+            }, opts);
+          return opts;
         };
         return {
           attr: _attr,
+          nsctx: nsctx_getter,
           opts: opts_getter,
           prop: ctx_prop,
-          args: ns_args_getter,
+          attrs: ns_attrs_getter,
           path: path,
           elem: elem,
           ctx: _ctx
@@ -56,7 +67,7 @@ define([
 
   ctrls.TIMEOUT = 3000;
 
-  function ctrls(node, result_controls, _ctx, resolve_elem_compile, reject_elem_compile) {
+  function ctrls(node, _ctx, resolve_elem_compile, reject_elem_compile) {
     if (node.nodeType !== 1)
       return resolve_elem_compile();
     var ctrl_defs = _make_ctrl_defs_list(node, _ctx);
@@ -69,9 +80,11 @@ define([
               require([ctrl_def.path], retrieve_controller(ctrl_def, resolve_controller, reject_controller), reject_controller);
             })
             .then(function(controller) {
-              ctrl_def.controller = controller;
-              result_controls[ctrl_def.prop] = ctrl_def;
-              return ctrl_def;
+              // ctrl_def.controller = controller;
+              // _ctx[ctrl_def.prop] = ctrl_def;
+              // return ctrl_def;
+              _ctx[ctrl_def.prop] = controller;
+              return controller;
             })
             /*.timeout(ctrls.TIMEOUT, {
               msg: 'Qix elem controller timeout ms:' + ctrls.TIMEOUT,
@@ -81,9 +94,7 @@ define([
         });
 
       Plite.all(controllers_defs_promises)
-        .then(function(ctrls_array) {
-          resolve_elem_compile(result_controls);
-        })
+        .then(resolve_elem_compile)
         .catch(function(err) {
           console.error('Qix elem controller error:', err);
           reject_elem_compile(err);

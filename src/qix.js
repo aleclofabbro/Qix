@@ -19,19 +19,14 @@ define('qix', [
       elem_loader.loadElem(url, function(master_element) {
           var qix_elem = Object.create(master_element);
           qix_elem.compileTo = function(to_elem, ctx) {
-            return compile(master_element.cloneBody(), ctx)
-              .then(function(_q_elem) {
-                Array.prototype.slice.call(_q_elem.childNodes)
-                  .forEach(function(ch) {
-                    to_elem.appendChild(ch);
-                  });
-                return _q_elem.childNodes;
-              });
+            this.appendTo(to_elem);
+            return compile(to_elem.childNodes, ctx);
           };
           qix_elem.compile = function(ctx) {
-            return compile(master_element.cloneBody(), ctx)
-              .then(function(_q_elem) {
-                return _q_elem.childNodes;
+            var _clone = master_element.cloneBody();
+            return compile(_clone, ctx)
+              .then(function() {
+                return _clone.childNodes;
               });
           };
           qix_elem.appendTo = function(to_elem) {

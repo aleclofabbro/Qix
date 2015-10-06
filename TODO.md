@@ -12,5 +12,9 @@
 + getter per options: 
 	+ `nsctx`: `ctx[prop-ns]`
 	+ `attrs`: object for `< prop-ns-attributes >`
-	+ `opts`: `Object.create(nsctx).mixin(attrs)` così le opzioni programmatiche overridano gli attributi xml 
+	+ `opts`: `Object.create(attrs).mixin(nsctx)` così le opzioni programmatiche overridano gli attributi xml 
 + attr.name tipo `my-prop` si trasformano in `my_prop` 
+
+
+
+*ci sono sobrapposizioni/conflitti con più tpl nello stesso... -- -- *

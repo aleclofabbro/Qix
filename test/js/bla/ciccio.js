@@ -14,7 +14,7 @@ define([
       var _inn = ctrlctx.elem.innerHTML;
       ctrlctx.elem.innerHTML = '';
       templ.compileTo(ctrlctx.elem, sub_ctx)
-        .then(function(sub_elem) {
+        .then(function(sub_ctx) {
           resolve({
             setText: sub_ctx.text,
             swapCol: sub_ctx.col.swap
