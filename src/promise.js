@@ -1,59 +1,56 @@
 ;
 (function() {
-
   'use strict';
 
-  function _apply(args, fn) {
-    try {
-      return fn.apply(null, args);
-    } catch (err) {
-      return [err];
-    }
-  }
+  function promise(fullfiller) {
+    setTimeout(fullfiller.bind(null, fullfill_fn));
 
-  function Promise(resolver) {
-    setTimeout(resolver.bind(null, resolution_fn));
+    var _fullfillment_array,
+      _subscribers = [];
 
-    var _resolution_args,
-      my_resolve_down;
-
-    function resolution_fn() {
-      _resolution_args = arguments;
-      my_resolve_down.apply()
-      _listeners.forEach(_apply.bind(null, arguments));
-    }
-
-    function then(callback) {
-      if (_resolution_args)
-        setTimeout(_apply.bind(null, _resolution_args, resolution));
-
-
-      function sub_resolver() {}
-      var _sub_promise = Promise(sub_resolver);
-
-      _listeners.push(function() {
-        try {
-          _resolveall();
-        } catch (err) {
-          sub_resolver(err);
-        }
+    function fullfill_fn() {
+      if (_fullfillment_array)
+        return console.warn('Can\'t fullfill a fullfilled Promise:  ', _fullfillment_array, arguments);
+      _fullfillment_array = Array.prototype.slice.call(arguments);
+      _subscribers.forEach(function(_map_resolve) {
+        _map_resolve(_fullfillment_array);
       });
-      return _sub_promise;
+      _subscribers = null;
+    }
+
+    function _map_resolve_fn(callback, _fulfill_sub_fn, _fullfillment_array) {
+      try {
+        var map_result = callback.apply(null, _fullfillment_array);
+        _fulfill_sub_fn.apply(null, map_result);
+      } catch (err) {
+        _fulfill_sub_fn.call(null, err);
+      }
+    }
+
+    function map(callback) {
+      function sub_fullfiller(_fulfill_sub_fn) {
+        var _my_map_resolve = _map_resolve_fn.bind(null, callback, _fulfill_sub_fn);
+        if (_fullfillment_array)
+          _my_map_resolve(_fullfillment_array);
+        else
+          _subscribers.push(_my_map_resolve);
+      }
+      return promise(sub_fullfiller);
     }
 
     return {
-      then: then
+      map: map
     };
   };
 
   if (typeof exports === 'object') {
-    module.exports = Promise;
+    module.exports = promise;
   } else if (typeof define === 'function' && define.amd) {
     define(function() {
-      return Promise;
+      return promise;
     });
   } else {
-    this.Promise = Promise;
+    this.promise = promise;
   }
 
 }.call(this));
