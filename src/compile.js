@@ -20,10 +20,6 @@ define([
       .map(function(curr_node) {
         var node_compilers_promises = compile.compilers
           .map(function(compiler) {
-            // var _compiler_stack_elem = {
-            //   compiler: compiler,
-            //   node: curr_node
-            // };
             return P(function(resolve, reject) {
               compiler(curr_node, _ctx, resolve, reject);
             });

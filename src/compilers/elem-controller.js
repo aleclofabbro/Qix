@@ -48,7 +48,7 @@ define([
       .map(function(_attr) {
         var ctx_prop = _attr.name.split(':')[1];
         var ns_ctx = ctx[ctx_prop];
-        var path = _attr.value;
+        var module = _attr.value;
         var my_nsctx_getter = nsctx_getter.bind(null, ns_ctx);
         var my_ns_attrs_getter = ns_attrs_getter.bind(null, elem, ctx_prop);
         var my_opts_getter = opts_getter.bind(null, my_ns_attrs_getter, my_nsctx_getter);
@@ -58,7 +58,7 @@ define([
           opts: my_opts_getter,
           prop: ctx_prop,
           attrs: my_ns_attrs_getter,
-          path: path,
+          module: module,
           elem: elem,
           ctx: ctx
         };
@@ -73,8 +73,8 @@ define([
       ctrl.$qix.apply(ctrl, ctrl_args);
     } else {
       var module_result = {
-        def: ctrl_def,
-        ctrl: ctrl
+        qix_def: ctrl_def,
+        module: ctrl
       };
       resolve_controller(module_result);
     }
@@ -90,7 +90,7 @@ define([
       var controllers_defs_promises = ctrl_defs
         .map(function(ctrl_def) {
           return P(function(resolve_controller, reject_controller) {
-              require([ctrl_def.path], function(ctrl){
+              require([ctrl_def.module], function(ctrl){
                 retrieve_controller(ctrl, ctrl_def, resolve_controller, reject_controller, node_all_ctrls_promise);
               }, reject_controller);
             })
