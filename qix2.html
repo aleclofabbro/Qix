@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Test</title>
+  <script type="text/javascript" src="lib/requirejs/require.js"></script>
+  <script type="text/javascript" src="qix.js"></script>
+  <script type="text/javascript">
+  require(['qix!templ.html'], function(comp) {
+    ctrls = comp.spawn_into({
+      a: '*a',
+      b: '*b'
+    }, document.body);
+  });
+  </script>
+</head>
+
+<body>
+</body>
+
+</html>

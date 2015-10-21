@@ -1,0 +1,62 @@
+<div qix:a="core/mod-1#modprop" a:opt-a="299">
+  <div qix:b="core/mod-2">
+  </div>
+</div>
+<!-- 
+  :: qix(elem,opts,scope,callback,errback)
+  
+  cerca tutti gli elem con attr_name match \^qix:.*$\
+  per ogni attrqix estrapola la coppia nome-modulo/prop ctrl_requires={mod:'xx/yy', prop:'subctrlname', scope:'nomescope'}
+  require(ctrl_requires.map(R.prop('mod')),req_ok,req_ko); // req_ko è il ko dell'utente (errback)
+  req_ok:fn()
+  calcola dipendenze da qix-scope
+  riordina ok_arguments e ctrl_requires insieme
+  cicla ok_arguments e invoka il modulo oppure il mod prop con argomenti:[element, opts, scopename] 
+  opts è : 
+    oggetto costruito con gli scope attributes, overridden con il [ qix-scope[ctrl_requires.scope] oggetto o qix.req's return ]
+  
+  bind ctrl-element lifecycle :: ctrl implements { destroy }
+
+  popola oggetto ctrldefs con 
+  [scopename] : {
+    ctrl: il return dell'invoke del modulo,
+    elem: elemento,
+    opts: le opzioni passate
+  }
+
+  ( ... opts può essere una funzione per averlo dinamico ... oppure un Bacon.Model/Property)
+
+  invoka callback(ctrldefs);
+
+-->
+<script type="text/javascript">
+qix(elem, {//qix-scope
+  b: qix.req(['a'], function(a) {
+    return {
+      opt_a: useRequiresModule(a),
+      opt_b: '12121'
+    };
+  }),
+  a: {
+    opt_a: 111,
+    opt_b: 2222
+  }
+},
+{},//qix-scope
+ function(ctrls) {
+
+  /* 
+  ctrls == {
+    a : < ctrl-def core/mod-1#modprop() > 
+    b : < ctrl-def core/mod-2() > 
+  }
+
+  ctrl-def : {
+    ctrl: < returned ctrl >,
+    elem: < own elem >,
+    opts: < le opts passate al ctrl >
+  }
+  */
+
+})
+</script>
