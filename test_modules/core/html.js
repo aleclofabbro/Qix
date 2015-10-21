@@ -4,12 +4,20 @@ define([],
     return {
       x: function $qix(elem, binders, link) {
         return {
-          x: arguments
+          x: {
+            elem: elem,
+            binders: binders,
+            link: link
+          }
         };
       },
       y: function $qix(elem, binders, link) {
         return {
-          y: arguments
+          y: {
+            elem: elem,
+            binders: binders,
+            link: link
+          }
         };
       },
     };

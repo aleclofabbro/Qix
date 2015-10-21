@@ -35,8 +35,9 @@ define('qix', function() {
   function get_ctrl_attributes(ctrl_name, elem) {
     return as_array(elem.attributes)
       .reduce(function(ctrl_attrs, attr) {
-        if (is_attr_namespaced(ctrl_name, attr)) {
-          ctrl_attrs[split_attr_ns_name(attr)[1]] = attr.value;
+        if (is_attr_namespaced(denormalize_hyphens(ctrl_name), attr)) {
+          var normalized_attr_name = normalize_hyphens(split_attr_ns_name(attr)[1]);
+          ctrl_attrs[normalized_attr_name] = attr.value;
         }
         return ctrl_attrs;
       }, {});
@@ -46,7 +47,7 @@ define('qix', function() {
     var name = split_attr_ns_name(attr)[1];
     var val_split = attr.value.split('#');
     return {
-      name: name,
+      name: normalize_hyphens(name),
       module_path: val_split[0],
       module_prop: val_split[1]
         // master_elem: master_elem
@@ -113,9 +114,13 @@ define('qix', function() {
     return master_elem.cloneNode(true);
   };
 
-  // function normalize_name(name) {
-  //   return name.replace('-', '_');
-  // }
+  function normalize_hyphens(name) {
+    return name.replace(/-/g, '_');
+  }
+
+  function denormalize_hyphens(name) {
+    return name.replace(/_/g, '-');
+  }
 
   function populate_controllers(_the_qix, binders, ctrls, elem_clone) {
 
@@ -132,10 +137,11 @@ define('qix', function() {
             var _module = require(ctrl_def.module_path);
             var factory = ctrl_def.module_prop ? _module[ctrl_def.module_prop] : _module;
             if (!factory)
-              throw new Error('No Factory for ctrl_def', ctrl_def);
+              throw new Error('No Factory for ctrl_def' + JSON.stringify(ctrl_def, null, 4));
             var _ctrl_link = Object.create(ctrl_def);
             _ctrl_link.attrs = get_ctrl_attributes.bind(null, name, qix_elem);
-            ctrls[normalize_name(name)] = factory(qix_elem, binders[name], _ctrl_link);
+            _ctrl_link.elem = qix_elem;
+            ctrls[name] = factory(qix_elem, binders[name], _ctrl_link);
             ctrls['$' + name] = _ctrl_link;
             //qix_elem.addEventListener();
           });
