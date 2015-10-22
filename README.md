@@ -1,4 +1,5 @@
 ```
-bower install  
-/test/qix_1.html
+bower install
+< webserver on root dir >
+/test/index.html
 ```

@@ -6,11 +6,6 @@
   "devDependencies": {
     "requirejs": ""
   },
-  "moduleType": [
-    "amd",
-    "globals",
-    "node"
-  ],
   "authors": [
     "alec <alec@example.com>"
   ],

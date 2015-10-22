@@ -1,28 +1,243 @@
-/*!
- *
- * Copyright 2009-2013 Kris Kowal under the terms of the MIT
- * license found at http://github.com/kriskowal/q/raw/master/LICENSE
- *
- * With parts by Tyler Close
- * Copyright 2007-2009 Tyler Close under the terms of the MIT X license found
- * at http://www.opensource.org/licenses/mit-license.html
- * Forked at ref_send.js version: 2009-05-11
- *
- * With parts by Mark Miller
- * Copyright (C) 2011 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
+(function() {
+  'use strict';
+  define('qix', function() {
+    var _qix_attr_placeholder = 'qix-element';
+    var is_qix_attr = is_attr_namespaced.bind(null, 'qix');
 
-function isObject(e){return e===Object(e)}function makeStackTraceLong(e,t){if(hasStacks&&t.stack&&typeof e=="object"&&e!==null&&e.stack&&e.stack.indexOf(STACK_JUMP_SEPARATOR)===-1){var n=[];for(var r=t;!!r&&handlers.get(r);r=handlers.get(r).became)r.stack&&n.unshift(r.stack);n.unshift(e.stack);var i=n.join("\n"+STACK_JUMP_SEPARATOR+"\n");e.stack=filterStackString(i)}}function filterStackString(e){if(Q.isIntrospective)return e;var t=e.split("\n"),n=[];for(var r=0;r<t.length;++r){var i=t[r];!isInternalFrame(i)&&!isNodeFrame(i)&&i&&n.push(i)}return n.join("\n")}function isNodeFrame(e){return e.indexOf("(module.js:")!==-1||e.indexOf("(node.js:")!==-1}function getFileNameAndLineNumber(e){var t=/at .+ \((.+):(\d+):(?:\d+)\)$/.exec(e);if(t)return[t[1],Number(t[2])];var n=/at ([^ ]+):(\d+):(?:\d+)$/.exec(e);if(n)return[n[1],Number(n[2])];var r=/.*@(.+):(\d+)$/.exec(e);if(r)return[r[1],Number(r[2])]}function isInternalFrame(e){var t=getFileNameAndLineNumber(e);if(!t)return!1;var n=t[0],r=t[1];return n===qFileName&&r>=qStartingLine&&r<=qEndingLine}function captureLine(){if(!hasStacks)return;try{throw new Error}catch(e){var t=e.stack.split("\n"),n=t[0].indexOf("@")>0?t[1]:t[2],r=getFileNameAndLineNumber(n);if(!r)return;return qFileName=r[0],r[1]}}function deprecate(e,t,n){return function(){return typeof console!="undefined"&&typeof console.warn=="function"&&(n?console.warn(t+" is deprecated, use "+n+" instead.",(new Error("")).stack):console.warn(t+" is deprecated.",(new Error("")).stack)),e.apply(this,arguments)}}function Q_getHandler(e){var t=handlers.get(e);return!t||!t.became?t:(t=follow(t),handlers.set(e,t),t)}function follow(e){return e.became?(e.became=follow(e.became),e.became):e}function Q(e){return Q_isPromise(e)?e:isThenable(e)?(thenables.has(e)||thenables.set(e,new Promise(new Thenable(e))),thenables.get(e)):new Promise(new Fulfilled(e))}function Q_reject(e){return new Promise(new Rejected(e))}function defer(){var e=new Pending,t=new Promise(e),n=new Deferred(t);if(Q.longStackSupport&&hasStacks)try{throw new Error}catch(r){t.stack=r.stack.substring(r.stack.indexOf("\n")+1)}return n}function Q_all(e){function u(){s=-Infinity;for(var e=0;e<i.length;e++)i[e]>s&&(s=i[e])}if(Q_isPromise(e))return typeof console!="undefined"&&typeof console.warn=="function"&&console.warn("Q.all no longer directly unwraps a promise. Use Q(array).all()"),Q(e).all();var t=0,n=defer(),r=Array(e.length),i=[],s=-Infinity,o;return Array.prototype.forEach.call(e,function(f,l){var c;Q_isPromise(f)&&(c=Q_getHandler(f)).state==="fulfilled"?r[l]=c.value:(++t,f=Q(f),f.then(function(i){r[l]=i,--t===0&&n.resolve(r)},n.reject),f.observeEstimate(function(r){var a=i[l];i[l]=r,r>s?s=r:a===s&&r<=s&&u(),i.length===e.length&&s!==o&&(n.setEstimate(s),o=s)}))}),t===0&&n.resolve(r),n.promise}function Q_allSettled(e){return Q_isPromise(e)?(typeof console!="undefined"&&typeof console.warn=="function"&&console.warn("Q.allSettled no longer directly unwraps a promise. Use Q(array).allSettled()"),Q(e).allSettled()):Q_all(e.map(function(t){function n(){return t.inspect()}return t=Q(t),t.then(n,n)}))}function Q_spread(e,t,n){return Q(e).spread(t,n)}function Q_race(e){return new Promise(function(t){e.forEach(function(e){Q(e).then(t.resolve,t.reject)})})}function Promise_function(e){return function(){var n=new Array(arguments.length);for(var r=0;r<arguments.length;r++)n[r]=arguments[r];return Q(e).apply(this,n)}}function Q_async(e){return function(){function n(e,t){var n;try{n=r[e](t)}catch(o){return Q_reject(o)}return n.done?Q(n.value):Q(n.value).then(i,s)}var r=e.apply(this,arguments),i=n.bind(n,"next"),s=n.bind(n,"throw");return i()}}function Q_spawn(e){Q_async(e)().done()}function Promise(e){if(!(this instanceof Promise))return new Promise(e);if(typeof e=="function"){var t=e,n=defer();e=Q_getHandler(n.promise);try{t(n.resolve,n.reject,n.setEstimate)}catch(r){n.reject(r)}}handlers.set(this,e)}function Promise_resolve(e){return Q(e)}function Q_isPromise(e){return isObject(e)&&!!handlers.get(e)}function isThenable(e){return isObject(e)&&typeof e.then=="function"}function Promise_rethrow(e){throw e}function Deferred(e){this.promise=e,promises.set(this,e);var t=this,n=this.resolve;this.resolve=function(e){n.call(t,e)};var r=this.reject;this.reject=function(e){r.call(t,e)}}function Fulfilled(e){this.value=e,this.estimate=Date.now()}function Rejected(e){this.reason=e,this.estimate=Infinity}function Pending(){this.messages=[],this.observers=[],this.estimate=Infinity}function Thenable(e){this.thenable=e,this.became=null,this.estimate=Infinity}function Passed(e){this.promise=e}var hasStacks=!1;try{throw new Error}catch(e){hasStacks=!!e.stack}var qStartingLine=captureLine(),qFileName;require("collections/shim");var WeakMap=require("collections/weak-map"),Iterator=require("collections/iterator"),asap=require("asap"),STACK_JUMP_SEPARATOR="From previous event:",handlers=new WeakMap,theViciousCycleError=new Error("Can't resolve a promise with itself"),theViciousCycleRejection=Q_reject(theViciousCycleError),theViciousCycle=Q_getHandler(theViciousCycleRejection),thenables=new WeakMap;module.exports=Q,Q.longStackSupport=!1,Q.reject=Q_reject,Q.defer=defer,Q.when=function(t,n,r,i){return Q(t).then(n,r,i)},Q.all=Q_all,Q.allSettled=Q_allSettled,Q.delay=function(t,n){return n===void 0&&(n=t,t=void 0),Q(t).delay(n)},Q.timeout=function(t,n,r){return Q(t).timeout(n,r)},Q.spread=Q_spread,Q.join=function(t,n){return Q.spread([t,n],function(t,n){if(t===n)return t;throw new Error("Can't join: not the same: "+t+" "+n)})},Q.race=Q_race,Q.try=function(t){return Q(t).dispatch("call",[[]])},Q.function=Promise_function,Q.promised=function(t){return function(){var n=new Array(arguments.length);for(var r=0;r<arguments.length;r++)n[r]=arguments[r];return Q_spread([this,Q_all(n)],function(n,r){return t.apply(n,r)})}},Q.passByCopy=Q.push=function(e){return Object(e)===e&&!Q_isPromise(e)&&passByCopies.set(e,!0),e},Q.isPortable=function(e){return Object(e)===e&&passByCopies.has(e)};var passByCopies=new WeakMap;Q.async=Q_async,Q.spawn=Q_spawn,Q.Promise=Promise,Promise.all=Q_all,Promise.race=Q_race,Promise.resolve=Promise_resolve,Promise.reject=Q_reject,Q.isPromise=Q_isPromise,Promise.prototype.inspect=function(){return Q_getHandler(this).inspect()},Promise.prototype.isPending=function(){return Q_getHandler(this).state==="pending"},Promise.prototype.isFulfilled=function(){return Q_getHandler(this).state==="fulfilled"},Promise.prototype.isRejected=function(){return Q_getHandler(this).state==="rejected"},Promise.prototype.toBePassed=function(){return Q_getHandler(this).state==="passed"},Promise.prototype.toString=function(){return"[object Promise]"},Promise.prototype.then=function(t,n,r){var i=this,s=defer(),o;typeof t=="function"?o=function(n){try{s.resolve(t.call(void 0,n))}catch(r){s.reject(r)}}:o=s.resolve;var u;typeof n=="function"?u=function(t){try{s.resolve(n.call(void 0,t))}catch(r){s.reject(r)}}:u=s.reject,this.done(o,u);if(r!==void 0){var a=function(){s.setEstimate(i.getEstimate()+r)};this.observeEstimate(a),a()}return s.promise},Promise.prototype.done=function(t,n){var r=this,i=!1;asap(function(){var s;typeof t=="function"&&(Q.onerror?s=function(n){if(i)return;i=!0;try{t.call(void 0,n)}catch(r){(Q.onerror||Promise_rethrow)(r)}}:s=function(n){if(i)return;i=!0,t.call(void 0,n)});var o;typeof n=="function"&&Q.onerror?o=function(t){if(i)return;i=!0,makeStackTraceLong(t,r);try{n.call(void 0,t)}catch(s){(Q.onerror||Promise_rethrow)(s)}}:typeof n=="function"?o=function(t){if(i)return;i=!0,makeStackTraceLong(t,r),n.call(void 0,t)}:o=Q.onerror||Promise_rethrow,typeof process=="object"&&process.domain&&(o=process.domain.bind(o)),Q_getHandler(r).dispatch(s,"then",[o])})},Promise.prototype.thenResolve=function(t){return t=Q(t),Q_all([this,t]).then(function(){return t},null,0)},Promise.prototype.thenReject=function(t){return this.then(function(){throw t},null,0)},Promise.prototype.all=function(){return this.then(Q_all)},Promise.prototype.allSettled=function(){return this.then(Q_allSettled)},Promise.prototype.catch=function(t){return this.then(void 0,t)},Promise.prototype.finally=function(t,n){return t?(t=Q(t),this.then(function(e){return t.call().then(function(){return e})},function(e){return t.call().then(function(){throw e})},n)):this},Promise.prototype.observeEstimate=function(t){return this.rawDispatch(null,"estimate",[t]),this},Promise.prototype.getEstimate=function(){return Q_getHandler(this).estimate},Promise.prototype.dispatch=function(t,n){var r=defer();return this.rawDispatch(r.resolve,t,n),r.promise},Promise.prototype.rawDispatch=function(t,n,r){var i=this;asap(function(){Q_getHandler(i).dispatch(t,n,r)})},Promise.prototype.get=function(t){return this.dispatch("get",[t])},Promise.prototype.invoke=function(t){var n=new Array(arguments.length-1);for(var r=1;r<arguments.length;r++)n[r-1]=arguments[r];return this.dispatch("invoke",[t,n])},Promise.prototype.apply=function(t,n){return this.dispatch("call",[n,t])},Promise.prototype.call=function(t){var n=new Array(Math.max(0,arguments.length-1));for(var r=1;r<arguments.length;r++)n[r-1]=arguments[r];return this.dispatch("call",[n,t])},Promise.prototype.bind=function(t){var n=this,r=new Array(Math.max(0,arguments.length-1));for(var i=1;i<arguments.length;i++)r[i-1]=arguments[i];return function(){var i=r.slice();for(var s=0;s<arguments.length;s++)i[i.length]=arguments[s];return n.dispatch("call",[i,t])}},Promise.prototype.keys=function(){return this.dispatch("keys",[])},Promise.prototype.iterate=function(){return this.dispatch("iterate",[])},Promise.prototype.spread=function(t,n,r){return this.all().then(function(n){return t.apply(void 0,n)},n,r)},Promise.prototype.timeout=function(t,n){var r=defer(),i=setTimeout(function(){r.reject(new Error(n||"Timed out after "+t+" ms"))},t);return this.then(function(t){clearTimeout(i),r.resolve(t)},function(t){clearTimeout(i),r.reject(t)}),r.promise},Promise.prototype.delay=function(t){return this.then(function(n){var r=defer();return r.setEstimate(Date.now()+t),setTimeout(function(){r.resolve(n)},t),r.promise},null,t)},Promise.prototype.pull=function(){return this.dispatch("pull",[])},Promise.prototype.pass=function(){return this.toBePassed()?this:new Promise(new Passed(this))};var promises=new WeakMap;Deferred.prototype.resolve=function(t){var n=Q_getHandler(promises.get(this));if(!n.messages)return;n.become(Q(t))},Deferred.prototype.reject=function(t){var n=Q_getHandler(promises.get(this));if(!n.messages)return;n.become(Q_reject(t))},Deferred.prototype.setEstimate=function(t){t=+t,t!==t&&(t=Infinity);if(t<1e12&&t!==-Infinity)throw new Error("Estimate values should be a number of miliseconds in the future");var n=Q_getHandler(promises.get(this));n.setEstimate&&n.setEstimate(t)},Fulfilled.prototype.state="fulfilled",Fulfilled.prototype.inspect=function(){return{state:"fulfilled",value:this.value}},Fulfilled.prototype.dispatch=function(t,n,r){var i;if(n==="then"||n==="get"||n==="call"||n==="invoke"||n==="keys"||n==="iterate"||n==="pull")try{i=this[n].apply(this,r)}catch(s){i=Q_reject(s)}else if(n==="estimate")r[0].call(void 0,this.estimate);else{var o=new Error("Fulfilled promises do not support the "+n+" operator");i=Q_reject(o)}t&&t(i)},Fulfilled.prototype.then=function(){return this.value},Fulfilled.prototype.get=function(t){return this.value[t]},Fulfilled.prototype.call=function(t,n){return this.callInvoke(this.value,t,n)},Fulfilled.prototype.invoke=function(t,n){return this.callInvoke(this.value[t],n,this.value)},Fulfilled.prototype.callInvoke=function(t,n,r){var i;for(var s=0;s<n.length;s++)Q_isPromise(n[s])&&n[s].toBePassed()&&(i=i||[],i.push(n[s]));if(i){var o=this;return Q_all(i).then(function(){return o.callInvoke(t,n.map(function(e){return Q_isPromise(e)&&e.toBePassed()?e.inspect().value:e}),r)})}return t.apply(r,n)},Fulfilled.prototype.keys=function(){return Object.keys(this.value)},Fulfilled.prototype.iterate=function(){return new Iterator(this.value)},Fulfilled.prototype.pull=function(){var t;if(Object(this.value)===this.value){t=Array.isArray(this.value)?[]:{};for(var n in this.value)t[n]=this.value[n]}else t=this.value;return Q.push(t)},Rejected.prototype.state="rejected",Rejected.prototype.inspect=function(){return{state:"rejected",reason:this.reason}},Rejected.prototype.dispatch=function(t,n,r){var i;n==="then"?i=this.then(t,r[0]):i=this,t&&t(i)},Rejected.prototype.then=function(t,n){return n?n(this.reason):this},Pending.prototype.state="pending",Pending.prototype.inspect=function(){return{state:"pending"}},Pending.prototype.dispatch=function(t,n,r){this.messages.push([t,n,r]);if(n==="estimate"){this.observers.push(r[0]);var i=this;asap(function(){r[0].call(void 0,i.estimate)})}},Pending.prototype.become=function(t){this.became=theViciousCycle;var n=Q_getHandler(t);this.became=n,handlers.set(t,n),this.promise=void 0,this.messages.forEach(function(n){asap(function(){var r=Q_getHandler(t);r.dispatch.apply(r,n)})}),this.messages=void 0,this.observers=void 0},Pending.prototype.setEstimate=function(t){if(this.observers){var n=this;n.estimate=t,this.observers.forEach(function(n){asap(function(){n.call(void 0,t)})})}},Thenable.prototype.state="thenable",Thenable.prototype.inspect=function(){return{state:"pending"}},Thenable.prototype.cast=function(){if(!this.became){var t=defer(),n=this.thenable;asap(function(){try{n.then(t.resolve,t.reject)}catch(r){t.reject(r)}}),this.became=Q_getHandler(t.promise)}return this.became},Thenable.prototype.dispatch=function(t,n,r){this.cast().dispatch(t,n,r)},Passed.prototype.state="passed",Passed.prototype.inspect=function(){return this.promise.inspect()},Passed.prototype.dispatch=function(t,n,r){return this.promise.rawDispatch(t,n,r)},Q.ninvoke=function(t,n){var r=new Array(Math.max(0,arguments.length-1));for(var i=2;i<arguments.length;i++)r[i-2]=arguments[i];var s=Q.defer();return r[i-2]=s.makeNodeResolver(),Q(t).dispatch("invoke",[n,r]).catch(s.reject),s.promise},Promise.prototype.ninvoke=function(t){var n=new Array(arguments.length);for(var r=1;r<arguments.length;r++)n[r-1]=arguments[r];var i=Q.defer();return n[r-1]=i.makeNodeResolver(),this.dispatch("invoke",[t,n]).catch(i.reject),i.promise},Q.denodeify=function(t,n){return function(){var r=new Array(arguments.length+1),i=0;for(;i<arguments.length;i++)r[i]=arguments[i];var s=Q.defer();return r[i]=s.makeNodeResolver(n),Q(t).apply(this,r).catch(s.reject),s.promise}},Deferred.prototype.makeNodeResolver=function(e){var t=this.resolve;return e===!0?function(n){if(n)t(Q_reject(n));else{var r=new Array(Math.max(0,arguments.length-1));for(var i=1;i<arguments.length;i++)r[i-1]=arguments[i];t(r)}}:e?function(r){if(r)t(Q_reject(r));else{var i={};for(var s in e)i[e[s]]=arguments[s+1];t(i)}}:function(n,r){n?t(Q_reject(n)):t(r)}},Promise.prototype.nodeify=function(t){if(!t)return this;this.done(function(e){t(null,e)},t)},Q.nextTick=deprecate(asap,"nextTick","asap package"),Q.resolve=deprecate(Q,"resolve","Q"),Q.fulfill=deprecate(Q,"fulfill","Q"),Q.isPromiseAlike=deprecate(isThenable,"isPromiseAlike","(not supported)"),Q.fail=deprecate(function(e,t){return Q(e).catch(t)},"Q.fail","Q(value).catch"),Q.fin=deprecate(function(e,t){return Q(e).finally(t)},"Q.fin","Q(value).finally"),Q.progress=deprecate(function(e){return e},"Q.progress","no longer supported"),Q.thenResolve=deprecate(function(e,t){return Q(e).thenResolve(t)},"thenResolve","Q(value).thenResolve"),Q.thenReject=deprecate(function(e,t){return Q(e).thenResolve(t)},"thenResolve","Q(value).thenResolve"),Q.isPending=deprecate(function(e){return Q(e).isPending()},"isPending","Q(value).isPending"),Q.isFulfilled=deprecate(function(e){return Q(e).isFulfilled()},"isFulfilled","Q(value).isFulfilled"),Q.isRejected=deprecate(function(e){return Q(e).isRejected()},"isRejected","Q(value).isRejected"),Q.master=deprecate(function(e){return e},"master","no longer necessary"),Q.makePromise=function(){throw new Error("makePromise is no longer supported")},Q.dispatch=deprecate(function(e,t,n){return Q(e).dispatch(t,n)},"dispatch","Q(value).dispatch"),Q.get=deprecate(function(e,t){return Q(e).get(t)},"get","Q(value).get"),Q.keys=deprecate(function(e){return Q(e).keys()},"keys","Q(value).keys"),Q.post=deprecate(function(e,t,n){return Q(e).post(t,n)},"post","Q(value).invoke (spread arguments)"),Q.mapply=deprecate(function(e,t,n){return Q(e).post(t,n)},"post","Q(value).invoke (spread arguments)"),Q.send=deprecate(function(e,t){return Q(e).post(t,Array.prototype.slice.call(arguments,2))},"send","Q(value).invoke"),Q.set=function(){throw new Error("Q.set no longer supported")},Q.delete=function(){throw new Error("Q.delete no longer supported")},Q.nearer=deprecate(function(e){return Q_isPromise(e)&&e.isFulfilled()?e.inspect().value:e},"nearer","inspect().value (+nuances)"),Q.fapply=deprecate(function(e,t){return Q(e).dispatch("call",[t])},"fapply","Q(callback).apply(thisp, args)"),Q.fcall=deprecate(function(e){return Q(e).dispatch("call",[Array.prototype.slice.call(arguments,1)])},"fcall","Q(callback).call(thisp, ...args)"),Q.fbind=deprecate(function(e){var t=Q(e),n=Array.prototype.slice.call(arguments,1);return function(){return t.dispatch("call",[n.concat(Array.prototype.slice.call(arguments)),this])}},"fbind","bind with thisp"),Q.promise=deprecate(Promise,"promise","Promise"),Promise.prototype.fapply=deprecate(function(e){return this.dispatch("call",[e])},"fapply","apply with thisp"),Promise.prototype.fcall=deprecate(function(){return this.dispatch("call",[Array.prototype.slice.call(arguments)])},"fcall","try or call with thisp"),Promise.prototype.fail=deprecate(function(e){return this.catch(e)},"fail","catch"),Promise.prototype.fin=deprecate(function(e){return this.finally(e)},"fin","finally"),Promise.prototype.set=function(){throw new Error("Promise set no longer supported")},Promise.prototype.delete=function(){throw new Error("Promise delete no longer supported")},Deferred.prototype.notify=deprecate(function(){},"notify","no longer supported"),Promise.prototype.progress=deprecate(function(){return this},"progress","no longer supported"),Promise.prototype.mapply=deprecate(function(e,t){return this.dispatch("invoke",[e,t])},"mapply","invoke"),Promise.prototype.fbind=deprecate(function(){return Q.fbind.apply(Q,[void 0].concat(Array.prototype.slice.call(arguments)))},"fbind","bind(thisp, ...args)"),Promise.prototype.send=deprecate(function(){return this.dispatch("invoke",[name,Array.prototype.slice.call(arguments,1)])},"send","invoke"),Promise.prototype.mcall=deprecate(function(){return this.dispatch("invoke",[name,Array.prototype.slice.call(arguments,1)])},"mcall","invoke"),Promise.prototype.passByCopy=deprecate(function(e){return e},"passByCopy","Q.passByCopy"),Q.nfapply=deprecate(function(e,t){var n=Q.defer(),r=Array.prototype.slice.call(t);return r.push(n.makeNodeResolver()),Q(e).apply(this,r).catch(n.reject),n.promise},"nfapply"),Promise.prototype.nfapply=deprecate(function(e){return Q.nfapply(this,e)},"nfapply"),Q.nfcall=deprecate(function(e){var t=Array.prototype.slice.call(arguments,1);return Q.nfapply(e,t)},"nfcall"),Promise.prototype.nfcall=deprecate(function(){var e=new Array(arguments.length);for(var t=0;t<arguments.length;t++)e[t]=arguments[t];return Q.nfapply(this,e)},"nfcall"),Q.nfbind=deprecate(function(e){var t=Array.prototype.slice.call(arguments,1);return function(){var n=t.concat(Array.prototype.slice.call(arguments)),r=Q.defer();return n.push(r.makeNodeResolver()),Q(e).apply(this,n).catch(r.reject),r.promise}},"nfbind","denodeify (with caveats)"),Promise.prototype.nfbind=deprecate(function(){var e=new Array(arguments.length);for(var t=0;t<arguments.length;t++)e[t]=arguments[t];return Q.nfbind(this,e)},"nfbind","denodeify (with caveats)"),Q.nbind=deprecate(function(e,t){var n=Array.prototype.slice.call(arguments,2);return function(){function s(){return e.apply(t,arguments)}var r=n.concat(Array.prototype.slice.call(arguments)),i=Q.defer();return r.push(i.makeNodeResolver()),Q(s).apply(this,r).catch(i.reject),i.promise}},"nbind","denodeify (with caveats)"),Q.npost=deprecate(function(e,t,n){var r=Q.defer();return n.push(r.makeNodeResolver()),Q(e).dispatch("invoke",[t,n]).catch(r.reject),r.promise},"npost","ninvoke (with spread arguments)"),Promise.prototype.npost=deprecate(function(e,t){return Q.npost(this,e,t)},"npost","Q.ninvoke (with caveats)"),Q.nmapply=deprecate(Q.nmapply,"nmapply","q/node nmapply"),Promise.prototype.nmapply=deprecate(Promise.prototype.npost,"nmapply","Q.nmapply"),Q.nsend=deprecate(Q.ninvoke,"nsend","q/node ninvoke"),Q.nmcall=deprecate(Q.ninvoke,"nmcall","q/node ninvoke"),Promise.prototype.nsend=deprecate(Promise.prototype.ninvoke,"nsend","q/node ninvoke"),Promise.prototype.nmcall=deprecate(Promise.prototype.ninvoke,"nmcall","q/node ninvoke");var qEndingLine=captureLine();define("lib/q/q",function(){}),define("compilers/elem-controller",["../lib/q/q"],function(e){"use strict";function t(e){return Array.prototype.slice.call(e)}function n(e,n){return t(e.attributes).filter(function(e){return e.name.split(":")[0]===n}).reduce(function(e,t){return e[t.name.split(":")[1]]=t.value,e},{})}function r(e){return"function"==typeof e?e():e}function i(e,t){var n=Object.create(e()||null),r=t();if(r)for(var i in r)n[i]=r[i];return n}function s(e,s){return t(e.attributes).filter(function(e){return e.name.startsWith("qix:")}).map(function(t){var o=t.name.split(":")[1],u=s[o],a=t.value,f=r.bind(null,u),l=n.bind(null,e,o),c=i.bind(null,l,f);return{attr:t,nsctx:f,opts:c,prop:o,attrs:l,path:a,elem:e,ctx:s}})}function o(e,t,n,r,i){var s=[t,n,r,i];if("function"==typeof e&&e.name==="$qix")e.apply(null,s);else if(e&&"function"==typeof e.$qix)e.$qix.apply(e,s);else{var o={def:t,ctrl:e};n(o)}}function u(t,n,r,i){if(t.nodeType!==1)return r();var u=s(t,n);if(!u.length)r();else{var a=u.map(function(t){return e(function(e,n){require([t.path],function(r){o(r,t,e,n,f)},n)}).then(function(e){return n[t.prop]=e,t})}),f=e.all(a);f.then(r)}}return u}),define("compile",["./lib/q/q","./compilers/elem-controller"],function(e,t){"use strict";function n(e){return Array.prototype.slice.call(e)}function r(e){return!!e&&"number"==typeof e.length}function i(t,r){var s=n(t),o=s.map(function(t){var n=i.compilers.map(function(n){return e(function(e,i){n(t,r,e,i)})});return e.all(n).then(function(e){return t.childNodes.length?i(t.childNodes,r):r})});return e.all(o).timeout(i.TIMEOUT,"Qix Compile timeout ms:"+i.TIMEOUT).then(function(){return r})}return i.TIMEOUT=6e4,i.compilers=[t],function(e,t){var n=e;return r(e)||(n=[e]),i(n,t).catch(function(e){return console.error("Qix compile error:",e),e}).then(function(e){return e})}}),define("template-loader",[],function(){"use strict";function e(e,t){var r=n();if(!r)throw new Error("NO XHR!");r.responseType="text",r.open("GET",e,!0),r.onreadystatechange=function(){if(r.readyState!=4)return;if(r.status!=200&&r.status!=304)return;t(r.responseText)};if(r.readyState==4)return;r.send()}function n(){var e=!1;for(var n=0;n<t.length;n++){try{e=t[n]()}catch(r){continue}break}return e}function r(t,n){e(t,function(e){function r(){return i().childNodes}function i(){return t.cloneNode(!0)}function s(){return t}function o(){return e}function u(e){var t=r();Array.prototype.slice.call(t).forEach(function(t){e.appendChild(t)})}var t=document.createElement("div");t.innerHTML=e,n({clone:r,cloneBody:i,master:s,text:o,appendTo:u})})}function i(e,t,n,i){var s=t.toUrl(e);r(s,n)}var t=[function(){return new XMLHttpRequest},function(){return new ActiveXObject("Msxml2.XMLHTTP")},function(){return new ActiveXObject("Msxml3.XMLHTTP")},function(){return new ActiveXObject("Microsoft.XMLHTTP")}];return{loadElem:r,load:i}}),define("qix",["./compile","./lib/q/q","./template-loader"],function(e,t,n){"use strict";function r(e){return Array.prototype.slice.call(e)}function i(e,n){return t(function(t,i){(n||require)(e,function(){t(r(arguments))},i)})}function s(t,r,i,s){var o=r.toUrl(t);n.loadElem(o,function(t){function n(n,r){return t.appendTo(n),e(n.childNodes,r)}function r(n){var r=t.cloneBody();return e(r,n).then(function(){return r.childNodes})}var s=Object.create(t);s.compileTo=n,s.compile=r,i(s)},function(e){console.error("qix loader err:",e)})}return{requireP:i,compile:e,load:s}});
+    function is_array_like(obj) {
+      return ('length' in obj) && ('number' === typeof obj.length);
+    }
+
+    function as_array(obj) {
+      return is_array_like(obj) ? Array.prototype.slice.call(obj) : [obj];
+    }
+
+    function master_elem_array_from_text(text) {
+      var div = document.createElement('div');
+      div.innerHTML = text;
+      return as_array(div.children);
+    };
+
+    function get_master_elem_array(master_elem_array_or_text) {
+      if ('string' === typeof master_elem_array_or_text) {
+        return master_elem_array_from_text(master_elem_array_or_text);
+      } else return as_array(master_elem_array_or_text);
+
+    }
+
+    function is_attr_namespaced(prefix, attr) {
+      return split_attr_ns_name(attr)[0] === prefix;
+    }
+
+    function split_attr_ns_name(attr) {
+      return attr.name.split(':');
+    }
+
+    function get_ctrl_attributes(ctrl_name, elem) {
+      return as_array(elem.attributes)
+        .reduce(function(ctrl_attrs, attr) {
+          if (is_attr_namespaced(denormalize_hyphens(ctrl_name), attr)) {
+            var normalized_attr_name = normalize_hyphens(split_attr_ns_name(attr)[1]);
+            ctrl_attrs[normalized_attr_name] = attr.value;
+          }
+          return ctrl_attrs;
+        }, {});
+    }
+
+    function make_ctrl_def(master_elem, attr) {
+      var name = split_attr_ns_name(attr)[1];
+      var val_split = attr.value.split('#');
+      return {
+        name: normalize_hyphens(name),
+        module_path: val_split[0],
+        module_prop: val_split[1]
+          // master_elem: master_elem
+      };
+    }
+
+    function make_ctrl_defs(master_elem) {
+      return as_array(master_elem.attributes)
+        .filter(is_qix_attr)
+        .map(make_ctrl_def.bind(null, master_elem));
+    }
+
+    function merge_objs(target, obj) {
+      for (var k in obj)
+        target[k] = obj[k];
+      return target;
+    }
+
+    function mark_qix_elem(master_elem, _ctrl_defs) {
+      var _elems_ctrl_names = _ctrl_defs.map(prop_get.bind(null, 'name'));
+      master_elem.setAttribute(_qix_attr_placeholder, _elems_ctrl_names.join(','));
+    }
+
+    function get_all_ctrl_defs(master_elem_array) {
+      return master_elem_array
+        .reduce(function(all_defs, master_elem) {
+          var _ctrl_defs = make_ctrl_defs(master_elem);
+          if (_ctrl_defs.length) {
+            mark_qix_elem(master_elem, _ctrl_defs);
+            _ctrl_defs.forEach(function(_ctrl_def) {
+              all_defs[_ctrl_def.name] = _ctrl_def;
+            });
+          }
+          return merge_objs(get_all_ctrl_defs(as_array(master_elem.children)), all_defs);
+        }, {});
+    }
+
+    function prop_get(prop, obj) {
+      return obj ? obj[prop] : void(0);
+    }
+
+    function get_prop(obj, prop) {
+      return prop_get(prop, obj);
+    }
+
+
+    function make_qix(callback, errback, master_elem_array_or_text) {
+      var master_elem_array = get_master_elem_array(master_elem_array_or_text);
+      var all_ctrl_defs = get_all_ctrl_defs(master_elem_array);
+      var all_module_arr = Object.keys(get_all_ctrl_defs(master_elem_array))
+        .map(get_prop.bind(null, all_ctrl_defs))
+        .map(prop_get.bind(null, 'module_path'));
+
+      require(all_module_arr,
+        function( /* all_modules */ ) {
+          var qix_obj = Object.create(qix_proto);
+          qix_obj._all_ctrl_defs = all_ctrl_defs;
+          qix_obj._master_elem_array = master_elem_array;
+          callback(qix_obj);
+        }, errback);
+    }
+
+    function make_clone(master_elem) {
+      return master_elem.cloneNode(true);
+    };
+
+    function normalize_hyphens(name) {
+      return name.replace(/-/g, '_');
+    }
+
+    function denormalize_hyphens(name) {
+      return name.replace(/_/g, '-');
+    }
+
+    function populate_controllers(_the_qix, binders, ctrls, elem_clone) {
+
+      var _qix_elems = as_array(elem_clone.querySelectorAll('[' + _qix_attr_placeholder + ']'));
+      if (elem_clone.hasAttribute(_qix_attr_placeholder))
+        _qix_elems.unshift(elem_clone);
+      _qix_elems
+        .forEach(function(qix_elem) {
+          var qix_attr_value = qix_elem.getAttribute(_qix_attr_placeholder);
+          var elem_ctrl_names = qix_attr_value.split(',');
+          elem_ctrl_names
+            .forEach(function(name) {
+              var ctrl_def = _the_qix._all_ctrl_defs[name];
+              var _module = require(ctrl_def.module_path);
+              var factory = ctrl_def.module_prop ? _module[ctrl_def.module_prop] : _module;
+              if (!factory)
+                throw new Error('No Factory for ctrl_def' + JSON.stringify(ctrl_def, null, 4));
+              var _ctrl_link = Object.create(ctrl_def);
+              _ctrl_link.attrs = get_ctrl_attributes.bind(null, name, qix_elem);
+              _ctrl_link.elem = qix_elem;
+              ctrls[name] = factory(qix_elem, binders[name], _ctrl_link);
+              ctrls['$' + name] = _ctrl_link;
+              //qix_elem.addEventListener();
+            });
+        });
+      return ctrls;
+    }
+
+    var qix_proto = {
+      spawn: function(binders) {
+        var _the_qix = this;
+        var _root_elems = _the_qix._master_elem_array
+          .map(make_clone);
+        return _root_elems
+          .reduce(populate_controllers.bind(null, _the_qix, binders), {
+            $root_elems: _root_elems
+          });
+      },
+      spawn_into: function(binders, into_elem) {
+        var ctrls = this.spawn(binders);
+        ctrls
+          .$root_elems
+          .forEach(into_elem.appendChild.bind(into_elem));
+        return ctrls;
+      }
+    };
+
+    var noop = function() {};
+
+    return {
+      load: function(name, localrequire, done) {
+        localrequire(['text!' + name], make_qix.bind(null, done, noop));
+      }
+    };
+  });
+
+  /*
+   * text loader
+   **/
+  define('text', function() {
+    function sendRequest(url, callback) {
+      var xhr = createXMLHTTPObject();
+      if (!xhr)
+        throw new Error('NO XHR!');
+      xhr.responseType = "text";
+      xhr.open('GET', url, true);
+      // xhr.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState != 4)
+          return;
+        if (xhr.status != 200 && xhr.status != 304) {
+          //          alert('HTTP error ' + xhr.status);
+          return;
+        }
+        callback(xhr.responseText);
+      }
+      if (xhr.readyState == 4)
+        return;
+      xhr.send();
+    }
+
+    var XMLHttpFactories = [
+      function() {
+        return new XMLHttpRequest()
+      },
+      function() {
+        return new ActiveXObject("Msxml2.XMLHTTP")
+      },
+      function() {
+        return new ActiveXObject("Msxml3.XMLHTTP")
+      },
+      function() {
+        return new ActiveXObject("Microsoft.XMLHTTP")
+      }
+    ];
+
+    function createXMLHTTPObject() {
+      var xmlhttp = false;
+      for (var i = 0; i < XMLHttpFactories.length; i++) {
+        try {
+          xmlhttp = XMLHttpFactories[i]();
+        } catch (e) {
+          continue;
+        }
+        break;
+      }
+      return xmlhttp;
+    }
+
+    function load(name, parentRequire, onload, config) {
+      var url = parentRequire.toUrl(name);
+      sendRequest(url, onload);
+    }
+
+    return {
+      load: load
+    };
+  });
+}());
