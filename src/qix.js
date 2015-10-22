@@ -1,16 +1,16 @@
 (function() {
   'use strict';
+
+  function is_array_like(obj) {
+    return ('length' in obj) && ('number' === typeof obj.length);
+  }
+
+  function as_array(obj) {
+    return is_array_like(obj) ? Array.prototype.slice.call(obj) : [obj];
+  }
   define('qix', function() {
     var _qix_attr_placeholder = 'qix-element-placeholder';
     var is_qix_attr = is_attr_namespaced.bind(null, 'qix');
-
-    function is_array_like(obj) {
-      return ('length' in obj) && ('number' === typeof obj.length);
-    }
-
-    function as_array(obj) {
-      return is_array_like(obj) ? Array.prototype.slice.call(obj) : [obj];
-    }
 
     function master_elem_array_from_text(text) {
       var div = document.createElement('div');
@@ -18,12 +18,12 @@
       return as_array(div.children);
     };
 
-    function get_master_elem_array(master_elem_array_or_text) {
-      if ('string' === typeof master_elem_array_or_text) {
-        return master_elem_array_from_text(master_elem_array_or_text);
-      } else return as_array(master_elem_array_or_text);
+    // function get_master_elem_array(master_elem_array_or_text) {
+    //   if ('string' === typeof master_elem_array_or_text) {
+    //     return master_elem_array_from_text(master_elem_array_or_text);
+    //   } else return as_array(master_elem_array_or_text);
 
-    }
+    // }
 
     function is_attr_namespaced(prefix, attr) {
       return split_attr_ns_name(attr)[0] === prefix;
@@ -31,6 +31,15 @@
 
     function split_attr_ns_name(attr) {
       return attr.name.split(':');
+    }
+
+    function set_ctrl_attribute(ctrl_name, elem, name, val) {
+      var denorm_ns_attr_name = denormalize_hyphens(ctrl_name) + ':' + denormalize_hyphens(name);
+      if (val === null)
+        elem.removeAttribute(denorm_ns_attr_name, val);
+      else
+        elem.setAttribute(denorm_ns_attr_name, val = (val === void(0) ? '' : val));
+      return val;
     }
 
     function get_ctrl_attributes(ctrl_name, elem) {
@@ -55,7 +64,7 @@
       };
     }
 
-    function make_ctrl_defs(master_elem) {
+    function make_ctrl_defs_for_elem(master_elem) {
       return as_array(master_elem.attributes)
         .filter(is_qix_attr)
         .map(make_ctrl_def.bind(null, master_elem));
@@ -67,7 +76,7 @@
       return target;
     }
 
-    function mark_qix_elem(master_elem, _ctrl_defs) {
+    function mark_as_qix_elem(master_elem, _ctrl_defs) {
       var _elems_ctrl_names = _ctrl_defs.map(prop_get.bind(null, 'name'));
       master_elem.setAttribute(_qix_attr_placeholder, _elems_ctrl_names.join(','));
     }
@@ -75,12 +84,13 @@
     function get_all_ctrl_defs(master_elem_array) {
       return master_elem_array
         .reduce(function(all_defs, master_elem) {
-          var _ctrl_defs = make_ctrl_defs(master_elem);
+          var _ctrl_defs = make_ctrl_defs_for_elem(master_elem);
           if (_ctrl_defs.length) {
-            mark_qix_elem(master_elem, _ctrl_defs);
-            _ctrl_defs.forEach(function(_ctrl_def) {
-              all_defs[_ctrl_def.name] = _ctrl_def;
-            });
+            mark_as_qix_elem(master_elem, _ctrl_defs);
+            _ctrl_defs
+              .forEach(function(_ctrl_def) {
+                all_defs[_ctrl_def.name] = _ctrl_def;
+              });
           }
           return merge_objs(get_all_ctrl_defs(as_array(master_elem.children)), all_defs);
         }, {});
@@ -95,16 +105,29 @@
     }
 
 
-    function make_qix(callback, errback, master_elem_array_or_text) {
-      var master_elem_array = get_master_elem_array(master_elem_array_or_text);
-      // TODO hook 
+    function make_qix(callback, errback, component_seed) {
+      // TODO hook text 
+      var master_elem_array = master_elem_array_from_text(component_seed.text);
+      // TODO hook elems
       var all_ctrl_defs = get_all_ctrl_defs(master_elem_array);
-      var all_module_arr = Object.keys(get_all_ctrl_defs(master_elem_array))
+      var all_defs_keys =
+        Object.keys(all_ctrl_defs);
+
+      var all_module_arr =
+        all_defs_keys
         .map(get_prop.bind(null, all_ctrl_defs))
         .map(prop_get.bind(null, 'module_path'));
 
-      require(all_module_arr,
+      component_seed.localrequire(all_module_arr,
         function( /* all_modules */ ) {
+          all_defs_keys.forEach(function(def_key, index) {
+            var ctrl_def = all_ctrl_defs[def_key];
+            var _module = component_seed.localrequire(ctrl_def.module_path);
+            var factory = ctrl_def.module_prop ? _module[ctrl_def.module_prop] : _module;
+            if (!factory)
+              throw new Error('No Factory for ctrl_def' + JSON.stringify(ctrl_def, null, 4));
+            ctrl_def.factory = factory;
+          });
           var qix_obj = Object.create(qix_proto);
           qix_obj._all_ctrl_defs = all_ctrl_defs;
           qix_obj._master_elem_array = master_elem_array;
@@ -124,30 +147,48 @@
       return name.replace(/_/g, '-');
     }
 
+    function make_ctrl_link(ctrl_def, name, qix_elem) {
+      var _ctrl_link = Object.create(ctrl_def);
+      _ctrl_link.get_attrs = get_ctrl_attributes.bind(null, name, qix_elem);
+      _ctrl_link.set_attr = set_ctrl_attribute.bind(null, name, qix_elem);
+      _ctrl_link.elem = qix_elem;
+      return _ctrl_link;
+    }
+
+    function bind_controller(_all_ctrl_defs, binders, qix_elem, ctrls, name) {
+      var ctrl_def = _all_ctrl_defs[name];
+
+      var _ctrl_link = make_ctrl_link(ctrl_def, name, qix_elem);
+      // TODO hook
+      ctrls[name] = ctrl_def.factory(qix_elem, binders[name], _ctrl_link);
+      ctrls['$' + name] = _ctrl_link;
+    }
+
+    function bind_controllers_elem(_all_ctrl_defs, binders, ctrls, qix_elem) {
+      var qix_attr_value = qix_elem.getAttribute(_qix_attr_placeholder);
+      var elem_ctrl_names = qix_attr_value.split(',');
+      elem_ctrl_names
+        .forEach(bind_controller.bind(null, _all_ctrl_defs, binders, qix_elem, ctrls));
+    }
+
+    function is_qix_elem(elem) {
+      return elem.hasAttribute(_qix_attr_placeholder);
+    }
+
+    function get_qix_children_elems_array(elem) {
+      return as_array(elem.querySelectorAll('[' + _qix_attr_placeholder + ']'))
+    }
+
+    function get_all_qix_elems_array(elem) {
+      var _qix_elems = get_qix_children_elems_array(elem);
+      if (is_qix_elem(elem))
+        _qix_elems.unshift(elem);
+      return _qix_elems;
+    }
+
     function bind_controllers(_the_qix, binders, ctrls, elem_clone) {
-      var _qix_elems = as_array(elem_clone.querySelectorAll('[' + _qix_attr_placeholder + ']'));
-      if (elem_clone.hasAttribute(_qix_attr_placeholder))
-        _qix_elems.unshift(elem_clone);
-      _qix_elems
-        .forEach(function(qix_elem) {
-          var qix_attr_value = qix_elem.getAttribute(_qix_attr_placeholder);
-          var elem_ctrl_names = qix_attr_value.split(',');
-          elem_ctrl_names
-            .forEach(function(name) {
-              var ctrl_def = _the_qix._all_ctrl_defs[name];
-              var _module = require(ctrl_def.module_path);
-              var factory = ctrl_def.module_prop ? _module[ctrl_def.module_prop] : _module;
-              if (!factory)
-                throw new Error('No Factory for ctrl_def' + JSON.stringify(ctrl_def, null, 4));
-              var _ctrl_link = Object.create(ctrl_def);
-              _ctrl_link.attrs = get_ctrl_attributes.bind(null, name, qix_elem);
-              _ctrl_link.elem = qix_elem;
-              _ctrl_link.factory = factory;
-              // TODO hook
-              ctrls[name] = factory(qix_elem, binders[name], _ctrl_link);
-              ctrls['$' + name] = _ctrl_link;
-            });
-        });
+      get_all_qix_elems_array(elem_clone)
+        .forEach(bind_controllers_elem.bind(null, _the_qix._all_ctrl_defs, binders, ctrls));
       return ctrls;
     }
 
@@ -233,9 +274,33 @@
       return xmlhttp;
     }
 
-    function load(name, parentRequire, onload, config) {
-      var url = parentRequire.toUrl(name);
-      sendRequest(url, onload);
+
+
+    function path_relative_to(baseurl, path) {
+      if (path.startsWith('.'))
+        return baseurl + path;
+      else
+        return path;
+    }
+
+    function load(name, localrequire, onload, config) {
+      var url = localrequire.toUrl(name);
+      var baseurl = name.substring(0, name.lastIndexOf('/') + 1);
+      var path_resolver = path_relative_to.bind(null, baseurl);
+      sendRequest(url, function(text) {
+        onload({
+          text: text,
+          localrequire: function(deps) {
+            if (Array.prototype.isPrototypeOf(deps)) {
+              var args = as_array(arguments);
+              args[0] = args[0].map(path_resolver);
+              return require.apply(null, args);
+            } else {
+              return require(path_resolver(deps));
+            }
+          }
+        });
+      });
     }
 
     return {

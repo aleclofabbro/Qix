@@ -7,11 +7,16 @@
   <script type="text/javascript" src="../src/qix.js"></script>
   <!-- <script type="text/javascript" src="../dist/qix.min.js"></script> -->
   <script type="text/javascript">
-  require(['qix!templ.html'], function(comp) {
+  require(['qix!mod/templ.html'], function(comp) {
     ctrls = comp.spawn_into({
       b_lm: '*blm',
       a_lm: '*a',
       b: '*b'
+    }, document.body);
+    ctrls2 = comp.spawn_into({
+      b_lm: '*****blm',
+      a_lm: '*****a',
+      b: '****b'
     }, document.body);
   });
   </script>
