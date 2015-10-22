@@ -4,7 +4,7 @@
 + ridurre in fn + semplici `bind_controllers`
 + eliminare `root_elems` (gli array) fare in modo che ci sia un holder sia per il master che per il clone in fase di instanziazione 
 + hooks
-  + *master* in `make_qix` hook -> `master_element` chiamato ovviamente un'unica volta al primo require dopo che le sub dipendenze sono state risolte.. utile per «plugin» e modifiche globali dei componenti
+  + *master* in `make_qix` -> `master_element` chiamato ovviamente un'unica volta al primo require dopo che le sub dipendenze sono state risolte.. utile per «plugin» e modifiche globali dei componenti
   + *template* in `spawn` -> `root_elems` per elaborazione locale del clone prima del processo di binding
   + *link* in `bind_controllers` -> `link` per ogni `qix_ctrl` per customizzazioni pre-factory (i.e. modifica ns-attrs..)
 + link
