@@ -1,7 +1,7 @@
 (function() {
   'use strict';
   define('qix', function() {
-    var _qix_attr_placeholder = 'qix-element';
+    var _qix_attr_placeholder = 'qix-element-placeholder';
     var is_qix_attr = is_attr_namespaced.bind(null, 'qix');
 
     function is_array_like(obj) {
@@ -97,6 +97,7 @@
 
     function make_qix(callback, errback, master_elem_array_or_text) {
       var master_elem_array = get_master_elem_array(master_elem_array_or_text);
+      // TODO hook 
       var all_ctrl_defs = get_all_ctrl_defs(master_elem_array);
       var all_module_arr = Object.keys(get_all_ctrl_defs(master_elem_array))
         .map(get_prop.bind(null, all_ctrl_defs))
@@ -124,7 +125,6 @@
     }
 
     function populate_controllers(_the_qix, binders, ctrls, elem_clone) {
-
       var _qix_elems = as_array(elem_clone.querySelectorAll('[' + _qix_attr_placeholder + ']'));
       if (elem_clone.hasAttribute(_qix_attr_placeholder))
         _qix_elems.unshift(elem_clone);
@@ -142,9 +142,10 @@
               var _ctrl_link = Object.create(ctrl_def);
               _ctrl_link.attrs = get_ctrl_attributes.bind(null, name, qix_elem);
               _ctrl_link.elem = qix_elem;
+              _ctrl_link.factory = factory;
+              // TODO hook
               ctrls[name] = factory(qix_elem, binders[name], _ctrl_link);
               ctrls['$' + name] = _ctrl_link;
-              //qix_elem.addEventListener();
             });
         });
       return ctrls;
@@ -155,6 +156,7 @@
         var _the_qix = this;
         var _root_elems = _the_qix._master_elem_array
           .map(make_clone);
+        // TODO hook
         return _root_elems
           .reduce(populate_controllers.bind(null, _the_qix, binders), {
             $root_elems: _root_elems
@@ -186,7 +188,7 @@
       var xhr = createXMLHTTPObject();
       if (!xhr)
         throw new Error('NO XHR!');
-      xhr.responseType = "text";
+      xhr.responseType = 'text';
       xhr.open('GET', url, true);
       // xhr.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
       xhr.onreadystatechange = function() {
@@ -208,13 +210,13 @@
         return new XMLHttpRequest()
       },
       function() {
-        return new ActiveXObject("Msxml2.XMLHTTP")
+        return new ActiveXObject('Msxml2.XMLHTTP')
       },
       function() {
-        return new ActiveXObject("Msxml3.XMLHTTP")
+        return new ActiveXObject('Msxml3.XMLHTTP')
       },
       function() {
-        return new ActiveXObject("Microsoft.XMLHTTP")
+        return new ActiveXObject('Microsoft.XMLHTTP')
       }
     ];
 
