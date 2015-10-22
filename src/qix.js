@@ -124,7 +124,7 @@
       return name.replace(/_/g, '-');
     }
 
-    function populate_controllers(_the_qix, binders, ctrls, elem_clone) {
+    function bind_controllers(_the_qix, binders, ctrls, elem_clone) {
       var _qix_elems = as_array(elem_clone.querySelectorAll('[' + _qix_attr_placeholder + ']'));
       if (elem_clone.hasAttribute(_qix_attr_placeholder))
         _qix_elems.unshift(elem_clone);
@@ -158,7 +158,7 @@
           .map(make_clone);
         // TODO hook
         return _root_elems
-          .reduce(populate_controllers.bind(null, _the_qix, binders), {
+          .reduce(bind_controllers.bind(null, _the_qix, binders), {
             $root_elems: _root_elems
           });
       },
