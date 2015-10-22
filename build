@@ -1,2 +1,5 @@
 #/bin/bash
-r.js -o name=qix out=./dist/qix.js baseUrl=./src/
+rm -rf dist
+mkdir dist
+cp src/qix.js dist/
+uglifyjs src/qix.js -m --source-map dist/qix.js.map --source-map-root qix.js > dist/qix.min.js 
