@@ -2,7 +2,7 @@ define([],
   function() {
     "use strict";
     return {
-      x: function $qix(elem, binders, link) {
+      x: function(elem, binders, link) {
         elem.innerText = 'controller [x] was here';
         return {
           x: {
@@ -12,7 +12,7 @@ define([],
           }
         };
       },
-      y: function $qix(elem, binders, link) {
+      y: function(elem, binders, link) {
         elem.style.color = 'blue';
         elem.title = 'controller [y] bound a click event here';
         elem.addEventListener('click', alert.bind(window, 'controller [y] rules!'));
