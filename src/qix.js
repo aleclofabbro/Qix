@@ -217,6 +217,9 @@
     return {
       load: function(name, localrequire, done) {
         localrequire(['qix-seed!' + name], make_qix.bind(null, done, noop));
+      },
+      make: function(component_seed, callback, errback) {
+        return make_qix(callback, errback, component_seed);
       }
     };
   });
