@@ -118,11 +118,11 @@
         .map(get_prop.bind(null, all_ctrl_defs))
         .map(prop_get.bind(null, 'module_path'));
 
-      component_seed.localrequire(all_module_arr,
+      component_seed.require(all_module_arr,
         function( /* all_modules */ ) {
           all_defs_keys.forEach(function(def_key, index) {
             var ctrl_def = all_ctrl_defs[def_key];
-            var _module = component_seed.localrequire(ctrl_def.module_path);
+            var _module = component_seed.require(ctrl_def.module_path);
             var factory = ctrl_def.module_prop ? _module[ctrl_def.module_prop] : _module;
             if (!factory)
               throw new Error('No Factory for ctrl_def' + JSON.stringify(ctrl_def, null, 4));
@@ -216,65 +216,15 @@
 
     return {
       load: function(name, localrequire, done) {
-        localrequire(['text!' + name], make_qix.bind(null, done, noop));
+        localrequire(['qix-seed!' + name], make_qix.bind(null, done, noop));
       }
     };
   });
 
   /*
-   * text loader
+   * qix-seed loader
    **/
-  define('text', function() {
-    function sendRequest(url, callback) {
-      var xhr = createXMLHTTPObject();
-      if (!xhr)
-        throw new Error('NO XHR!');
-      xhr.responseType = 'text';
-      xhr.open('GET', url, true);
-      // xhr.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState != 4)
-          return;
-        if (xhr.status != 200 && xhr.status != 304) {
-          //          alert('HTTP error ' + xhr.status);
-          return;
-        }
-        callback(xhr.responseText);
-      }
-      if (xhr.readyState == 4)
-        return;
-      xhr.send();
-    }
-
-    var XMLHttpFactories = [
-      function() {
-        return new XMLHttpRequest()
-      },
-      function() {
-        return new ActiveXObject('Msxml2.XMLHTTP')
-      },
-      function() {
-        return new ActiveXObject('Msxml3.XMLHTTP')
-      },
-      function() {
-        return new ActiveXObject('Microsoft.XMLHTTP')
-      }
-    ];
-
-    function createXMLHTTPObject() {
-      var xmlhttp = false;
-      for (var i = 0; i < XMLHttpFactories.length; i++) {
-        try {
-          xmlhttp = XMLHttpFactories[i]();
-        } catch (e) {
-          continue;
-        }
-        break;
-      }
-      return xmlhttp;
-    }
-
-
+  define('qix-seed', function() {
 
     function path_relative_to(baseurl, path) {
       if (path.startsWith('.'))
@@ -284,27 +234,94 @@
     }
 
     function load(name, localrequire, onload, config) {
-      var url = localrequire.toUrl(name);
       var baseurl = name.substring(0, name.lastIndexOf('/') + 1);
       var path_resolver = path_relative_to.bind(null, baseurl);
-      sendRequest(url, function(text) {
-        onload({
+      // var url = localrequire.toUrl(name);
+      // get_remote_text(url, function(text) {
+      localrequire(['text!' + name], function(text) {
+        var component_seed = {
           text: text,
-          localrequire: function(deps) {
+          require: function(deps) {
             if (Array.prototype.isPrototypeOf(deps)) {
               var args = as_array(arguments);
               args[0] = args[0].map(path_resolver);
               return require.apply(null, args);
             } else {
-              return require(path_resolver(deps));
+              var _local_path = path_resolver(deps);
+              return require(_local_path);
             }
           }
-        });
+        };
+        onload(component_seed);
       });
     }
+    return {
+      load: load
+    };
+  });
+
+
+  /*
+   * text loader
+   **/
+  define('text', function() {
+    function load(name, localrequire, onload, config) {
+      var url = localrequire.toUrl(name);
+      get_remote_text(url, onload);
+    }
+
 
     return {
       load: load
     };
   });
+
+  function get_remote_text(url, callback) {
+    var xhr = createXMLHTTPObject();
+    if (!xhr)
+      throw new Error('NO XHR!');
+    xhr.responseType = 'text';
+    xhr.open('GET', url, true);
+    // xhr.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState != 4)
+        return;
+      if (xhr.status != 200 && xhr.status != 304) {
+        //          alert('HTTP error ' + xhr.status);
+        return;
+      }
+      callback(xhr.responseText);
+    }
+    if (xhr.readyState == 4)
+      return;
+    xhr.send();
+  }
+
+  var XMLHttpFactories = [
+    function() {
+      return new XMLHttpRequest()
+    },
+    function() {
+      return new ActiveXObject('Msxml2.XMLHTTP')
+    },
+    function() {
+      return new ActiveXObject('Msxml3.XMLHTTP')
+    },
+    function() {
+      return new ActiveXObject('Microsoft.XMLHTTP')
+    }
+  ];
+
+  function createXMLHTTPObject() {
+    var xmlhttp = false;
+    for (var i = 0; i < XMLHttpFactories.length; i++) {
+      try {
+        xmlhttp = XMLHttpFactories[i]();
+      } catch (e) {
+        continue;
+      }
+      break;
+    }
+    return xmlhttp;
+  }
 }());

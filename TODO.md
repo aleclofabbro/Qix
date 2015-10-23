@@ -1,7 +1,7 @@
 #TODO
 
 + ~~prova a trasformare i `forEach` in `reduce`~~
-+ ~~testare e capire bene come giocano i `require()` local (relativo al component-path) e/o global .. (ora sono solo global)~~ ok con path relativo, ma con altri tipi di path va strano, check
++ ~~testare e capire bene come giocano i `require()` local (relativo al component-path) e/o global .. (ora sono solo global)~~
 + ~~ridurre in fn + semplici `bind_controllers`~~
 + ~~eliminare `root_elems` (gli array) fare in modo che ci sia un holder sia per il master che per il clone in fase di instanziazione .. forse utilizzando [`<template>`](https://developer.mozilla.org/it/docs/Web/HTML/Element/template) ? .. (ma forse no .. infatti è utile perché quando si trova sparato nell html non viene renderizzato, in più [non è completamente supportato](http://caniuse.com/#feat=template))~~ mantenuti gli array, perché tanto non ci può essere un holder esterno dopo il binding: l'holder è il parent nel componente superiore.  
 + link
