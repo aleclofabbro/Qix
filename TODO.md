@@ -11,12 +11,12 @@
     + lifecycle (no recycle a causa dei hooks che modificano localmente) 
 
 ##!!
-forse con il `comp-seed!` loader si possono eliminare gli hook `locali` e implementare anche il `recycle` ...  
++ forse con il `comp-seed!` loader si possono eliminare gli hook `locali` e implementare anche il `recycle` ...  
 pensarci su ...   
 intanto no hooks
 
 ##NODO
-~~componenti qix si creano solo da require.  
++ ~~componenti qix si creano solo da require.  
 non compilare dinamicamente un elemento, bensì averci pronti i qix relativi e spawnarli  
 oppure fare elementi, appenderli e poi usare direttamente i controllers reqirabili (il path di un ctrl locale ad un componente è uguale a quello del componente stesso)~~ **fatto!! qix.make(component_seed)**
 
