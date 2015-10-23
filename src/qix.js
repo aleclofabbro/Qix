@@ -53,21 +53,20 @@
         }, {});
     }
 
-    function make_ctrl_def(master_elem, attr) {
+    function make_ctrl_def(attr) {
       var name = split_attr_ns_name(attr)[1];
       var val_split = attr.value.split('#');
       return {
         name: normalize_hyphens(name),
         module_path: val_split[0],
         module_prop: val_split[1]
-          // master_elem: master_elem
       };
     }
 
     function make_ctrl_defs_for_elem(master_elem) {
       return as_array(master_elem.attributes)
         .filter(is_qix_attr)
-        .map(make_ctrl_def.bind(null, master_elem));
+        .map(make_ctrl_def);
     }
 
     function merge_objs(target, obj) {
@@ -155,8 +154,7 @@
       return _ctrl_link;
     }
 
-    function bind_controller(_all_ctrl_defs, binders, qix_elem, ctrls, name) {
-      var ctrl_def = _all_ctrl_defs[name];
+    function bind_controller(ctrl_def, binders, qix_elem, ctrls, name) {
 
       var _ctrl_link = make_ctrl_link(ctrl_def, name, qix_elem);
       // TODO hook
@@ -168,7 +166,9 @@
       var qix_attr_value = qix_elem.getAttribute(_qix_attr_placeholder);
       var elem_ctrl_names = qix_attr_value.split(',');
       elem_ctrl_names
-        .forEach(bind_controller.bind(null, _all_ctrl_defs, binders, qix_elem, ctrls));
+        .forEach(function(name) {
+          bind_controller(_all_ctrl_defs[name], binders, qix_elem, ctrls)
+        });
     }
 
     function is_qix_elem(elem) {
