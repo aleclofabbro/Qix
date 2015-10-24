@@ -157,7 +157,7 @@
 
     function bind_controller(ctrl_def, ctrl_inits, qix_elem, ctrls) {
       var name = ctrl_def.name;
-      if (ctrl[name])
+      if (ctrls[name])
         throw new Error('QIX#bind_controller: duplicate ctrl name:' + name);
       var _ctrl_link = make_ctrl_link(ctrl_def, qix_elem);
       // TODO hook
@@ -169,9 +169,12 @@
       // DONT mark as qix
       var control_link = make_ctrl_link({
         name: name,
-        factory: factory
+        factory: factory,
       }, elem);
-      return factory(elem, ctrl_init, control_link);
+      var ctrl = {};
+      ctrl['$' + name] = control_link;
+      ctrl[name] = factory(elem, ctrl_init, control_link);
+      return ctrl;
     }
 
     function bind_controllers_elem(_all_ctrl_defs, ctrl_inits, ctrls, qix_elem) {
