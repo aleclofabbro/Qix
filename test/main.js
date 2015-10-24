@@ -7,6 +7,8 @@
       a_lm: '*a',
       b: '*b'
     }, target);
+    console.log(ctrls.a_lm.y.binders);
+    
     ctrls2 = comp.spawn_into({
       b_lm: '*****blm',
       a_lm: '*****a',

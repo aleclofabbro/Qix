@@ -146,7 +146,8 @@
       return name.replace(/_/g, '-');
     }
 
-    function make_ctrl_link(ctrl_def, name, qix_elem) {
+    function make_ctrl_link(ctrl_def, qix_elem) {
+      var name = ctrl_def.name;
       var _ctrl_link = Object.create(ctrl_def);
       _ctrl_link.get_attrs = get_ctrl_attributes.bind(null, name, qix_elem);
       _ctrl_link.set_attr = set_ctrl_attribute.bind(null, name, qix_elem);
@@ -154,9 +155,9 @@
       return _ctrl_link;
     }
 
-    function bind_controller(ctrl_def, binders, qix_elem, ctrls, name) {
-
-      var _ctrl_link = make_ctrl_link(ctrl_def, name, qix_elem);
+    function bind_controller(ctrl_def, binders, qix_elem, ctrls) {
+      var name = ctrl_def.name;
+      var _ctrl_link = make_ctrl_link(ctrl_def, qix_elem);
       // TODO hook
       ctrls[name] = ctrl_def.factory(qix_elem, binders[name], _ctrl_link);
       ctrls['$' + name] = _ctrl_link;
