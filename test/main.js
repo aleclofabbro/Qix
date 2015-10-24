@@ -1,19 +1,30 @@
   require(['qix!mod/templ.html', 'qix', 'require'], function(comp, qix, localrequire) {
+    function test_ctrls(name, ctrls) {
+      console.log('-----\nController Test:' + name);
+      Object.keys(ctrls)
+        .filter(function(k) {
+          return k[0] !== '$';
+        })
+        .forEach(function(k) {
+          console.log(k, ctrls[k]());
+        });
+      console.log('-------\n');
 
+    };
     //spawn 2 components in target
     var target = document.getElementById('app-container');
-    ctrls = comp.spawn_into({
+    ctrls1 = comp.spawn_into({
       b_lm: '*blm',
       a_lm: '*a',
       b: '*b'
     }, target);
-    console.log(ctrls.a_lm.y.binders);
-    
+    test_ctrls('ctrls1', ctrls1);
     ctrls2 = comp.spawn_into({
       b_lm: '*****blm',
       a_lm: '*****a',
       b: '****b'
     }, target);
+    test_ctrls('ctrls2', ctrls2);
 
 
     //spawn a custom components in other target
@@ -31,5 +42,12 @@
         xxa_lm: 'xxx*****a',
         xxb: 'xxxx****b'
       }, custom_target)
+      test_ctrls('ctrl_cust', ctrl_cust);
     });
+
+    //control an element
+    var control_target = document.getElementById('control-this');
+    var factory = require('mod/core/test-ctrl').x;
+    var controlled = qix.control(factory, 'name', control_target, '*-*-*-* CONTROL-THIS');
+    console.log('-- CONTROL-THIS',controlled())
   });

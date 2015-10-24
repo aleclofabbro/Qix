@@ -157,10 +157,21 @@
 
     function bind_controller(ctrl_def, binders, qix_elem, ctrls) {
       var name = ctrl_def.name;
+      if (ctrl[name])
+        throw new Error('QIX#bind_controller: duplicate ctrl name:' + name);
       var _ctrl_link = make_ctrl_link(ctrl_def, qix_elem);
       // TODO hook
       ctrls[name] = ctrl_def.factory(qix_elem, binders[name], _ctrl_link);
       ctrls['$' + name] = _ctrl_link;
+    }
+
+    function qix_control(factory, name, elem, binder) {
+      // DONT mark as qix
+      var control_link = make_ctrl_link({
+        name: name,
+        factory: factory
+      }, elem);
+      return factory(elem, binder, control_link);
     }
 
     function bind_controllers_elem(_all_ctrl_defs, binders, ctrls, qix_elem) {
@@ -168,7 +179,7 @@
       var elem_ctrl_names = qix_attr_value.split(',');
       elem_ctrl_names
         .forEach(function(name) {
-          bind_controller(_all_ctrl_defs[name], binders, qix_elem, ctrls)
+          bind_controller(_all_ctrl_defs[name], binders, qix_elem, ctrls);
         });
     }
 
@@ -221,7 +232,8 @@
       },
       make: function(component_seed, callback, errback) {
         return make_qix(callback, errback, component_seed);
-      }
+      },
+      control: qix_control
     };
   });
 
