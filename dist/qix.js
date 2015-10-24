@@ -155,31 +155,31 @@
       return _ctrl_link;
     }
 
-    function bind_controller(ctrl_def, binders, qix_elem, ctrls) {
+    function bind_controller(ctrl_def, ctrl_inits, qix_elem, ctrls) {
       var name = ctrl_def.name;
       if (ctrl[name])
         throw new Error('QIX#bind_controller: duplicate ctrl name:' + name);
       var _ctrl_link = make_ctrl_link(ctrl_def, qix_elem);
       // TODO hook
-      ctrls[name] = ctrl_def.factory(qix_elem, binders[name], _ctrl_link);
+      ctrls[name] = ctrl_def.factory(qix_elem, ctrl_inits[name], _ctrl_link);
       ctrls['$' + name] = _ctrl_link;
     }
 
-    function qix_control(factory, name, elem, binder) {
+    function qix_control(factory, name, elem, ctrl_init) {
       // DONT mark as qix
       var control_link = make_ctrl_link({
         name: name,
         factory: factory
       }, elem);
-      return factory(elem, binder, control_link);
+      return factory(elem, ctrl_init, control_link);
     }
 
-    function bind_controllers_elem(_all_ctrl_defs, binders, ctrls, qix_elem) {
+    function bind_controllers_elem(_all_ctrl_defs, ctrl_inits, ctrls, qix_elem) {
       var qix_attr_value = qix_elem.getAttribute(_qix_attr_placeholder);
       var elem_ctrl_names = qix_attr_value.split(',');
       elem_ctrl_names
         .forEach(function(name) {
-          bind_controller(_all_ctrl_defs[name], binders, qix_elem, ctrls);
+          bind_controller(_all_ctrl_defs[name], ctrl_inits, qix_elem, ctrls);
         });
     }
 
@@ -198,25 +198,25 @@
       return _qix_elems;
     }
 
-    function bind_controllers(_the_qix, binders, ctrls, elem_clone) {
+    function bind_controllers(_the_qix, ctrl_inits, ctrls, elem_clone) {
       get_all_qix_elems_array(elem_clone)
-        .forEach(bind_controllers_elem.bind(null, _the_qix._all_ctrl_defs, binders, ctrls));
+        .forEach(bind_controllers_elem.bind(null, _the_qix._all_ctrl_defs, ctrl_inits, ctrls));
       return ctrls;
     }
 
     var qix_proto = {
-      spawn: function(binders) {
+      spawn: function(ctrl_inits) {
         var _the_qix = this;
         var _root_elems = _the_qix._master_elem_array
           .map(make_clone);
         // TODO hook
         return _root_elems
-          .reduce(bind_controllers.bind(null, _the_qix, binders), {
+          .reduce(bind_controllers.bind(null, _the_qix, ctrl_inits), {
             $root_elems: _root_elems
           });
       },
-      spawn_into: function(binders, into_elem) {
-        var ctrls = this.spawn(binders);
+      spawn_into: function(ctrl_inits, into_elem) {
+        var ctrls = this.spawn(ctrl_inits);
         ctrls
           .$root_elems
           .forEach(into_elem.appendChild.bind(into_elem));
