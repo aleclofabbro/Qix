@@ -1,16 +1,17 @@
 #TODO
 
-+ `qix.control(elem, name, controller/setAttribute/path)` usare `make_ctrl_def` e `bind_controller`
++ ~~`qix.control(elem, name, controller/setAttribute/path)` usare `make_ctrl_def` e `bind_controller`~~
 + ~~prova a trasformare i `forEach` in `reduce`~~
 + ~~testare e capire bene come giocano i `require()` local (relativo al component-path) e/o global .. (ora sono solo global)~~
 + ~~ridurre in fn + semplici `bind_controllers`~~
 + ~~eliminare `root_elems` (gli array) fare in modo che ci sia un holder sia per il master che per il clone in fase di instanziazione .. forse utilizzando [`<template>`](https://developer.mozilla.org/it/docs/Web/HTML/Element/template) ? .. (ma forse no .. infatti è utile perché quando si trova sparato nell html non viene renderizzato, in più [non è completamente supportato](http://caniuse.com/#feat=template))~~ **mantenuti gli array, perché tanto non ci può essere un holder esterno dopo il binding: l'holder è il parent nel componente superiore.**
 + link
   + ~~`attrs()` overload per single-getter e setter : `get_ctrl_attributes(ctrl_name, elem [, name [, val] ] )~~` 
-  + qix traverse (find, all, ...)
-  + qix events
-    + lifecycle (no recycle a causa dei hooks che modificano localmente) 
+  + ~~qix traverse (find, all, ...)~~
+  + ~~qix events~~
+    + ~~lifecycle (no recycle a causa dei hooks che modificano localmente)~~
 
+_forse meglio non mettere traverse, event, lifecycle ecc_   
 ##!!
 + forse con il `comp-seed!` loader si possono eliminare gli hook `locali` e implementare anche il `recycle` ...  
 pensarci su ...   
