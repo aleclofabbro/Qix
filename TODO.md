@@ -1,5 +1,11 @@
 #TODO
 
++ Controllare `bind_controllers_elem` il ruolo contestuale di `_qix_attr_placeholder` se è giusto o se è da portare su 
++ Qix controller[name] scoped custom events `link` api
+  + `link.on` 
+  + `link.emit` 
++ lavorare sui `Node` invece che sui `Element` ?
++ albero di flusso con nomi funzioni
 + ~~`qix.control(elem, name, controller/setAttribute/path)` usare `make_ctrl_def` e `bind_controller`~~
 + ~~prova a trasformare i `forEach` in `reduce`~~
 + ~~testare e capire bene come giocano i `require()` local (relativo al component-path) e/o global .. (ora sono solo global)~~

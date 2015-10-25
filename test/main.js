@@ -46,15 +46,15 @@
     });
 
     //control an element
-    var control_target = document.getElementById('control-this');
-    var ctl_factory = require('mod/core/test-ctrl').y;
-    var controlled = qix.control(ctl_factory, 'name', control_target, '*-*-*-* CONTROL-THIS');
+    control_target = document.getElementById('control-this');
+    ctl_factory = require('mod/core/test-ctrl').y;
+    controlled = qix.control(ctl_factory, 'name', control_target, '*-*-*-* CONTROL-THIS');
     console.log('-- CONTROL-THIS', controlled.name());
 
     //overload an element
-    var overload_target = document.getElementById('overload-this');
-    var over_factory = require('mod/core/test-ctrl').y;
-    var overloaded = qix.control(over_factory, 'b_lm', overload_target, '!!!!!! OVERLOAD-THIS');
+    overload_target = document.getElementById('overload-this');
+    over_factory = require('mod/core/test-ctrl').y;
+    overloaded = qix.control(over_factory, 'b_lm', overload_target, '!!!!!! OVERLOAD-THIS');
     console.log('-- OVERLOAD-THIS', overloaded.b_lm());
     console.log('*** overloaded.$b_lm.elem === ctrls1.$b_lm.elem', overloaded.$b_lm.elem === ctrls1.$b_lm.elem);
 

@@ -37,18 +37,22 @@
       var denorm_ns_attr_name = denormalize_hyphens(ctrl_name) + ':' + denormalize_hyphens(name);
       if (val === null)
         elem.removeAttribute(denorm_ns_attr_name, val);
-      else
-        elem.setAttribute(denorm_ns_attr_name, val = (val === void(0) ? '' : val));
+      else {
+        val = (val === void(0) ? '' : val)
+        elem.setAttribute(denorm_ns_attr_name, val);
+      }
       return val;
     }
 
     function get_ctrl_attributes(ctrl_name, elem) {
+      var _denomalized_name = denormalize_hyphens(ctrl_name);
       return as_array(elem.attributes)
+        .filter(function(attr) {
+          return is_attr_namespaced(_denomalized_name, attr);
+        })
         .reduce(function(ctrl_attrs, attr) {
-          if (is_attr_namespaced(denormalize_hyphens(ctrl_name), attr)) {
-            var normalized_attr_name = normalize_hyphens(split_attr_ns_name(attr)[1]);
-            ctrl_attrs[normalized_attr_name] = attr.value;
-          }
+          var normalized_attr_name = normalize_hyphens(split_attr_ns_name(attr)[1]);
+          ctrl_attrs[normalized_attr_name] = attr.value;
           return ctrl_attrs;
         }, {});
     }
@@ -76,21 +80,21 @@
     }
 
     function mark_as_qix_elem(master_elem, _ctrl_defs) {
-      var _elems_ctrl_names = _ctrl_defs.map(prop_get.bind(null, 'name'));
-      master_elem.setAttribute(_qix_attr_placeholder, _elems_ctrl_names.join(','));
+      if (_ctrl_defs.length) {
+        var _elems_ctrl_names = _ctrl_defs.map(prop_get.bind(null, 'name'));
+        master_elem.setAttribute(_qix_attr_placeholder, _elems_ctrl_names.join(','));
+      }
     }
 
     function get_all_ctrl_defs(master_elem_array) {
       return master_elem_array
         .reduce(function(all_defs, master_elem) {
           var _ctrl_defs = make_ctrl_defs_for_elem(master_elem);
-          if (_ctrl_defs.length) {
-            mark_as_qix_elem(master_elem, _ctrl_defs);
-            _ctrl_defs
-              .forEach(function(_ctrl_def) {
-                all_defs[_ctrl_def.name] = _ctrl_def;
-              });
-          }
+          mark_as_qix_elem(master_elem, _ctrl_defs);
+          _ctrl_defs
+            .forEach(function(_ctrl_def) {
+              all_defs[_ctrl_def.name] = _ctrl_def;
+            });
           return merge_objs(get_all_ctrl_defs(as_array(master_elem.children)), all_defs);
         }, {});
     }
@@ -146,22 +150,22 @@
       return name.replace(/_/g, '-');
     }
 
-    function make_ctrl_link(ctrl_def, qix_elem) {
+    function make_ctrl_link(ctrl_def, elem) {
       var name = ctrl_def.name;
       var _ctrl_link = Object.create(ctrl_def);
-      _ctrl_link.get_attrs = get_ctrl_attributes.bind(null, name, qix_elem);
-      _ctrl_link.set_attr = set_ctrl_attribute.bind(null, name, qix_elem);
-      _ctrl_link.elem = qix_elem;
+      _ctrl_link.get_attrs = get_ctrl_attributes.bind(null, name, elem);
+      _ctrl_link.set_attr = set_ctrl_attribute.bind(null, name, elem);
+      _ctrl_link.elem = elem;
       return _ctrl_link;
     }
 
-    function bind_controller(ctrl_def, ctrl_inits, qix_elem, ctrls) {
+    function bind_controller(ctrl_def, ctrl_inits, elem, ctrls) {
       var name = ctrl_def.name;
       if (ctrls[name])
         throw new Error('QIX#bind_controller: duplicate ctrl name:' + name);
-      var _ctrl_link = make_ctrl_link(ctrl_def, qix_elem);
+      var _ctrl_link = make_ctrl_link(ctrl_def, elem);
       // TODO hook
-      ctrls[name] = ctrl_def.factory(qix_elem, ctrl_inits[name], _ctrl_link);
+      ctrls[name] = ctrl_def.factory(elem, ctrl_inits[name], _ctrl_link);
       ctrls['$' + name] = _ctrl_link;
     }
 
@@ -177,12 +181,12 @@
       return ctrl;
     }
 
-    function bind_controllers_elem(_all_ctrl_defs, ctrl_inits, ctrls, qix_elem) {
-      var qix_attr_value = qix_elem.getAttribute(_qix_attr_placeholder);
+    function bind_controllers_elem(_all_ctrl_defs, ctrl_inits, ctrls, elem) {
+      var qix_attr_value = elem.getAttribute(_qix_attr_placeholder);
       var elem_ctrl_names = qix_attr_value.split(',');
       elem_ctrl_names
         .forEach(function(name) {
-          bind_controller(_all_ctrl_defs[name], ctrl_inits, qix_elem, ctrls);
+          bind_controller(_all_ctrl_defs[name], ctrl_inits, elem, ctrls);
         });
     }
 
@@ -201,9 +205,9 @@
       return _qix_elems;
     }
 
-    function bind_controllers(_the_qix, ctrl_inits, ctrls, elem_clone) {
-      get_all_qix_elems_array(elem_clone)
-        .forEach(bind_controllers_elem.bind(null, _the_qix._all_ctrl_defs, ctrl_inits, ctrls));
+    function bind_controllers(_all_ctrl_defs, ctrl_inits, ctrls, elem) {
+      get_all_qix_elems_array(elem)
+        .forEach(bind_controllers_elem.bind(null, _all_ctrl_defs, ctrl_inits, ctrls));
       return ctrls;
     }
 
@@ -214,7 +218,9 @@
           .map(make_clone);
         // TODO hook
         return _root_elems
-          .reduce(bind_controllers.bind(null, _the_qix, ctrl_inits), {
+          .reduce(function(ctrls, elem_clone) {
+            return bind_controllers(_the_qix._all_ctrl_defs, ctrl_inits, ctrls, elem_clone);
+          }, {
             $root_elems: _root_elems
           });
       },
@@ -227,7 +233,7 @@
       }
     };
 
-    var noop = function() {};
+    function noop() {};
 
     return {
       load: function(name, localrequire, done) {
@@ -288,8 +294,6 @@
       var url = localrequire.toUrl(name);
       get_remote_text(url, onload);
     }
-
-
     return {
       load: load
     };
