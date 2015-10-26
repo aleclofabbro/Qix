@@ -328,8 +328,7 @@
       if (xhr.readyState != 4)
         return;
       if (xhr.status != 200 && xhr.status != 304) {
-        //          alert('HTTP error ' + xhr.status);
-        return;
+        throw new Error('get_remote_text HTTP error for [' + url + '] : ' + xhr.status);
       }
       callback(xhr.responseText);
     }
