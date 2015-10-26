@@ -150,11 +150,29 @@
       return name.replace(/_/g, '-');
     }
 
+    function qix_emit(link, elem, ev_name, payload) {
+      // TODO dunmmy
+      elem.dispatchEvent('ev_name', {
+        link: link,
+        payload: payload
+      });
+    }
+
+    function qix_on(link, elem, ev_name, handler) {
+      // TODO dunmmy
+      elem.addEventListener('ev_name', function(ev) {
+        if (ev.data.link === link)
+          handler(event);
+      });
+    }
+
     function make_ctrl_link(ctrl_def, elem) {
       var name = ctrl_def.name;
       var _ctrl_link = Object.create(ctrl_def);
       _ctrl_link.get_attrs = get_ctrl_attributes.bind(null, name, elem);
       _ctrl_link.set_attr = set_ctrl_attribute.bind(null, name, elem);
+      _ctrl_link.emit = qix_emit.bind(null, _ctrl_link, elem);
+      _ctrl_link.on = qix_on.bind(null, _ctrl_link, elem);
       _ctrl_link.elem = elem;
       return _ctrl_link;
     }
@@ -167,6 +185,7 @@
       // TODO hook
       ctrls[name] = ctrl_def.factory(elem, ctrl_inits[name], _ctrl_link);
       ctrls['$' + name] = _ctrl_link;
+      return ctrls;
     }
 
     function qix_control(factory, name, elem, ctrl_init) {
@@ -184,10 +203,10 @@
     function bind_controllers_elem(_all_ctrl_defs, ctrl_inits, ctrls, elem) {
       var qix_attr_value = elem.getAttribute(_qix_attr_placeholder);
       var elem_ctrl_names = qix_attr_value.split(',');
-      elem_ctrl_names
-        .forEach(function(name) {
-          bind_controller(_all_ctrl_defs[name], ctrl_inits, elem, ctrls);
-        });
+      return elem_ctrl_names
+        .reduce(function(ctrls, name) {
+          return bind_controller(_all_ctrl_defs[name], ctrl_inits, elem, ctrls);
+        }, ctrls);
     }
 
     function is_qix_elem(elem) {
@@ -206,9 +225,8 @@
     }
 
     function bind_controllers(_all_ctrl_defs, ctrl_inits, ctrls, elem) {
-      get_all_qix_elems_array(elem)
-        .forEach(bind_controllers_elem.bind(null, _all_ctrl_defs, ctrl_inits, ctrls));
-      return ctrls;
+      return get_all_qix_elems_array(elem)
+        .reduce(bind_controllers_elem.bind(null, _all_ctrl_defs, ctrl_inits), ctrls);
     }
 
     var qix_proto = {
