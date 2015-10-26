@@ -1,5 +1,6 @@
 #TODO
 
++ Pensare bene alla signature dei controllers.. potrebbe essere fatta con `[arguments]` generici in modo da slegare completamente il qix dai moduli. 
 + Controllare `bind_controllers_elem` il ruolo contestuale di `_qix_attr_placeholder` se è giusto o se è da portare su 
 + Qix controller[name] scoped custom events `link` api
   + `link.on` 
