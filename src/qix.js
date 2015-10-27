@@ -18,13 +18,6 @@
       return as_array(div.children);
     };
 
-    // function get_master_elem_array(master_elem_array_or_text) {
-    //   if ('string' === typeof master_elem_array_or_text) {
-    //     return master_elem_array_from_text(master_elem_array_or_text);
-    //   } else return as_array(master_elem_array_or_text);
-
-    // }
-
     function is_attr_namespaced(prefix, attr) {
       return split_attr_ns_name(attr)[0] === prefix;
     }
@@ -47,9 +40,7 @@
     function get_ctrl_attributes(ctrl_name, elem) {
       var _denomalized_name = denormalize_hyphens(ctrl_name);
       return as_array(elem.attributes)
-        .filter(function(attr) {
-          return is_attr_namespaced(_denomalized_name, attr);
-        })
+        .filter(is_attr_namespaced.bind(null, _denomalized_name))
         .reduce(function(ctrl_attrs, attr) {
           var normalized_attr_name = normalize_hyphens(split_attr_ns_name(attr)[1]);
           ctrl_attrs[normalized_attr_name] = attr.value;
@@ -131,11 +122,32 @@
               throw new Error('No Factory for ctrl_def' + JSON.stringify(ctrl_def, null, 4));
             ctrl_def.factory = factory;
           });
-          var qix_obj = Object.create(qix_proto);
-          qix_obj._all_ctrl_defs = all_ctrl_defs;
-          qix_obj._master_elem_array = master_elem_array;
+          var qix_obj = {
+            spawn: spawn.bind(null, master_elem_array, all_ctrl_defs),
+            spawn_into: spawn_into.bind(null, master_elem_array, all_ctrl_defs)
+          };
           callback(qix_obj);
         }, errback);
+    }
+
+    function spawn(master_elem_array, all_ctrl_defs, ctrl_inits) {
+      var _root_elems = master_elem_array
+        .map(make_clone);
+      // TODO hook
+      return _root_elems
+        .reduce(function(ctrls, elem_clone) {
+          return bind_controllers(all_ctrl_defs, ctrl_inits, ctrls, elem_clone);
+        }, {
+          $root_elems: _root_elems
+        });
+    }
+
+    function spawn_into(master_elem_array, all_ctrl_defs, ctrl_inits, into_elem) {
+      var ctrls = spawn(master_elem_array, all_ctrl_defs, ctrl_inits);
+      ctrls
+        .$root_elems
+        .forEach(into_elem.appendChild.bind(into_elem));
+      return ctrls;
     }
 
     function make_clone(master_elem) {
@@ -150,20 +162,20 @@
       return name.replace(/_/g, '-');
     }
 
-    function qix_emit(link, elem, ev_name, payload) {
-      // TODO dunmmy
-      elem.dispatchEvent('ev_name', {
-        link: link,
-        payload: payload
-      });
+    function qix_emit( /*ns_name, elem, ev_name, payload*/ ) {
+      // !!!! TODO DUMMY
+      // elem.dispatchEvent(ev_name, {
+      //   ns: ns,
+      //   payload: payload
+      // });
     }
 
-    function qix_on(link, elem, ev_name, handler) {
-      // TODO dunmmy
-      elem.addEventListener('ev_name', function(ev) {
-        if (ev.data.link === link)
-          handler(event);
-      });
+    function is_my_qix_event( /*ns_name, elem, ev_name, handler*/ ) {
+      // !!!! TODO DUMMY
+      // elem.addEventListener(ev_name, function(ev) {
+      //   if (ev.data.ns === ns)
+      //     handler(event);
+      // });
     }
 
     function make_ctrl_link(ctrl_def, elem) {
@@ -171,8 +183,8 @@
       var _ctrl_link = Object.create(ctrl_def);
       _ctrl_link.get_attrs = get_ctrl_attributes.bind(null, name, elem);
       _ctrl_link.set_attr = set_ctrl_attribute.bind(null, name, elem);
-      _ctrl_link.emit = qix_emit.bind(null, _ctrl_link, elem);
-      _ctrl_link.on = qix_on.bind(null, _ctrl_link, elem);
+      _ctrl_link.emit = qix_emit.bind(null /*, name, elem*/ );
+      _ctrl_link.is_my_qix_event = is_my_qix_event.bind(null /*, name, elem*/ );
       _ctrl_link.elem = elem;
       return _ctrl_link;
     }
@@ -228,28 +240,6 @@
       return get_all_qix_elems_array(elem)
         .reduce(bind_controllers_elem.bind(null, _all_ctrl_defs, ctrl_inits), ctrls);
     }
-
-    var qix_proto = {
-      spawn: function(ctrl_inits) {
-        var _the_qix = this;
-        var _root_elems = _the_qix._master_elem_array
-          .map(make_clone);
-        // TODO hook
-        return _root_elems
-          .reduce(function(ctrls, elem_clone) {
-            return bind_controllers(_the_qix._all_ctrl_defs, ctrl_inits, ctrls, elem_clone);
-          }, {
-            $root_elems: _root_elems
-          });
-      },
-      spawn_into: function(ctrl_inits, into_elem) {
-        var ctrls = this.spawn(ctrl_inits);
-        ctrls
-          .$root_elems
-          .forEach(into_elem.appendChild.bind(into_elem));
-        return ctrls;
-      }
-    };
 
     function noop() {};
 

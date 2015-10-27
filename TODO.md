@@ -1,9 +1,10 @@
 #TODO
 
-+ Pensare bene alla signature dei controllers.. potrebbe essere fatta con `[arguments]` generici in modo da slegare completamente il qix dai moduli. 
-+ Controllare `bind_controllers_elem` il ruolo contestuale di `_qix_attr_placeholder` se è giusto o se è da portare su 
-+ Qix controller[name] scoped custom events `link` api
-  + `link.on` 
++ ~~Pensare bene alla signature dei controllers.. potrebbe essere fatta con `[arguments]` generici in modo da slegare completamente il qix dai moduli.~~ no chi gioca a qix segue 1 sola regola, la signature del ctrl. dividere le libs. 1 libera e 1 qix che la usa 
++ ~~Controllare `bind_controllers_elem` il ruolo contestuale di `_qix_attr_placeholder` se è giusto o se è da portare su~~ 
++ (__valutare__) Qix controller[name] scoped custom events `link` api -- 
+  + ~~`link.on`~~ non voglio mantenere listeners
+  + `link.is_my_event` ?? 
   + `link.emit` 
 + lavorare sui `Node` invece che sui `Element` ?
 + albero di flusso con nomi funzioni
