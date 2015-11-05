@@ -134,6 +134,8 @@
       var _root_elems = master_elem_array
         .map(make_clone);
       // TODO hook
+      var _tmp_container = document.create('div');
+      _root_elems.forEach(_tmp_container.appendChild.bind(_tmp_container));
       return _root_elems
         .reduce(function(ctrls, elem_clone) {
           return bind_controllers(all_ctrl_defs, ctrl_inits, ctrls, elem_clone);
