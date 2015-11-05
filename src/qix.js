@@ -61,7 +61,11 @@
     function make_ctrl_defs_for_elem(master_elem) {
       return as_array(master_elem.attributes)
         .filter(is_qix_attr)
-        .map(make_ctrl_def);
+        .map(make_ctrl_def)
+        .map(function(ctrl_def) {
+          ctrl_def.master_element = master_elem;
+          return ctrl_def;
+        });
     }
 
     function merge_objs(target, obj) {
@@ -98,7 +102,9 @@
       return prop_get(prop, obj);
     }
 
-
+    /** @function make_qix 
+     *    generates a qix component facctory from a component seed
+     */
     function make_qix(callback, errback, component_seed) {
       // TODO hook text 
       var master_elem_array = master_elem_array_from_text(component_seed.text);
@@ -119,10 +125,25 @@
             var _module = component_seed.require(ctrl_def.module_path);
             var factory = ctrl_def.module_prop ? _module[ctrl_def.module_prop] : _module;
             if (!factory)
-              throw new Error('No Factory for ctrl_def' + JSON.stringify(ctrl_def, null, 4));
+              throw new Error('No Factory for ctrl_def:\n' + JSON.stringify(ctrl_def, null, 4));
             ctrl_def.factory = factory;
+            ctrl_def.component_seed = component_seed;
+            if (ctrl_def.factory.$qix) {
+              var _opts = ctrl_def.factory.$qix;
+              if (_opts.spawn) {
+                var _my_strip_clone = ctrl_def.master_element.cloneNode(true);
+                _my_strip_clone.removeAttribute('qix:' + ctrl_def.name);
+                _my_strip_clone.setAttribute(_qix_attr_placeholder, _my_strip_clone.getAttribute(_qix_attr_placeholder).split(',').filter(function(tok) {
+                  return tok !== ctrl_def.name;
+                }).join(','));
+                ctrl_def.spawn = spawn.bind(null, [_my_strip_clone], all_ctrl_defs)
+                ctrl_def.spawn_into = spawn_into.bind(null, [_my_strip_clone], all_ctrl_defs)
+
+              }
+            }
           });
           var qix_obj = {
+            component_seed: component_seed,
             spawn: spawn.bind(null, master_elem_array, all_ctrl_defs),
             spawn_into: spawn_into.bind(null, master_elem_array, all_ctrl_defs)
           };
@@ -131,17 +152,24 @@
     }
 
     function spawn(master_elem_array, all_ctrl_defs, ctrl_inits) {
-      var _root_elems = master_elem_array
+      var _cloned_elems = master_elem_array
         .map(make_clone);
       // TODO hook
-      var _tmp_container = document.create('div');
-      _root_elems.forEach(_tmp_container.appendChild.bind(_tmp_container));
-      return _root_elems
+      // var _tmp_container = document.createElement('div');
+      // _cloned_elems.forEach(_tmp_container.appendChild.bind(_tmp_container));
+      var ctrls = _cloned_elems
         .reduce(function(ctrls, elem_clone) {
           return bind_controllers(all_ctrl_defs, ctrl_inits, ctrls, elem_clone);
         }, {
-          $root_elems: _root_elems
+          $root_elems: _cloned_elems,
+          $factories: []
         });
+      ctrls.bind_all = [].forEach.bind(ctrls.$factories, invoke);
+      return ctrls;
+    }
+
+    function invoke(fn) {
+      return fn();
     }
 
     function spawn_into(master_elem_array, all_ctrl_defs, ctrl_inits, into_elem) {
@@ -149,6 +177,7 @@
       ctrls
         .$root_elems
         .forEach(into_elem.appendChild.bind(into_elem));
+      ctrls.bind_all();
       return ctrls;
     }
 
@@ -164,29 +193,11 @@
       return name.replace(/_/g, '-');
     }
 
-    function qix_emit( /*ns_name, elem, ev_name, payload*/ ) {
-      // !!!! TODO DUMMY
-      // elem.dispatchEvent(ev_name, {
-      //   ns: ns,
-      //   payload: payload
-      // });
-    }
-
-    function is_my_qix_event( /*ns_name, elem, ev_name, handler*/ ) {
-      // !!!! TODO DUMMY
-      // elem.addEventListener(ev_name, function(ev) {
-      //   if (ev.data.ns === ns)
-      //     handler(event);
-      // });
-    }
-
     function make_ctrl_link(ctrl_def, elem) {
       var name = ctrl_def.name;
       var _ctrl_link = Object.create(ctrl_def);
       _ctrl_link.get_attrs = get_ctrl_attributes.bind(null, name, elem);
       _ctrl_link.set_attr = set_ctrl_attribute.bind(null, name, elem);
-      _ctrl_link.emit = qix_emit.bind(null /*, name, elem*/ );
-      _ctrl_link.is_my_qix_event = is_my_qix_event.bind(null /*, name, elem*/ );
       _ctrl_link.elem = elem;
       return _ctrl_link;
     }
@@ -197,7 +208,9 @@
         throw new Error('QIX#bind_controller: duplicate ctrl name:' + name);
       var _ctrl_link = make_ctrl_link(ctrl_def, elem);
       // TODO hook
-      ctrls[name] = ctrl_def.factory(elem, ctrl_inits[name], _ctrl_link);
+      ctrls.$factories.unshift(function() {
+        ctrls[name] = ctrl_def.factory(elem, ctrl_inits[name], _ctrl_link);
+      });
       ctrls['$' + name] = _ctrl_link;
       return ctrls;
     }
@@ -224,34 +237,54 @@
     }
 
     function is_qix_elem(elem) {
-      return elem.hasAttribute(_qix_attr_placeholder);
+      return !!elem.getAttribute(_qix_attr_placeholder);
     }
 
     function get_qix_children_elems_array(elem) {
       return as_array(elem.querySelectorAll('[' + _qix_attr_placeholder + ']'))
     }
 
+    // function get_all_qix_elems_array(elem) {
+    //   var _qix_elems = get_qix_children_elems_array(elem);
+    //   if (is_qix_elem(elem))
+    //     _qix_elems.unshift(elem);
+    //   return _qix_elems;
+    // }
+
+    // function bind_controllers(_all_ctrl_defs, ctrl_inits, ctrls, elem) {
+    //   return get_all_qix_elems_array(elem)
+    //     .reduce(bind_controllers_elem.bind(null, _all_ctrl_defs, ctrl_inits), ctrls);
+    // }
     function get_all_qix_elems_array(elem) {
-      var _qix_elems = get_qix_children_elems_array(elem);
-      if (is_qix_elem(elem))
-        _qix_elems.unshift(elem);
-      return _qix_elems;
+      return as_array(elem.children).filter(is_qix_elem);
     }
 
     function bind_controllers(_all_ctrl_defs, ctrl_inits, ctrls, elem) {
-      return get_all_qix_elems_array(elem)
+      ctrls = get_all_qix_elems_array(elem)
         .reduce(bind_controllers_elem.bind(null, _all_ctrl_defs, ctrl_inits), ctrls);
+      ctrls = as_array(elem.children).reduce(bind_controllers.bind(null, _all_ctrl_defs, ctrl_inits), ctrls);
+      return ctrls;
     }
 
     function noop() {};
 
+    /** @function load 
+     *   the requirejs plugin load method
+     *   load
+     */
+    function load(name, localrequire, done) {
+      localrequire(['qix-seed!' + name], make_qix.bind(null, done, noop));
+    };
+
+    /** @function make 
+     *   a make_qix rearranged for users
+     */
+    function make(component_seed, callback, errback) {
+      return make_qix(callback, errback, component_seed);
+    }
     return {
-      load: function(name, localrequire, done) {
-        localrequire(['qix-seed!' + name], make_qix.bind(null, done, noop));
-      },
-      make: function(component_seed, callback, errback) {
-        return make_qix(callback, errback, component_seed);
-      },
+      load: load,
+      make: make,
       control: qix_control
     };
   });
