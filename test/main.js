@@ -13,13 +13,13 @@
     };
     //spawn 2 components in target
     var target = document.getElementById('app-container');
-    ctrls1 = comp.spawn_into({
+    ctrls1 = comp.spawn({
       b_lm: '*blm',
       a_lm: '*a',
       b: '*b'
     }, target);
     test_ctrls('ctrls1', ctrls1);
-    ctrls2 = comp.spawn_into({
+    ctrls2 = comp.spawn({
       b_lm: '*****blm',
       a_lm: '*****a',
       b: '****b'
@@ -37,7 +37,7 @@
       require: localrequire
     }, function(comp) {
       var custom_target = document.getElementById('custom');
-      ctrl_cust = comp.spawn_into({
+      ctrl_cust = comp.spawn({
         xxc: 'xxx*****c',
         xxa_lm: 'xxx*****a',
         xxb: 'xxxx****b'

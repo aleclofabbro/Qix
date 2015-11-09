@@ -8,27 +8,24 @@
     };
 
     function when(elem, binders, link) {
-      var _placeholder = document.createComment('qix-flux#when placeholder'),
-        _controllers = null,
+      var _placeholder = document.createComment('qix-flux#when(' + link.name + ') placeholder'),
+        _controllers = true,
         _curr_elem = elem,
         _parent = elem.parentElement;
+      _parent.insertBefore(_placeholder, _curr_elem);
       _when(false);
 
-      function _when(bool, inits) {
-        // if (!bool === !_controllers)
-        //   return _controllers;
+      function _when(bool, _binders) {
+        if (!bool === !_controllers)
+          return _controllers;
+        if (arguments.length === 1)
+          _binders = binders;
         if (bool) {
-          _controllers = link.spawn(inits);
-          _controllers.$root_elems
-            .forEach(function(_elem) {
-              _parent.insertBefore(_elem, _placeholder);
-            });
-          _controllers.bind_all();
+          _controllers = link.spawn(_binders, _parent, 'after', _placeholder);
           _curr_elem = _controllers.$root_elems[0];
-          _placeholder.remove();
         } else {
-          _parent.insertBefore(_placeholder, _curr_elem);
           _curr_elem.remove();
+          _curr_elem = null;
           _controllers = null;
           //link.destroy();
         }

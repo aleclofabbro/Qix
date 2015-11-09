@@ -136,24 +136,42 @@
                 _my_strip_clone.setAttribute(_qix_attr_placeholder, _my_strip_clone.getAttribute(_qix_attr_placeholder).split(',').filter(function(tok) {
                   return tok !== ctrl_def.name;
                 }).join(','));
-                ctrl_def.spawn = spawn.bind(null, [_my_strip_clone], all_ctrl_defs)
-                ctrl_def.spawn_into = spawn_into.bind(null, [_my_strip_clone], all_ctrl_defs)
+                ctrl_def.spawn = spawn.bind(null, [_my_strip_clone], all_ctrl_defs);
+                // ctrl_def.spawn_into = spawn_into.bind(null, [_my_strip_clone], all_ctrl_defs)
 
               }
             }
           });
           var qix_obj = {
             component_seed: component_seed,
-            spawn: spawn.bind(null, master_elem_array, all_ctrl_defs),
-            spawn_into: spawn_into.bind(null, master_elem_array, all_ctrl_defs)
+            spawn: spawn.bind(null, master_elem_array, all_ctrl_defs)
+              // spawn_into: spawn_into.bind(null, master_elem_array, all_ctrl_defs)
           };
           callback(qix_obj);
         }, errback);
     }
 
-    function spawn(master_elem_array, all_ctrl_defs, ctrl_inits) {
+    function spawn(master_elem_array, all_ctrl_defs, ctrl_inits, into_elem, where, ref_elem) {
+      where = where || 'append';
       var _cloned_elems = master_elem_array
         .map(make_clone);
+
+      //after / before / append / prepend ?
+      if (where === 'append' || (where === 'after' && !ref_elem.nextSibling) ) {
+        _cloned_elems
+          .forEach(into_elem.appendChild.bind(into_elem));
+      } else {
+        var ref_elem_next = ref_elem; // case 'before'
+        if (where === 'prepend')
+          ref_elem_next = into_elem.firstChild;
+        else if (where === 'after')
+          ref_elem_next = ref_elem.nextSibling;
+        _cloned_elems
+          .forEach(function(_elem) {
+            into_elem.insertBefore(_elem, ref_elem_next);
+          });
+      }
+
       // TODO hook
       // var _tmp_container = document.createElement('div');
       // _cloned_elems.forEach(_tmp_container.appendChild.bind(_tmp_container));
@@ -164,7 +182,9 @@
           $root_elems: _cloned_elems,
           $factories: []
         });
-      ctrls.bind_all = [].forEach.bind(ctrls.$factories, invoke);
+      // ctrls.bind_all = [].forEach.bind(ctrls.$factories, invoke);
+      ctrls.$factories
+        .forEach(invoke);
       return ctrls;
     }
 
@@ -172,14 +192,14 @@
       return fn();
     }
 
-    function spawn_into(master_elem_array, all_ctrl_defs, ctrl_inits, into_elem) {
-      var ctrls = spawn(master_elem_array, all_ctrl_defs, ctrl_inits);
-      ctrls
-        .$root_elems
-        .forEach(into_elem.appendChild.bind(into_elem));
-      ctrls.bind_all();
-      return ctrls;
-    }
+    // function spawn_into(master_elem_array, all_ctrl_defs, ctrl_inits, into_elem) {
+    //   var ctrls = spawn(master_elem_array, all_ctrl_defs, ctrl_inits);
+    //   ctrls
+    //     .$root_elems
+    //     .forEach(into_elem.appendChild.bind(into_elem));
+    //   ctrls.bind_all();
+    //   return ctrls;
+    // }
 
     function make_clone(master_elem) {
       return master_elem.cloneNode(true);
@@ -244,27 +264,27 @@
       return as_array(elem.querySelectorAll('[' + _qix_attr_placeholder + ']'))
     }
 
-    // function get_all_qix_elems_array(elem) {
-    //   var _qix_elems = get_qix_children_elems_array(elem);
-    //   if (is_qix_elem(elem))
-    //     _qix_elems.unshift(elem);
-    //   return _qix_elems;
-    // }
-
-    // function bind_controllers(_all_ctrl_defs, ctrl_inits, ctrls, elem) {
-    //   return get_all_qix_elems_array(elem)
-    //     .reduce(bind_controllers_elem.bind(null, _all_ctrl_defs, ctrl_inits), ctrls);
-    // }
     function get_all_qix_elems_array(elem) {
-      return as_array(elem.children).filter(is_qix_elem);
+      var _qix_elems = get_qix_children_elems_array(elem);
+      if (is_qix_elem(elem))
+        _qix_elems.unshift(elem);
+      return _qix_elems;
     }
 
     function bind_controllers(_all_ctrl_defs, ctrl_inits, ctrls, elem) {
-      ctrls = get_all_qix_elems_array(elem)
+      return get_all_qix_elems_array(elem)
         .reduce(bind_controllers_elem.bind(null, _all_ctrl_defs, ctrl_inits), ctrls);
-      ctrls = as_array(elem.children).reduce(bind_controllers.bind(null, _all_ctrl_defs, ctrl_inits), ctrls);
-      return ctrls;
     }
+    // function get_all_qix_elems_array(elem) {
+    //   return as_array(elem.children).filter(is_qix_elem);
+    // }
+
+    // function bind_controllers(_all_ctrl_defs, ctrl_inits, ctrls, elem) {
+    //   ctrls = get_all_qix_elems_array(elem)
+    //     .reduce(bind_controllers_elem.bind(null, _all_ctrl_defs, ctrl_inits), ctrls);
+    //   ctrls = as_array(elem.children).reduce(bind_controllers.bind(null, _all_ctrl_defs, ctrl_inits), ctrls);
+    //   return ctrls;
+    // }
 
     function noop() {};
 
