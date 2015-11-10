@@ -19,6 +19,9 @@
       b: '*b'
     }, target);
     test_ctrls('ctrls1', ctrls1);
+
+/*
+
     ctrls2 = comp.spawn({
       b_lm: '*****blm',
       a_lm: '*****a',
@@ -57,5 +60,5 @@
     overloaded = qix.control(over_factory, 'b_lm', overload_target, '!!!!!! OVERLOAD-THIS');
     console.log('-- OVERLOAD-THIS', overloaded.b_lm());
     console.log('*** overloaded.$b_lm.elem === ctrls1.$b_lm.elem', overloaded.$b_lm.elem === ctrls1.$b_lm.elem);
-
+*/
   });
