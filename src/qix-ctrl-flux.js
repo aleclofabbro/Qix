@@ -1,10 +1,6 @@
 define('qix-flux', function (require, exports, module) {
   //ctrls
   exports.when = when;
-  when.$qix = {
-    spawn: true
-  };
-
   function when(elem, binders, link) {
     var _placeholder = document.createComment('qix-flux#when(' + link.name + ') placeholder'),
       _controllers = true,

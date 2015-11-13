@@ -30,7 +30,7 @@ function safe_string_prop_setter(prop, obj, str) {
   return (obj[prop] = safe_string(str));
 }
 
-function is_array_like(obj) {
+function is_array_like(obj) { // improve ?
   return ('length' in obj) && ('number' === typeof obj.length);
 }
 
@@ -38,13 +38,21 @@ function is_undefined(o) {
   return o === void(0);
 }
 
-function as_array(obj) {
-  if (is_undefined(obj))
+function as_array(obj, strict) {
+  if (!strict && is_undefined(obj))
     return [];
   return is_array_like(obj) ? Array.prototype.slice.call(obj) : [obj];
 }
-
-var get_remote_text = (function () {
+define('text', function() {
+  function load(name, localrequire, onload, config) {
+    var url = localrequire.toUrl(name);
+    get_remote_text(url, onload);
+  }
+  return {
+    load: load
+  };
+});
+var get_remote_text = (function() {
   function get_remote_text(url, callback) {
     var xhr = createXMLHTTPObject();
     if (!xhr)
@@ -52,7 +60,7 @@ var get_remote_text = (function () {
     xhr.responseType = 'text';
     xhr.open('GET', url, true);
     // xhr.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
-    xhr.onreadystatechange = function () {
+    xhr.onreadystatechange = function() {
       if (xhr.readyState != 4)
         return;
       if (xhr.status != 200 && xhr.status != 304) {
@@ -66,16 +74,16 @@ var get_remote_text = (function () {
   }
 
   var XMLHttpFactories = [
-    function () {
+    function() {
       return new XMLHttpRequest();
     },
-    function () {
+    function() {
       return new ActiveXObject('Msxml2.XMLHTTP');
     },
-    function () {
+    function() {
       return new ActiveXObject('Msxml3.XMLHTTP');
     },
-    function () {
+    function() {
       return new ActiveXObject('Microsoft.XMLHTTP');
     }
   ];
@@ -166,10 +174,10 @@ function make_component_tree(seed_require, node) {
 
 function collect_deps(branch) {
   return branch.$qix.attr_ctrl_defs.concat(branch.$qix.node_ctrl_def)
-    .map(function (ctrl) {
+    .map(function(ctrl) {
       return ctrl.module_name;
     })
-    .concat(branch.map(collect_deps).reduce(function (accum, sub_deps) {
+    .concat(branch.map(collect_deps).reduce(function(accum, sub_deps) {
       return accum.concat(sub_deps);
     }, []));
 }
@@ -178,7 +186,7 @@ function make_qix_component(callback, seed) {
   var master_template_element = make_master_template_element_from_text(seed.text);
   var component_tree = make_component_tree(seed.require, master_template_element, seed);
   var deps = collect_deps(component_tree);
-  seed.require(deps, function () {
+  seed.require(deps, function() {
     callback(component_tree);
   });
 }
@@ -212,10 +220,6 @@ define('qix-elem', function (require, exports, module) {
 define('qix-flux', function (require, exports, module) {
   //ctrls
   exports.when = when;
-  when.$qix = {
-    spawn: true
-  };
-
   function when(elem, binders, link) {
     var _placeholder = document.createComment('qix-flux#when(' + link.name + ') placeholder'),
       _controllers = true,
@@ -288,7 +292,7 @@ define('qix-seed', function () {
 function insert_child(child, into_elem, where, ref_elem) {
   where = where || 'append';
   //after / before / append / prepend ?
-  if (where === 'append' || (where === 'after' && !ref_elem.nextSibling)) {
+  if (where === 'append' || (where === 'after' && !ref_elem.nextSibling)) { //case 'after' but no nextSibling === case 'append'
     into_elem.appendChild(child);
   } else {
     var ref_elem_next = ref_elem; // case 'before'
@@ -301,33 +305,35 @@ function insert_child(child, into_elem, where, ref_elem) {
 
 }
 
-function get_factory($qix) {
-  var comp_require = $qix.require;
-  var module_name = $qix.node_ctrl_def.module_name;
-  var module_prop = $qix.node_ctrl_def.module_prop;
+function get_factory(ctrl_def, comp_require) {
+  var module_name = ctrl_def.module_name;
+  var module_prop = ctrl_def.module_prop;
   var _module = comp_require(module_name);
   var factory = module_prop ? _module[module_prop] : _module;
   return factory;
 }
 
 function spawn_branch(branch, ctrl_inits, into_elem, where, ref_elem) {
-  var factory = get_factory(branch.$qix);
-  var child = factory(branch.$qix.node, ctrl_inits);
+  var attr_ctrls = branch.$qix.attr_ctrl_defs.map(function(attr_ctrl_def) {
+    return get_factory(attr_ctrl_def, branch.$qix.require);
+  });
+
+  // cicla attr_ctrls e se c'è un capture (solo il primo, credo ..)
+  //   -> interrompi il nodo corrente e passsare al capture il in modo di poter "proseguire" lo spawn..
+  //      proseguire poi col nodo successivo (sibling)
+  // else
+  //   -> prosegui attributi e nodo .. 
+
+  var node_factory = get_factory(branch.$qix.node_ctrl_def, branch.$qix.require);
+  var child = node_factory(branch.$qix.node, ctrl_inits);
   insert_child(child, into_elem, where, ref_elem);
-  branch.map(function (sub_branch) {
+  branch.map(function(sub_branch) { // forse reduce .. per popolare control 
     return spawn_branch(sub_branch, ctrl_inits, child);
   });
 
-  return {};
+  return {}; // return control
+  //?? control multilivello ?
+  //in caso, come dare i nomi ai livelli?
 }
-  define('text', function () {
-    function load(name, localrequire, onload, config) {
-      var url = localrequire.toUrl(name);
-      get_remote_text(url, onload);
-    }
-    return {
-      load: load
-    };
-  });
 }());
 //# sourceMappingURL=qix.js.map

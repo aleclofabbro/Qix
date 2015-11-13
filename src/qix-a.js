@@ -28,7 +28,7 @@ function safe_string_prop_setter(prop, obj, str) {
   return (obj[prop] = safe_string(str));
 }
 
-function is_array_like(obj) {
+function is_array_like(obj) { // improve ?
   return ('length' in obj) && ('number' === typeof obj.length);
 }
 
@@ -36,13 +36,21 @@ function is_undefined(o) {
   return o === void(0);
 }
 
-function as_array(obj) {
-  if (is_undefined(obj))
+function as_array(obj, strict) {
+  if (!strict && is_undefined(obj))
     return [];
   return is_array_like(obj) ? Array.prototype.slice.call(obj) : [obj];
 }
-
-var get_remote_text = (function () {
+define('text', function() {
+  function load(name, localrequire, onload, config) {
+    var url = localrequire.toUrl(name);
+    get_remote_text(url, onload);
+  }
+  return {
+    load: load
+  };
+});
+var get_remote_text = (function() {
   function get_remote_text(url, callback) {
     var xhr = createXMLHTTPObject();
     if (!xhr)
@@ -50,7 +58,7 @@ var get_remote_text = (function () {
     xhr.responseType = 'text';
     xhr.open('GET', url, true);
     // xhr.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
-    xhr.onreadystatechange = function () {
+    xhr.onreadystatechange = function() {
       if (xhr.readyState != 4)
         return;
       if (xhr.status != 200 && xhr.status != 304) {
@@ -64,16 +72,16 @@ var get_remote_text = (function () {
   }
 
   var XMLHttpFactories = [
-    function () {
+    function() {
       return new XMLHttpRequest();
     },
-    function () {
+    function() {
       return new ActiveXObject('Msxml2.XMLHTTP');
     },
-    function () {
+    function() {
       return new ActiveXObject('Msxml3.XMLHTTP');
     },
-    function () {
+    function() {
       return new ActiveXObject('Microsoft.XMLHTTP');
     }
   ];
