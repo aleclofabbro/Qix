@@ -1,0 +1,12 @@
+{
+  "name": "qix",
+  "version": "0.0.1",
+  "devDependencies": {
+    "grunt": "",
+    "grunt-contrib-jshint": "",
+    "grunt-contrib-concat": "",
+    "grunt-contrib-uglify": "",
+    "grunt-contrib-watch": "",
+    "grunt-contrib-clean": ""
+  }
+}

@@ -33,7 +33,7 @@
   }
 
   function make_master_template_element_from_text(text) {
-    var templ_el = document.createElement('template');
+    var templ_el = document.createElement('div');
     templ_el.innerHTML = text;
     return templ_el;
   }
@@ -53,7 +53,7 @@
       .filter(is_qix_attr)
       .map(make_ctrl_def)
       .map(function(ctrl_def) {
-        ctrl_def.master_element = master_elem;
+        ctrl_def.master_element = elem;
         return ctrl_def;
       });
   }
@@ -69,11 +69,11 @@
           node_ctrl_defs = get_elem_ctrl_defs(curr_node);
           _accum = _accum.concat(node_ctrl_defs);
           attach_all_qix_to_child_nodes(curr_node, _accum);
-          attach_qix_to_elem(curr_node, node_ctrl_defs);
+          // attach_qix_to_elem(curr_node, node_ctrl_defs);
         }
         // else if (curr_node.nodeType === Node.TEXT_NODE){}
         // else if (curr_node.nodeType === Node.COMMENT_NODE){}
-        if (node_ctrl_defs.length)
+        if (node_ctrl_defs && node_ctrl_defs.length)
           curr_node.$qix = {
             ctrl_defs: node_ctrl_defs
           };
@@ -82,11 +82,11 @@
   }
 
   function make_qix_component(callback, seed) {
-    var master_template_element = make_master_template_element_from_text(seed.text),
-      all_ctrl_defs = attach_all_qix_to_child_nodes(master_template_element),
-      all_requires = all_ctrl_defs.map(function(ctrl_def) {
-        return ctrl_def.module_path;
-      });
+    var master_template_element = make_master_template_element_from_text(seed.text);
+    var all_ctrl_defs = attach_all_qix_to_child_nodes(master_template_element);
+    var all_requires = all_ctrl_defs.map(function(ctrl_def) {
+      return ctrl_def.module_path;
+    });
 
     var component = {
       seed: seed,
@@ -94,7 +94,7 @@
     };
     seed.require(all_requires, function() {
       all_ctrl_defs.forEach(function(ctrl_def) {
-        var module = seed.require(ctrl_def.module_path);
+        var _module = seed.require(ctrl_def.module_path);
         var factory = ctrl_def.module_prop ? _module[ctrl_def.module_prop] : _module;
         if (!factory)
           throw new Error('No Factory for ctrl_def:\n' + JSON.stringify(ctrl_def, null, 4));
@@ -115,8 +115,8 @@
 
   function spawn_component(master_template_element, ctrl_inits, into_elem, where, ref_elem) {
     where = where || 'append';
-    var captured = capture_component(master_template_element, ctrl_inits),
-      _component_child_nodes = as_array(captured.component.childNodes);
+    var captured = capture_component(master_template_element, ctrl_inits);
+    var _component_child_nodes = as_array(captured.component.childNodes);
 
     //after / before / append / prepend ?
     if (where === 'append' || (where === 'after' && !ref_elem.nextSibling)) {
@@ -140,7 +140,7 @@
   }
 
   function capture_component(master, ctrl_inits) {
-    var _clone_template = document.createElement('template'),
+    var _clone_template = document.createElement('div'),
       binders = capture_children(master, _clone_template, ctrl_inits);
     return {
       component: _clone_template,
