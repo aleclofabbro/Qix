@@ -9,13 +9,13 @@
     }
     var compilers = {};
     compilers[Node.ATTRIBUTE_NODE] = function (attr) {
-      return get_compiler_definition(STATIC_COMPILER);
-      // var toks = attr.name.split(':');
-      // var ctx_name = toks[1];
-      // var factory = attr.value.split('#');
-      // var module_name = factory[0];
-      // var module_prop = factory[1];
-      // return get_compiler_definition(module_name, module_prop, ctx_name);
+      // return get_compiler_definition(STATIC_COMPILER);
+      var toks = attr.name.split(':');
+      var ctx_name = toks[1];
+      var factory = attr.value.split('#');
+      var module_name = factory[0];
+      var module_prop = factory[1];
+      return get_compiler_definition(module_name, module_prop, ctx_name);
     };
 
     function get_compiler_definition(module_name, module_prop, ctx_name) {
