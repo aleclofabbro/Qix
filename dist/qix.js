@@ -154,30 +154,31 @@ function is_qix_attr(attr) {
 }
 
 function make_node_qix(branch, node, seed_require) {
-  return {
-    spawn: spawn_branch.bind(null, branch),
-    node: node,
-    require: seed_require
-  };
+  var spawn = spawn_branch_content.bind(null, branch);
+  spawn.master_node = node;
+  spawn.require = seed_require;
+  return spawn;
 }
 
 function make_component_tree(seed_require, node) {
   var branch = as_array(node.childNodes).map(make_component_tree.bind(null, seed_require));
   branch.$qix = make_node_qix(branch, node, seed_require);
-  branch.spawn = branch.$qix.spawn;
-  branch.$qix.attr_ctrl_defs = as_array(node.attributes)
-    .filter(is_qix_attr)
-    .map(qix_node_compilers[Node.ATTRIBUTE_NODE]);
   branch.$qix.node_ctrl_def = qix_node_compilers[node.nodeType](node);
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    branch.$qix.attr_ctrl_defs = as_array(node.attributes)
+      .filter(is_qix_attr)
+      .map(qix_node_compilers[Node.ATTRIBUTE_NODE]);
+  }
   return branch;
 }
 
 function collect_deps(branch) {
-  return branch.$qix.attr_ctrl_defs.concat(branch.$qix.node_ctrl_def)
-    .map(function(ctrl) {
+  return as_array(branch.$qix.attr_ctrl_defs)
+    .concat(branch.$qix.node_ctrl_def)
+    .map(function (ctrl) {
       return ctrl.module_name;
     })
-    .concat(branch.map(collect_deps).reduce(function(accum, sub_deps) {
+    .concat(branch.map(collect_deps).reduce(function (accum, sub_deps) {
       return accum.concat(sub_deps);
     }, []));
 }
@@ -186,7 +187,7 @@ function make_qix_component(callback, seed) {
   var master_template_element = make_master_template_element_from_text(seed.text);
   var component_tree = make_component_tree(seed.require, master_template_element, seed);
   var deps = collect_deps(component_tree);
-  seed.require(deps, function() {
+  seed.require(deps, function () {
     callback(component_tree);
   });
 }
@@ -289,18 +290,18 @@ define('qix-seed', function () {
     load: load
   };
 });
-function insert_child(child, into_elem, where, ref_elem) {
+function insert_child(child_node, into_elem, where, ref_elem) {
   where = where || 'append';
   //after / before / append / prepend ?
   if (where === 'append' || (where === 'after' && !ref_elem.nextSibling)) { //case 'after' but no nextSibling === case 'append'
-    into_elem.appendChild(child);
+    into_elem.appendChild(child_node);
   } else {
     var ref_elem_next = ref_elem; // case 'before'
     if (where === 'prepend')
       ref_elem_next = into_elem.firstChild;
     else if (where === 'after')
       ref_elem_next = ref_elem.nextSibling;
-    into_elem.insertBefore(child, ref_elem_next);
+    into_elem.insertBefore(child_node, ref_elem_next);
   }
 
 }
@@ -313,27 +314,61 @@ function get_factory(ctrl_def, comp_require) {
   return factory;
 }
 
-function spawn_branch(branch, ctrl_inits, into_elem, where, ref_elem) {
-  var attr_ctrls = branch.$qix.attr_ctrl_defs.map(function(attr_ctrl_def) {
-    return get_factory(attr_ctrl_def, branch.$qix.require);
-  });
+function cycle_over_attr_ctrls(ctrls, elem, ctrl_inits) {
+  if (ctrls.length) {
+    var _remaining_ctrls = ctrls.slice(1);
+    var ctrl = ctrls[0];
+    ctrl(elem, ctrl_inits, {});
+    cycle_over_attr_ctrls(_remaining_ctrls, elem, ctrl_inits);
+  }
+}
+console.log = function () {}
 
-  // cicla attr_ctrls e se c'è un capture (solo il primo, credo ..)
-  //   -> interrompi il nodo corrente e passsare al capture il in modo di poter "proseguire" lo spawn..
-  //      proseguire poi col nodo successivo (sibling)
-  // else
-  //   -> prosegui attributi e nodo .. 
+function spawn_branch_content(of_branch, ctrl_inits, parent_elem, where, ref_elem) {
+  if (of_branch.length) {
+    var continue_branch_spawn = function () {
+      var branch = of_branch[0];
+      var _remaining_branches = of_branch.slice(1);
+      _remaining_branches.$qix = branch.$qix;
+      spawn_branch_content(_remaining_branches, ctrl_inits, parent_elem);
+    };
+    var branch = of_branch[0];
+    var node_factory = get_factory(branch.$qix.node_ctrl_def, branch.$qix.require);
+    var instance_node = node_factory(branch.$qix.master_node, ctrl_inits);
+    if (instance_node) {
+      insert_child(instance_node, parent_elem, where, ref_elem);
+      if (instance_node.nodeType === Node.ELEMENT_NODE) {
+        var attr_ctrls = branch.$qix.attr_ctrl_defs.map(function (attr_ctrl_def) {
+          return get_factory(attr_ctrl_def, branch.$qix.require);
+        });
+        cycle_over_attr_ctrls(attr_ctrls, instance_node, ctrl_inits);
+      }
+      spawn_branch_content(branch, ctrl_inits, instance_node);
+    }
+    continue_branch_spawn();
+  }
 
+  return {}; // return control
+}
+/*
+function spawn_branch_content(branch, ctrl_inits, parent_elem, where, ref_elem) {
   var node_factory = get_factory(branch.$qix.node_ctrl_def, branch.$qix.require);
-  var child = node_factory(branch.$qix.node, ctrl_inits);
-  insert_child(child, into_elem, where, ref_elem);
-  branch.map(function(sub_branch) { // forse reduce .. per popolare control 
-    return spawn_branch(sub_branch, ctrl_inits, child);
+  var instance_node = node_factory(branch.$qix.master_node, ctrl_inits);
+  if (instance_node) {
+    insert_child(instance_node, parent_elem, where, ref_elem);
+    if (instance_node.nodeType === Node.ELEMENT_NODE) {
+      var attr_ctrls = branch.$qix.attr_ctrl_defs.map(function (attr_ctrl_def) {
+        return get_factory(attr_ctrl_def, branch.$qix.require);
+      });
+      cycle_over_attr_ctrls(attr_ctrls, instance_node, ctrl_inits);
+    }
+  }
+
+  branch.map(function (sub_branch) { // forse reduce .. per popolare control 
+    return spawn_branch_content(sub_branch, ctrl_inits, instance_node);
   });
 
   return {}; // return control
-  //?? control multilivello ?
-  //in caso, come dare i nomi ai livelli?
-}
+}*/
 }());
 //# sourceMappingURL=qix.js.map
