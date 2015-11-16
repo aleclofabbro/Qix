@@ -1,11 +1,16 @@
-<qix:comp a name="/ww/ee.html" />
-<qix:if zz>
-  <div qix:x="qix-class:ss">
-    <qix:foreach kk>
-      <span qix:a="/yy/uu"></span>
-    </qix:foreach>
+<qix ctrl="zz:qix-flux#if">
+  <!-- shortcut:
+	<qix if="zz">
+	-->
+  <div qix="x:path/to/ctrl#prop|y:path/to/ctrl2#prp" x:par="22">
+    <qix comp="kk:qix-flux#map">
+      <!-- shortcut:
+				<qix map="kk">
+				-->
+      <span qix="k:/yy/uu" k:val="abc"></span>
+    </qix>
   </div>
-</qix:if>
+</qix>
 <!--
 require('qix:**')
 	fase 1: resolvi deps
