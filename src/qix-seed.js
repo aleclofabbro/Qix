@@ -1,4 +1,9 @@
 define('qix-seed', function () {
+  function make_master_element_from_text(text) {
+    var master_el = document.createElement('div');
+    master_el.innerHTML = text;
+    return master_el;
+  }
 
   function path_relative_to(baseurl, path) {
     if (path.startsWith('.'))
@@ -13,8 +18,9 @@ define('qix-seed', function () {
     // var url = localrequire.toUrl(name);
     // get_remote_text(url, function(text) {
     localrequire(['text!' + name], function (text) {
+      var master = make_master_element_from_text(text);
       var component_seed = {
-        text: text,
+        master: master,
         require: function (deps, cb, eb) {
           if (Array.prototype.isPrototypeOf(deps)) {
             deps = deps.map(path_resolver);

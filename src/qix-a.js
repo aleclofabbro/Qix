@@ -2,6 +2,12 @@ function invoke(fn) {
   return fn();
 }
 
+function flatten(a) {
+  return a.reduce(function (acc, arr_el) {
+    return acc.concat(arr_el);
+  }, []);
+}
+
 function as_bool(v) {
   return !!v;
 }
@@ -11,6 +17,16 @@ function neg_bool(v) {
 }
 
 function noop() {}
+
+// function compose(fn1, fn2) {
+//   return function (x) {
+//     return fn1(fn2(x));
+//   }
+// }
+
+function get_attribute(name, elem) {
+  return elem.getAttribute(name);
+}
 
 function id(v) {
   return v;
@@ -22,6 +38,10 @@ function safe_string(str) {
 
 function prop_setter(prop, obj, val) {
   return (obj[prop] = val);
+}
+
+function prop(prp, obj) {
+  return obj ? obj[prp] : void(0);
 }
 
 function safe_string_prop_setter(prop, obj, str) {
@@ -41,7 +61,7 @@ function as_array(obj, strict) {
     return [];
   return is_array_like(obj) ? Array.prototype.slice.call(obj) : [obj];
 }
-define('text', function() {
+define('text', function () {
   function load(name, localrequire, onload, config) {
     var url = localrequire.toUrl(name);
     get_remote_text(url, onload);
@@ -50,7 +70,7 @@ define('text', function() {
     load: load
   };
 });
-var get_remote_text = (function() {
+var get_remote_text = (function () {
   function get_remote_text(url, callback) {
     var xhr = createXMLHTTPObject();
     if (!xhr)
@@ -58,7 +78,7 @@ var get_remote_text = (function() {
     xhr.responseType = 'text';
     xhr.open('GET', url, true);
     // xhr.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
       if (xhr.readyState != 4)
         return;
       if (xhr.status != 200 && xhr.status != 304) {
@@ -72,16 +92,16 @@ var get_remote_text = (function() {
   }
 
   var XMLHttpFactories = [
-    function() {
+    function () {
       return new XMLHttpRequest();
     },
-    function() {
+    function () {
       return new ActiveXObject('Msxml2.XMLHTTP');
     },
-    function() {
+    function () {
       return new ActiveXObject('Msxml3.XMLHTTP');
     },
-    function() {
+    function () {
       return new ActiveXObject('Microsoft.XMLHTTP');
     }
   ];

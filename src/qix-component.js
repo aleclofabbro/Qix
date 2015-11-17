@@ -1,58 +1,59 @@
-function make_master_template_element_from_text(text) {
-  var templ_el = document.createElement('div');
-  templ_el.innerHTML = text;
-  return templ_el;
+function get_controller_by_component_definition(local_require, def) {
+  var _module = local_require(def.module);
+  return def.module_prop ? _module[def.module_prop] : _module;
 }
 
-function is_qix_attr(attr) {
-  return 'qix' === attr.name.split(':')[0];
+function get_component_definition_from_string(str) {
+  var toks = str.split(':');
+  var ctrl_name = toks[0];
+  var toks_module = toks[1].split('#');
+  var module = toks_module[0];
+  var module_prop = toks_module[1];
+  return {
+    module: module,
+    module_prop: module_prop,
+    name: ctrl_name
+  };
 }
 
-function make_node_qix(branch, node, seed_require) {
-  var spawn = spawn_branch_content.bind(null, branch);
-  spawn.master_node = node;
-  spawn.require = seed_require;
-  return spawn;
+function get_qix_elem_ctrl_def(qix_elem) {
+  return get_component_definition_from_string(qix_elem.getAttribute('comp'));
 }
 
-function set_factory(comp_require, ctrl_def) {
-  var module_name = ctrl_def.module_name;
-  var module_prop = ctrl_def.module_prop;
-  var _module = comp_require(module_name);
-  ctrl_def.factory = module_prop ? _module[module_prop] : _module;
-  return ctrl_def;
+function get_qix_elem_attr_ctrl_defs(qix_elem) {
+  return qix_elem.getAttribute('qix')
+    .split('|')
+    .map(get_component_definition_from_string);
 }
 
-function make_component_tree(seed_require, node) {
-  var branch = as_array(node.childNodes).map(make_component_tree.bind(null, seed_require));
-  branch.$qix = make_node_qix(branch, node, seed_require);
-  branch.$qix.node_ctrl_def = qix_node_compilers[node.nodeType](node);
-  set_factory(seed_require, branch.$qix.node_ctrl_def);
-  if (node.nodeType === Node.ELEMENT_NODE) {
-    branch.$qix.attr_ctrl_defs = as_array(node.attributes)
-      .filter(is_qix_attr)
-      .map(qix_node_compilers[Node.ATTRIBUTE_NODE])
-      .map(set_factory.bind(null, seed_require));
-  }
-  return branch;
+function get_one_qix_component_element(ancestor) {
+  return ancestor.querySelector('qix');
 }
 
-function collect_deps(branch) {
-  return as_array(branch.$qix.attr_ctrl_defs)
-    .concat(branch.$qix.node_ctrl_def)
-    .map(function (ctrl) {
-      return ctrl.module_name;
-    })
-    .concat(branch.map(collect_deps).reduce(function (accum, sub_deps) {
-      return accum.concat(sub_deps);
-    }, []));
+function get_all_qix_component_elements(ancestor) {
+  return as_array(ancestor.querySelectorAll('qix'));
+}
+
+function get_qix_controlled_elements(ancestor) {
+  return as_array(ancestor.querySelectorAll('[qix]'));
+}
+
+function require_deps(comp, callback) {
+  var deps = get_all_qix_component_elements(comp.master)
+    .map(get_qix_elem_ctrl_def)
+    .concat(flatten(get_qix_controlled_elements(comp.master)
+      .map(get_qix_elem_attr_ctrl_defs)))
+    .map(prop.bind(null, 'module'));
+  comp.require(deps, callback.bind(null, comp));
+}
+
+function seed_to_component(seed) {
+  var comp = Object.create(seed);
+  comp.spawn = spawn_component.bind(null, comp);
+  return comp;
 }
 
 function make_qix_component(callback, seed) {
-  var master_template_element = make_master_template_element_from_text(seed.text);
-  var component_tree = make_component_tree(seed.require, master_template_element, seed);
-  var deps = collect_deps(component_tree);
-  seed.require(deps, function () {
-    callback(component_tree);
-  });
+  var comp = seed_to_component(seed);
+  require_deps(comp, callback);
 }

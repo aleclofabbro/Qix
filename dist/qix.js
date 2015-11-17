@@ -4,6 +4,12 @@ function invoke(fn) {
   return fn();
 }
 
+function flatten(a) {
+  return a.reduce(function (acc, arr_el) {
+    return acc.concat(arr_el);
+  }, []);
+}
+
 function as_bool(v) {
   return !!v;
 }
@@ -13,6 +19,16 @@ function neg_bool(v) {
 }
 
 function noop() {}
+
+// function compose(fn1, fn2) {
+//   return function (x) {
+//     return fn1(fn2(x));
+//   }
+// }
+
+function get_attribute(name, elem) {
+  return elem.getAttribute(name);
+}
 
 function id(v) {
   return v;
@@ -24,6 +40,10 @@ function safe_string(str) {
 
 function prop_setter(prop, obj, val) {
   return (obj[prop] = val);
+}
+
+function prop(prp, obj) {
+  return obj ? obj[prp] : void(0);
 }
 
 function safe_string_prop_setter(prop, obj, str) {
@@ -43,7 +63,7 @@ function as_array(obj, strict) {
     return [];
   return is_array_like(obj) ? Array.prototype.slice.call(obj) : [obj];
 }
-define('text', function() {
+define('text', function () {
   function load(name, localrequire, onload, config) {
     var url = localrequire.toUrl(name);
     get_remote_text(url, onload);
@@ -52,7 +72,7 @@ define('text', function() {
     load: load
   };
 });
-var get_remote_text = (function() {
+var get_remote_text = (function () {
   function get_remote_text(url, callback) {
     var xhr = createXMLHTTPObject();
     if (!xhr)
@@ -60,7 +80,7 @@ var get_remote_text = (function() {
     xhr.responseType = 'text';
     xhr.open('GET', url, true);
     // xhr.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
       if (xhr.readyState != 4)
         return;
       if (xhr.status != 200 && xhr.status != 304) {
@@ -74,16 +94,16 @@ var get_remote_text = (function() {
   }
 
   var XMLHttpFactories = [
-    function() {
+    function () {
       return new XMLHttpRequest();
     },
-    function() {
+    function () {
       return new ActiveXObject('Msxml2.XMLHTTP');
     },
-    function() {
+    function () {
       return new ActiveXObject('Msxml3.XMLHTTP');
     },
-    function() {
+    function () {
       return new ActiveXObject('Microsoft.XMLHTTP');
     }
   ];
@@ -143,53 +163,64 @@ var get_remote_text = (function() {
       return node.cloneNode();
     };
   });
-function make_master_template_element_from_text(text) {
-  var templ_el = document.createElement('div');
-  templ_el.innerHTML = text;
-  return templ_el;
+function get_controller_by_component_definition(local_require, def) {
+  var _module = local_require(def.module);
+  return def.module_prop ? _module[def.module_prop] : _module;
 }
 
-function is_qix_attr(attr) {
-  return 'qix' === attr.name.split(':')[0];
+function get_component_definition_from_string(str) {
+  var toks = str.split(':');
+  var ctrl_name = toks[0];
+  var toks_module = toks[1].split('#');
+  var module = toks_module[0];
+  var module_prop = toks_module[1];
+  return {
+    module: module,
+    module_prop: module_prop,
+    name: ctrl_name
+  };
 }
 
-function make_node_qix(branch, node, seed_require) {
-  var spawn = spawn_branch_content.bind(null, branch);
-  spawn.master_node = node;
-  spawn.require = seed_require;
-  return spawn;
+function get_qix_elem_ctrl_def(qix_elem) {
+  return get_component_definition_from_string(qix_elem.getAttribute('comp'));
 }
 
-function make_component_tree(seed_require, node) {
-  var branch = as_array(node.childNodes).map(make_component_tree.bind(null, seed_require));
-  branch.$qix = make_node_qix(branch, node, seed_require);
-  branch.$qix.node_ctrl_def = qix_node_compilers[node.nodeType](node);
-  if (node.nodeType === Node.ELEMENT_NODE) {
-    branch.$qix.attr_ctrl_defs = as_array(node.attributes)
-      .filter(is_qix_attr)
-      .map(qix_node_compilers[Node.ATTRIBUTE_NODE]);
-  }
-  return branch;
+function get_qix_elem_attr_ctrl_defs(qix_elem) {
+  return qix_elem.getAttribute('qix')
+    .split('|')
+    .map(get_component_definition_from_string);
 }
 
-function collect_deps(branch) {
-  return as_array(branch.$qix.attr_ctrl_defs)
-    .concat(branch.$qix.node_ctrl_def)
-    .map(function (ctrl) {
-      return ctrl.module_name;
-    })
-    .concat(branch.map(collect_deps).reduce(function (accum, sub_deps) {
-      return accum.concat(sub_deps);
-    }, []));
+function get_one_qix_component_element(ancestor) {
+  return ancestor.querySelector('qix');
+}
+
+function get_all_qix_component_elements(ancestor) {
+  return as_array(ancestor.querySelectorAll('qix'));
+}
+
+function get_qix_controlled_elements(ancestor) {
+  return as_array(ancestor.querySelectorAll('[qix]'));
+}
+
+function require_deps(comp, callback) {
+  var deps = get_all_qix_component_elements(comp.master)
+    .map(get_qix_elem_ctrl_def)
+    .concat(flatten(get_qix_controlled_elements(comp.master)
+      .map(get_qix_elem_attr_ctrl_defs)))
+    .map(prop.bind(null, 'module'));
+  comp.require(deps, callback.bind(null, comp));
+}
+
+function seed_to_component(seed) {
+  var comp = Object.create(seed);
+  comp.spawn = spawn_component.bind(null, comp);
+  return comp;
 }
 
 function make_qix_component(callback, seed) {
-  var master_template_element = make_master_template_element_from_text(seed.text);
-  var component_tree = make_component_tree(seed.require, master_template_element, seed);
-  var deps = collect_deps(component_tree);
-  seed.require(deps, function () {
-    callback(component_tree);
-  });
+  var comp = seed_to_component(seed);
+  require_deps(comp, callback);
 }
 define('qix-elem', function (require, exports, module) {
   var html_setter = safe_string_prop_setter.bind(null, 'innerHTML');
@@ -257,6 +288,11 @@ define('qix', function () {
   return qix_module;
 });
 define('qix-seed', function () {
+  function make_master_element_from_text(text) {
+    var master_el = document.createElement('div');
+    master_el.innerHTML = text;
+    return master_el;
+  }
 
   function path_relative_to(baseurl, path) {
     if (path.startsWith('.'))
@@ -271,8 +307,9 @@ define('qix-seed', function () {
     // var url = localrequire.toUrl(name);
     // get_remote_text(url, function(text) {
     localrequire(['text!' + name], function (text) {
+      var master = make_master_element_from_text(text);
       var component_seed = {
-        text: text,
+        master: master,
         require: function (deps, cb, eb) {
           if (Array.prototype.isPrototypeOf(deps)) {
             deps = deps.map(path_resolver);
@@ -290,7 +327,16 @@ define('qix-seed', function () {
     load: load
   };
 });
-function insert_child(child_node, into_elem, where, ref_elem) {
+function insert_children(holder_node, into_elem, where, ref_elem) {
+  insert_children_map(into_elem, where, ref_elem, holder_node);
+}
+
+function insert_children_map(into_elem, where, ref_elem, holder_node) {
+  as_array(holder_node.children)
+    .forEach(insert_child_map.bind(null, into_elem, where, ref_elem));
+}
+
+function insert_child_map(into_elem, where, ref_elem, child_node) {
   where = where || 'append';
   //after / before / append / prepend ?
   if (where === 'append' || (where === 'after' && !ref_elem.nextSibling)) { //case 'after' but no nextSibling === case 'append'
@@ -303,72 +349,31 @@ function insert_child(child_node, into_elem, where, ref_elem) {
       ref_elem_next = ref_elem.nextSibling;
     into_elem.insertBefore(child_node, ref_elem_next);
   }
-
 }
 
-function get_factory(ctrl_def, comp_require) {
-  var module_name = ctrl_def.module_name;
-  var module_prop = ctrl_def.module_prop;
-  var _module = comp_require(module_name);
-  var factory = module_prop ? _module[module_prop] : _module;
-  return factory;
+function insert_child(child_node, into_elem, where, ref_elem) {
+  return insert_child_map(into_elem, where, ref_elem, child_node);
 }
 
-function cycle_over_attr_ctrls(ctrls, elem, ctrl_inits) {
-  if (ctrls.length) {
-    var _remaining_ctrls = ctrls.slice(1);
-    var ctrl = ctrls[0];
-    ctrl(elem, ctrl_inits, {});
-    cycle_over_attr_ctrls(_remaining_ctrls, elem, ctrl_inits);
+function spawn_component(comp, options, target) {
+  var _comp_elem;
+  while ((_comp_elem = get_one_qix_component_element(comp.master)) !== null) {
+    _comp_elem.remove();
+    var ctrl_def = get_qix_elem_ctrl_def(_comp_elem);
+    var ctrl = get_controller_by_component_definition(ctrl_def);
+    var _sub_comp = Object.create(comp);
+    _sub_comp.master = _comp_elem;
+    ctrl(_sub_comp, options);
   }
-}
-console.log = function () {}
-
-function spawn_branch_content(of_branch, ctrl_inits, parent_elem, where, ref_elem) {
-  if (of_branch.length) {
-    var continue_branch_spawn = function () {
-      var branch = of_branch[0];
-      var _remaining_branches = of_branch.slice(1);
-      _remaining_branches.$qix = branch.$qix;
-      spawn_branch_content(_remaining_branches, ctrl_inits, parent_elem);
-    };
-    var branch = of_branch[0];
-    var node_factory = get_factory(branch.$qix.node_ctrl_def, branch.$qix.require);
-    var instance_node = node_factory(branch.$qix.master_node, ctrl_inits);
-    if (instance_node) {
-      insert_child(instance_node, parent_elem, where, ref_elem);
-      if (instance_node.nodeType === Node.ELEMENT_NODE) {
-        var attr_ctrls = branch.$qix.attr_ctrl_defs.map(function (attr_ctrl_def) {
-          return get_factory(attr_ctrl_def, branch.$qix.require);
+  get_qix_controlled_elements(comp.master)
+    .map(function (elem) {
+      get_qix_elem_attr_ctrl_defs(elem)
+        .map(function (def) {
+          var ctrl = get_controller_by_component_definition(comp.require, def);
+          ctrl(elem, options);
         });
-        cycle_over_attr_ctrls(attr_ctrls, instance_node, ctrl_inits);
-      }
-      spawn_branch_content(branch, ctrl_inits, instance_node);
-    }
-    continue_branch_spawn();
-  }
-
-  return {}; // return control
+    });
+  insert_children(comp.master, target);
 }
-/*
-function spawn_branch_content(branch, ctrl_inits, parent_elem, where, ref_elem) {
-  var node_factory = get_factory(branch.$qix.node_ctrl_def, branch.$qix.require);
-  var instance_node = node_factory(branch.$qix.master_node, ctrl_inits);
-  if (instance_node) {
-    insert_child(instance_node, parent_elem, where, ref_elem);
-    if (instance_node.nodeType === Node.ELEMENT_NODE) {
-      var attr_ctrls = branch.$qix.attr_ctrl_defs.map(function (attr_ctrl_def) {
-        return get_factory(attr_ctrl_def, branch.$qix.require);
-      });
-      cycle_over_attr_ctrls(attr_ctrls, instance_node, ctrl_inits);
-    }
-  }
-
-  branch.map(function (sub_branch) { // forse reduce .. per popolare control 
-    return spawn_branch_content(sub_branch, ctrl_inits, instance_node);
-  });
-
-  return {}; // return control
-}*/
 }());
 //# sourceMappingURL=qix.js.map
