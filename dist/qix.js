@@ -356,8 +356,9 @@ function insert_child(child_node, into_elem, where, ref_elem) {
 }
 
 function spawn_component(comp, options, target) {
+  var master_clone = comp.master.cloneNode(true);
   var _comp_elem;
-  while ((_comp_elem = get_one_qix_component_element(comp.master)) !== null) {
+  while ((_comp_elem = get_one_qix_component_element(master_clone)) !== null) {
     _comp_elem.remove();
     var ctrl_def = get_qix_elem_ctrl_def(_comp_elem);
     var ctrl = get_controller_by_component_definition(ctrl_def);
@@ -365,7 +366,7 @@ function spawn_component(comp, options, target) {
     _sub_comp.master = _comp_elem;
     ctrl(_sub_comp, options);
   }
-  get_qix_controlled_elements(comp.master)
+  get_qix_controlled_elements(master_clone)
     .map(function (elem) {
       get_qix_elem_attr_ctrl_defs(elem)
         .map(function (def) {
@@ -373,7 +374,7 @@ function spawn_component(comp, options, target) {
           ctrl(elem, options);
         });
     });
-  insert_children(comp.master, target);
+  insert_children(master_clone, target);
 }
 }());
 //# sourceMappingURL=qix.js.map

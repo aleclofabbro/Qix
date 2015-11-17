@@ -20,17 +20,17 @@
       a_lm: '*a',
       b: '*b'
     }, target);
-    test_ctrls('ctrls1', ctrls1);
-    /*
+    //test_ctrls('ctrls1', ctrls1);
 
     console.time(1)
-    ctrls2 = comp.$qix({
+    ctrls2 = comp.spawn({
       b_lm: '*****blm',
       a_lm: '*****a',
       b: '****b'
     }, target);
-    test_ctrls('ctrls2', ctrls2);
+    //test_ctrls('ctrls2', ctrls2);
     console.timeEnd(1)
+    /*
 
 
         //spawn a custom components in other target
