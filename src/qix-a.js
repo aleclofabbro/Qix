@@ -8,6 +8,52 @@ function flatten(a) {
   }, []);
 }
 
+function prop(prp, obj) {
+  return obj ? obj[prp] : void(0);
+}
+
+function is_array_like(obj) { // TODO: improve ?
+  return ('length' in obj) && ('number' === typeof obj.length);
+}
+
+function is_undefined(o) {
+  return o === void(0);
+}
+
+function as_array(obj, strict) {
+  if (!strict && is_undefined(obj))
+    return [];
+  return is_array_like(obj) ? Array.prototype.slice.call(obj) : [obj];
+}
+
+function query(elem, _query) {
+  return elem.querySelector(_query);
+}
+
+function queryAll(elem, _query) {
+  return as_array(elem.querySelectorAll(_query));
+}
+
+function select(_query, elem) {
+  return query(elem, _query);
+}
+
+function selectAll(_query, elem) {
+  return queryAll(elem, _query);
+}
+
+function attrOf(elem, attr_name) {
+  return attr(attr_name, elem);
+}
+
+function attr(attr_name, elem) {
+  return elem.getAttribute(attr_name);
+}
+
+function has_attr(elem, attr_name) {
+  return elem.hasAttribute(attr_name);
+}
+/*
 function as_bool(v) {
   return !!v;
 }
@@ -18,11 +64,11 @@ function neg_bool(v) {
 
 function noop() {}
 
-// function compose(fn1, fn2) {
-//   return function (x) {
-//     return fn1(fn2(x));
-//   }
-// }
+function compose(fn1, fn2) {
+  return function (x) {
+    return fn1(fn2(x));
+  }
+}
 
 function get_attribute(name, elem) {
   return elem.getAttribute(name);
@@ -40,83 +86,10 @@ function prop_setter(prop, obj, val) {
   return (obj[prop] = val);
 }
 
-function prop(prp, obj) {
-  return obj ? obj[prp] : void(0);
-}
 
 function safe_string_prop_setter(prop, obj, str) {
   return (obj[prop] = safe_string(str));
 }
 
-function is_array_like(obj) { // improve ?
-  return ('length' in obj) && ('number' === typeof obj.length);
-}
 
-function is_undefined(o) {
-  return o === void(0);
-}
-
-function as_array(obj, strict) {
-  if (!strict && is_undefined(obj))
-    return [];
-  return is_array_like(obj) ? Array.prototype.slice.call(obj) : [obj];
-}
-define('text', function () {
-  function load(name, localrequire, onload, config) {
-    var url = localrequire.toUrl(name);
-    get_remote_text(url, onload);
-  }
-  return {
-    load: load
-  };
-});
-var get_remote_text = (function () {
-  function get_remote_text(url, callback) {
-    var xhr = createXMLHTTPObject();
-    if (!xhr)
-      throw new Error('NO XHR!');
-    xhr.responseType = 'text';
-    xhr.open('GET', url, true);
-    // xhr.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState != 4)
-        return;
-      if (xhr.status != 200 && xhr.status != 304) {
-        throw new Error('get_remote_text HTTP error for [' + url + '] : ' + xhr.status);
-      }
-      callback(xhr.responseText);
-    };
-    if (xhr.readyState == 4)
-      return;
-    xhr.send();
-  }
-
-  var XMLHttpFactories = [
-    function () {
-      return new XMLHttpRequest();
-    },
-    function () {
-      return new ActiveXObject('Msxml2.XMLHTTP');
-    },
-    function () {
-      return new ActiveXObject('Msxml3.XMLHTTP');
-    },
-    function () {
-      return new ActiveXObject('Microsoft.XMLHTTP');
-    }
-  ];
-
-  function createXMLHTTPObject() {
-    var xmlhttp = false;
-    for (var i = 0; i < XMLHttpFactories.length; i++) {
-      try {
-        xmlhttp = XMLHttpFactories[i]();
-      } catch (e) {
-        continue;
-      }
-      break;
-    }
-    return xmlhttp;
-  }
-  return get_remote_text;
-})();
+*/

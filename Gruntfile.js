@@ -50,7 +50,7 @@ module.exports = function (grunt) {
     },
     watch: {
       files: src_files,
-      tasks: ['clean:dist', 'concat:qix', 'jshint' /*, 'uglify:qix'*/ ],
+      tasks: ['clean:dist', 'concat:qix', 'jshint', 'uglify:qix'],
       options: {
         spawn: false,
         debounceDelay: 500

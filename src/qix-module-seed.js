@@ -15,8 +15,6 @@ define('qix-seed', function () {
   function load(name, localrequire, onload, config) {
     var baseurl = name.substring(0, name.lastIndexOf('/') + 1);
     var path_resolver = path_relative_to.bind(null, baseurl);
-    // var url = localrequire.toUrl(name);
-    // get_remote_text(url, function(text) {
     localrequire(['text!' + name], function (text) {
       var master = make_master_element_from_text(text);
       var component_seed = {
