@@ -4,7 +4,7 @@ function get_controller_by_component_definition(local_require, def) {
 }
 
 function get_component_definition_from_string(str) {
-  var toks = str.split(':');
+  var toks = str.trim().split(':');
   var ctrl_name = toks[0];
   var toks_module = toks[1].split('#');
   var module = toks_module[0];

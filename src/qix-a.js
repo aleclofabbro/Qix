@@ -53,6 +53,49 @@ function attr(attr_name, elem) {
 function has_attr(elem, attr_name) {
   return elem.hasAttribute(attr_name);
 }
+
+function insert_child_nodes(holder_node, into_elem, where, ref_elem) {
+  return insert_child_nodes_map(into_elem, where, ref_elem, holder_node);
+}
+
+function insert_child_nodes_map(into_elem, where, ref_elem, holder_node) {
+  return as_array(holder_node.childNodes)
+    .map(insert_child_map.bind(null, into_elem, where, ref_elem));
+}
+
+function replace_node(target, by) {
+  insert_child(by, target.parentNode, 'before', target);
+  target.remove();
+  return by;
+}
+
+function insert_child_map(into_elem, where, ref_elem, child_node) {
+  where = where || 'append';
+  //after / before / append / prepend ?
+  if (where === 'append' || (where === 'after' && !ref_elem.nextSibling)) { //case 'after' but no nextSibling === case 'append'
+    into_elem.appendChild(child_node);
+  } else {
+    var ref_elem_next = ref_elem; // case 'before'
+    if (where === 'prepend')
+      ref_elem_next = into_elem.firstChild;
+    else if (where === 'after')
+      ref_elem_next = ref_elem.nextSibling;
+    into_elem.insertBefore(child_node, ref_elem_next);
+  }
+  return child_node;
+}
+
+function insert_child(child_node, into_elem, where, ref_elem) {
+  return insert_child_map(into_elem, where, ref_elem, child_node);
+}
+
+function remove(els) {
+  return as_array(els)
+    .map(function (el) {
+      el.remove();
+      return el;
+    });
+}
 /*
 function as_bool(v) {
   return !!v;

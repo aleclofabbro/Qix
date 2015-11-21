@@ -1,57 +1,40 @@
-function insert_children(holder_node, into_elem, where, ref_elem) {
-  insert_children_map(into_elem, where, ref_elem, holder_node);
-}
-
-function insert_children_map(into_elem, where, ref_elem, holder_node) {
-  as_array(holder_node.children)
-    .forEach(insert_child_map.bind(null, into_elem, where, ref_elem));
-}
-
-function insert_child_map(into_elem, where, ref_elem, child_node) {
-  where = where || 'append';
-  //after / before / append / prepend ?
-  if (where === 'append' || (where === 'after' && !ref_elem.nextSibling)) { //case 'after' but no nextSibling === case 'append'
-    into_elem.appendChild(child_node);
-  } else {
-    var ref_elem_next = ref_elem; // case 'before'
-    if (where === 'prepend')
-      ref_elem_next = into_elem.firstChild;
-    else if (where === 'after')
-      ref_elem_next = ref_elem.nextSibling;
-    into_elem.insertBefore(child_node, ref_elem_next);
-  }
-}
-
-function insert_child(child_node, into_elem, where, ref_elem) {
-  return insert_child_map(into_elem, where, ref_elem, child_node);
-}
-
 var qix_comps = {
-  if: function (comp, opts) {
+  if: function (comp, opts, placeholder) {
     // console.log('if', arguments);
-    comp.spawn({}, document.body);
+    var b;
+    var int_id = setInterval(function () {
+      if (b) {
+        remove(b);
+        b = null;
+      } else {
+        b = comp.spawn({}, placeholder.parentNode, 'before', placeholder);
+      }
+    }, 1000);
+    // on destroy -> clearInterval(int_id);
   },
-  map: function (comp, opts) {
+  map: function (comp, opts, placeholder) {
     // console.log('map', arguments);
-    comp.spawn({}, document.body);
+    // comp.spawn({}, document.body);
   },
-  expose: function (comp, opts) {
+  expose: function (comp, opts, placeholder) {
       // console.log('expose', arguments);
-      comp.spawn({}, document.body);
+      // comp.spawn({}, document.body);
     } //to context
 };
 
-function spawn_component(comp, options, target) {
+function spawn_component(comp, options, target, where, ref_elem) {
   var master_clone = comp.master.cloneNode(true);
   var _comp_elem;
   while ((_comp_elem = get_one_qix_component_element(master_clone)) !== null) {
-    _comp_elem.remove();
-    var ctrl = qix_comps[_comp_elem.attributes[0].name];
+    var _ctrl_name = _comp_elem.attributes[0].name;
+    var ctrl = qix_comps[_ctrl_name];
+    var placeholder = document.createComment('qx:' + _ctrl_name);
+    replace_node(_comp_elem, placeholder);
     var _sub_comp = seed_to_component({
       require: comp.require,
       master: _comp_elem
     });
-    ctrl(_sub_comp, options);
+    ctrl(_sub_comp, options, placeholder);
   }
   get_qix_controlled_elements(master_clone)
     .map(function (elem) {
@@ -61,5 +44,5 @@ function spawn_component(comp, options, target) {
           ctrl(elem, options);
         });
     });
-  insert_children(master_clone, target);
+  return insert_child_nodes(master_clone, target, where, ref_elem);
 }

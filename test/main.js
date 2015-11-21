@@ -1,5 +1,5 @@
   require(['qix!mod/templ.html', 'qix', 'require'], function (comp, qix, localrequire) {
-    // console.log = function () {}
+    console.log = function () {}
 
     // go = function () {
 
