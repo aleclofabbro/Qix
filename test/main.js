@@ -1,15 +1,15 @@
-  require(['qix!mod/templ.html', 'qix', 'require'], function(comp, qix, localrequire) {
-    console.log = function() {}
+  require(['qix!mod/templ.html', 'qix', 'require'], function (comp, qix, localrequire) {
+    // console.log = function () {}
 
     // go = function () {
 
     function test_ctrls(name, ctrls) {
       console.log('-----\nController Test:' + name);
       Object.keys(ctrls)
-        .filter(function(k) {
+        .filter(function (k) {
           return k[0] !== '$';
         })
-        .forEach(function(k) {
+        .forEach(function (k) {
           console.log(k, ctrls[k]());
         });
       console.log('-------\n');
@@ -17,12 +17,12 @@
     };
     //spawn 2 components in target
     var target = document.getElementById('app-container');
-    // ctrls1 = comp.spawn({
-    //   b_lm: '*blm',
-    //   a_lm: '*a',
-    //   b: '*b'
-    // }, target);
-    //test_ctrls('ctrls1', ctrls1);
+    ctrls1 = comp.spawn({
+      b_lm: '*blm',
+      a_lm: '*a',
+      b: '*b'
+    }, target);
+    // test_ctrls('ctrls1', ctrls1);
 
     console.time(1)
     ctrls2 = comp.spawn({

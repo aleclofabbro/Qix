@@ -161,18 +161,18 @@ function safe_string_prop_setter(prop, obj, str) {
 
 
 */
-define('qix-strip-if', function() {
-  return function(placeholder, seed, main_scope) {
+define('qix-hook-if', function () {
+  return function (placeholder, seed, main_scope) {
     var current = null;
-    return function(cond, scope) {
+    return function (cond, scope) {
       if (cond) {
         if (!current)
           current = seed.spawn(scope || main_scope, placeholder, 'before');
         return current;
       } else {
         if (current) {
-          current.$.message('unbind');
-          remove(current.$.content);
+          current.$message('unbind');
+          remove(current.$content);
           current = null;
         }
       }
@@ -180,43 +180,43 @@ define('qix-strip-if', function() {
   };
 });
 
-var global_stripper = [];
+var global_hooker = [];
 
-function define_glob_stripper(name, stripper_path, priority) {
+function define_glob_hooker(name, hooker_path, priority) {
   var attr_name = 'qix-' + name;
-  require([stripper_path], function(stripper) {
-    global_stripper.push({
+  require([hooker_path], function (hooker) {
+    global_hooker.push({
       name: name,
-      stripper: stripper,
+      hooker: hooker,
       priority: Number(priority || 500),
-      strip_one: function(elem, local_require) {
-        var strip_elem = select_has_attr(attr_name, elem);
-        if (!strip_elem)
+      hook_one: function (elem, local_require) {
+        var hook_elem = select_has_attr(attr_name, elem);
+        if (!hook_elem)
           return null;
-        var attr_val = remove_attribute(attr_name, strip_elem);
-        var placeholder = document.createComment('qix-stripper:' + name);
-        replace_node(strip_elem, placeholder);
+        var attr_val = remove_attribute(attr_name, hook_elem);
+        var placeholder = document.createComment('qix-hooker:' + name);
+        replace_node(hook_elem, placeholder);
         var holder = document.createElement('div');
-        holder.appendChild(strip_elem);
-        var stripper_seed = make_template_seed(holder, local_require);
+        holder.appendChild(hook_elem);
+        var hooker_seed = make_template_seed(holder, local_require);
 
         return {
-          factory: stripper.bind(null, placeholder, stripper_seed),
+          factory: hooker.bind(null, placeholder, hooker_seed),
           scope_name: attr_val
         };
       }
     });
-    global_stripper.sort(function(a, b) {
+    global_hooker.sort(function (a, b) {
       return a.priority < b.priority;
     });
   });
 }
 
-define_glob_stripper('if', 'qix-strip-if', 1000);
-// define_glob_stripper('map', 'qix-strip-map', 900);
-// define_glob_stripper('ctx', 'qix-strip-ctx', 800);
-// define_glob_stripper('cmp', 'qix-strip-cmp', 700);
-// define_glob_stripper('tpl', 'qix-strip-tpl', 600);
+define_glob_hooker('if', 'qix-hook-if', 1000);
+// define_glob_hooker('map', 'qix-hook-map', 900);
+// define_glob_hooker('ctx', 'qix-hook-ctx', 800);
+// define_glob_hooker('cmp', 'qix-hook-cmp', 700);
+// define_glob_hooker('tpl', 'qix-hook-tpl', 600);
 function get_controller_by_definition(local_require, def) {
   var _module = local_require(def.module);
   return def.module_prop ? _module[def.module_prop] : _module;
@@ -250,16 +250,16 @@ function require_deps(seed, callback) {
     .map(prop.bind(null, 'module'));
   seed.require(deps, (callback || noop).bind(null, seed));
 }
-define('qix-defcmp', function() {
+define('qix-defhook', function () {
   function load(name, localrequire, onload, config) {
     var path_and_args = name.split(':');
     var path = path_and_args[0];
     var args = path_and_args[1].split('#');
-    var cmp_name = args[0];
-    var cmp_priority = args[1];
-    localrequire([path], function(cmp) {
-      define_glob_stripper(cmp_name, cmp, cmp_priority);
-      onload(cmp);
+    var hook_name = args[0];
+    var hook_priority = args[1];
+    localrequire([path], function (hook) {
+      define_glob_hooker(hook_name, hook, hook_priority);
+      onload(hook);
     });
   }
   return {
@@ -383,31 +383,30 @@ function make_template_seed(master, seed_require, require_cb) {
 function spawn_seed(seed, scope, target, where) {
   var master_clone = clone_node(true, seed.master);
   var component = control_content_of(master_clone, seed.require, scope);
-  var content_elems = as_array(master_clone.childNodes);
   insert_child_nodes(master_clone, target, where);
-  component.$ = {
-    content: content_elems,
-    message: noop
-  };
   return component;
 
 }
 
 function control_content_of(holder, local_require, scope) {
-  var component = {};
-  global_stripper.forEach(function(stripper_def) {
-    var stripper;
-    while ((stripper = stripper_def.strip_one(holder, local_require)) !== null) {
-      component[stripper.scope_name] = stripper.factory(scope);
+  var component = {
+    $message: noop
+  };
+  global_hooker.forEach(function (hooker_def) {
+    var hook;
+    while ((hook = hooker_def.hook_one(holder, local_require)) !== null) {
+      component[hook.scope_name] = hook.factory(scope);
     }
   });
+  component.$content = as_array(holder.children); //as_array(holder.childNodes);
 
   get_qix_controlled_elements(holder)
-    .map(function(elem) {
+    .map(function (elem) {
       get_qix_attr_ctrl_defs_of(elem)
-        .forEach(function(def) {
+        .forEach(function (def) {
           var ctrl = get_controller_by_definition(local_require, def);
           component[def.name] = ctrl(elem);
+          component['$' + def.name] = elem;
         });
     });
   return component;

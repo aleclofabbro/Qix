@@ -11,31 +11,30 @@ function make_template_seed(master, seed_require, require_cb) {
 function spawn_seed(seed, scope, target, where) {
   var master_clone = clone_node(true, seed.master);
   var component = control_content_of(master_clone, seed.require, scope);
-  var content_elems = as_array(master_clone.childNodes);
   insert_child_nodes(master_clone, target, where);
-  component.$ = {
-    content: content_elems,
-    message: noop
-  };
   return component;
 
 }
 
 function control_content_of(holder, local_require, scope) {
-  var component = {};
-  global_stripper.forEach(function(stripper_def) {
-    var stripper;
-    while ((stripper = stripper_def.strip_one(holder, local_require)) !== null) {
-      component[stripper.scope_name] = stripper.factory(scope);
+  var component = {
+    $message: noop
+  };
+  global_hooker.forEach(function (hooker_def) {
+    var hook;
+    while ((hook = hooker_def.hook_one(holder, local_require)) !== null) {
+      component[hook.scope_name] = hook.factory(scope);
     }
   });
+  component.$content = as_array(holder.children); //as_array(holder.childNodes);
 
   get_qix_controlled_elements(holder)
-    .map(function(elem) {
+    .map(function (elem) {
       get_qix_attr_ctrl_defs_of(elem)
-        .forEach(function(def) {
+        .forEach(function (def) {
           var ctrl = get_controller_by_definition(local_require, def);
           component[def.name] = ctrl(elem);
+          component['$' + def.name] = elem;
         });
     });
   return component;
