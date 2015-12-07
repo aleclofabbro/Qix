@@ -1,9 +1,5 @@
 (function () {
     "use strict";
-function invoke(fn) {
-  return fn();
-}
-
 function flatten(a) {
   return a.reduce(function(acc, arr_el) {
     return acc.concat(arr_el);
@@ -52,9 +48,6 @@ function selectAll(_query, elem) {
   return queryAll(elem, _query);
 }
 
-function attrOf(elem, attr_name) {
-  return attr(attr_name, elem);
-}
 
 function remove_attribute(attr_name, elem) {
   var val = elem.getAttribute(attr_name);
@@ -62,13 +55,6 @@ function remove_attribute(attr_name, elem) {
   return val;
 }
 
-function attr(attr_name, elem) {
-  return elem.getAttribute(attr_name);
-}
-
-function has_attr(elem, attr_name) {
-  return elem.hasAttribute(attr_name);
-}
 
 function insert_child_nodes(elem_holder, ref_elem, where) {
   return insert_child_nodes_map(ref_elem, where, elem_holder);
@@ -106,8 +92,8 @@ function insert_child(child_node, ref_elem, where) {
   return insert_child_map(ref_elem, where, child_node);
 }
 
-function is_element(elem) {
-  return elem.nodeType === Node.ELEMENT_NODE;
+function attr(attr_name, elem) {
+  return elem.getAttribute(attr_name);
 }
 
 function remove(els) {
@@ -118,14 +104,30 @@ function remove(els) {
     });
 }
 
+function noop() {}
+/*
+
+
+function attr_of(elem, attr_name) {
+  return attr(attr_name, elem);
+}
+function invoke(fn) {
+  return fn();
+}
+function is_element(elem) {
+  return elem.nodeType === Node.ELEMENT_NODE;
+}
+function has_attr(elem, attr_name) {
+  return elem.hasAttribute(attr_name);
+}
+
+
 function compose(fn1, fn2) {
   return function() {
     return fn1(fn2.apply(null, arguments));
   };
 }
 
-function noop() {}
-/*
 function as_bool(v) {
   return !!v;
 }
@@ -215,7 +217,7 @@ define_glob_stripper('if', 'qix-strip-if', 1000);
 // define_glob_stripper('ctx', 'qix-strip-ctx', 800);
 // define_glob_stripper('cmp', 'qix-strip-cmp', 700);
 // define_glob_stripper('tpl', 'qix-strip-tpl', 600);
-function get_controller_by_component_definition(local_require, def) {
+function get_controller_by_definition(local_require, def) {
   var _module = local_require(def.module);
   return def.module_prop ? _module[def.module_prop] : _module;
 }
@@ -293,7 +295,7 @@ define('qix-seed', function() {
           return require(_local_path);
         }
       };
-      var component_seed = make_template_seed(master, seed_require, onload);
+      make_template_seed(master, seed_require, onload);
       // onload(component_seed);
     });
   }
@@ -391,12 +393,6 @@ function spawn_seed(seed, scope, target, where) {
 
 }
 
-// function seed_to_component(seed) {
-//   var comp = Object.create(seed);
-//   comp.spawn = spawn_seed.bind(null, comp);
-//   return comp;
-// }
-
 function control_content_of(holder, local_require, scope) {
   var component = {};
   global_stripper.forEach(function(stripper_def) {
@@ -410,7 +406,7 @@ function control_content_of(holder, local_require, scope) {
     .map(function(elem) {
       get_qix_attr_ctrl_defs_of(elem)
         .forEach(function(def) {
-          var ctrl = get_controller_by_component_definition(local_require, def);
+          var ctrl = get_controller_by_definition(local_require, def);
           component[def.name] = ctrl(elem);
         });
     });

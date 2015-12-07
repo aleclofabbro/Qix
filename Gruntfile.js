@@ -25,7 +25,7 @@ module.exports = function(grunt) {
         browser: true,
         strict: true,
         undef: true,
-        // "unused": true,
+        // unused: true,
         globals: {
           require: true,
           ActiveXObject: true,
@@ -38,6 +38,7 @@ module.exports = function(grunt) {
           src: src_files.concat(['!./src/head.js', '!./src/tail.js'])
         },
         options: {
+          unused: false,
           undef: false,
           strict: false
         }

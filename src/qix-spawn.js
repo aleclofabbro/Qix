@@ -21,12 +21,6 @@ function spawn_seed(seed, scope, target, where) {
 
 }
 
-// function seed_to_component(seed) {
-//   var comp = Object.create(seed);
-//   comp.spawn = spawn_seed.bind(null, comp);
-//   return comp;
-// }
-
 function control_content_of(holder, local_require, scope) {
   var component = {};
   global_stripper.forEach(function(stripper_def) {
@@ -40,7 +34,7 @@ function control_content_of(holder, local_require, scope) {
     .map(function(elem) {
       get_qix_attr_ctrl_defs_of(elem)
         .forEach(function(def) {
-          var ctrl = get_controller_by_component_definition(local_require, def);
+          var ctrl = get_controller_by_definition(local_require, def);
           component[def.name] = ctrl(elem);
         });
     });

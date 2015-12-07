@@ -27,7 +27,7 @@ define('qix-seed', function() {
           return require(_local_path);
         }
       };
-      var component_seed = make_template_seed(master, seed_require, onload);
+      make_template_seed(master, seed_require, onload);
       // onload(component_seed);
     });
   }

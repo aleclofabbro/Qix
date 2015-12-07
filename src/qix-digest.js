@@ -1,4 +1,4 @@
-function get_controller_by_component_definition(local_require, def) {
+function get_controller_by_definition(local_require, def) {
   var _module = local_require(def.module);
   return def.module_prop ? _module[def.module_prop] : _module;
 }
