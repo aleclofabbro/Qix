@@ -1,4 +1,4 @@
-module.exports = function (grunt) {
+module.exports = function(grunt) {
   // var jshint_files = ['./src/**/qix-*.js'];
   var src_files = ['./src/**/*.js'];
   var dist_dir = './dist/';
@@ -33,7 +33,16 @@ module.exports = function (grunt) {
           debugger: true
         }
       },
-      src: dist
+      sources: {
+        files: {
+          src: src_files.concat(['!./src/head.js', '!./src/tail.js'])
+        },
+        options: {
+          undef: false,
+          strict: false
+        }
+      },
+      dist: dist
     },
     concat: {
       qix: {
@@ -50,7 +59,7 @@ module.exports = function (grunt) {
     },
     watch: {
       files: src_files,
-      tasks: ['clean:dist', 'concat:qix', 'uglify:qix', 'jshint'],
+      tasks: ['jshint:sources', 'clean:dist', 'concat:qix', 'uglify:qix', 'jshint:dist'],
       options: {
         spawn: false,
         debounceDelay: 500

@@ -1,48 +1,48 @@
-var qix_comps = {
-  if: function (comp, opts, placeholder) {
-    // console.log('if', arguments);
-    var b;
-    var int_id = setInterval(function () {
-      if (b) {
-        remove(b);
-        b = null;
-      } else {
-        b = comp.spawn({}, placeholder.parentNode, 'before', placeholder);
-      }
-    }, 1000);
-    // on destroy -> clearInterval(int_id);
-  },
-  map: function (comp, opts, placeholder) {
-    // console.log('map', arguments);
-    // comp.spawn({}, document.body);
-  },
-  expose: function (comp, opts, placeholder) {
-      // console.log('expose', arguments);
-      // comp.spawn({}, document.body);
-    } //to context
-};
+function make_template_seed(master, seed_require, require_cb) {
+  var seed = {
+    master: master,
+    require: seed_require
+  };
+  seed.spawn = spawn_seed.bind(null, seed);
+  require_deps(seed, require_cb);
+  return seed;
+}
 
-function spawn_component(comp, options, target, where, ref_elem) {
-  var master_clone = comp.master.cloneNode(true);
-  var _comp_elem;
-  while ((_comp_elem = get_one_qix_component_element(master_clone)) !== null) {
-    var _ctrl_name = _comp_elem.attributes[0].name;
-    var ctrl = qix_comps[_ctrl_name];
-    var placeholder = document.createComment('qx:' + _ctrl_name);
-    replace_node(_comp_elem, placeholder);
-    var _sub_comp = seed_to_component({
-      require: comp.require,
-      master: _comp_elem
-    });
-    ctrl(_sub_comp, options, placeholder);
-  }
-  get_qix_controlled_elements(master_clone)
-    .map(function (elem) {
+function spawn_seed(seed, scope, target, where) {
+  var master_clone = clone_node(true, seed.master);
+  var component = control_content_of(master_clone, seed.require, scope);
+  var content_elems = as_array(master_clone.childNodes);
+  insert_child_nodes(master_clone, target, where);
+  component.$ = {
+    content: content_elems,
+    message: noop
+  };
+  return component;
+
+}
+
+// function seed_to_component(seed) {
+//   var comp = Object.create(seed);
+//   comp.spawn = spawn_seed.bind(null, comp);
+//   return comp;
+// }
+
+function control_content_of(holder, local_require, scope) {
+  var component = {};
+  global_stripper.forEach(function(stripper_def) {
+    var stripper;
+    while ((stripper = stripper_def.strip_one(holder, local_require)) !== null) {
+      component[stripper.scope_name] = stripper.factory(scope);
+    }
+  });
+
+  get_qix_controlled_elements(holder)
+    .map(function(elem) {
       get_qix_attr_ctrl_defs_of(elem)
-        .forEach(function (def) {
-          var ctrl = get_controller_by_component_definition(comp.require, def);
-          ctrl(elem, options);
+        .forEach(function(def) {
+          var ctrl = get_controller_by_component_definition(local_require, def);
+          component[def.name] = ctrl(elem);
         });
     });
-  return insert_child_nodes(master_clone, target, where, ref_elem);
+  return component;
 }
