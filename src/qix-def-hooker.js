@@ -17,12 +17,13 @@ define('qix-hook-if', function () {
   };
 });
 
-var global_hooker = [];
+var global_hookers = [];
 
 function define_glob_hooker(name, hooker_path, priority) {
   var attr_name = 'qix-' + name;
   require([hooker_path], function (hooker) {
-    global_hooker.push({
+    global_hookers.push({
+      hooker_path: hooker_path,
       name: name,
       hooker: hooker,
       priority: Number(priority || 500),
@@ -43,7 +44,7 @@ function define_glob_hooker(name, hooker_path, priority) {
         };
       }
     });
-    global_hooker.sort(function (a, b) {
+    global_hookers.sort(function (a, b) {
       return a.priority < b.priority;
     });
   });
@@ -54,3 +55,8 @@ define_glob_hooker('if', 'qix-hook-if', 1000);
 // define_glob_hooker('ctx', 'qix-hook-ctx', 800);
 // define_glob_hooker('cmp', 'qix-hook-cmp', 700);
 // define_glob_hooker('tpl', 'qix-hook-tpl', 600);
+
+function get_globs_deps() {
+  return global_hookers
+    .map(prop.bind(null, 'hooker_path'));
+}

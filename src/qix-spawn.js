@@ -4,7 +4,7 @@ function make_template_seed(master, seed_require, require_cb) {
     require: seed_require
   };
   seed.spawn = spawn_seed.bind(null, seed);
-  require_deps(seed, require_cb);
+  require_deps(seed, (require_cb || noop));
   return seed;
 }
 
@@ -20,7 +20,7 @@ function control_content_of(holder, local_require, scope) {
   var component = {
     $message: noop
   };
-  global_hooker.forEach(function (hooker_def) {
+  global_hookers.forEach(function (hooker_def) {
     var hook;
     while ((hook = hooker_def.hook_one(holder, local_require)) !== null) {
       component[hook.scope_name] = hook.factory(scope);

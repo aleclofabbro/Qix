@@ -180,12 +180,13 @@ define('qix-hook-if', function () {
   };
 });
 
-var global_hooker = [];
+var global_hookers = [];
 
 function define_glob_hooker(name, hooker_path, priority) {
   var attr_name = 'qix-' + name;
   require([hooker_path], function (hooker) {
-    global_hooker.push({
+    global_hookers.push({
+      hooker_path: hooker_path,
       name: name,
       hooker: hooker,
       priority: Number(priority || 500),
@@ -206,7 +207,7 @@ function define_glob_hooker(name, hooker_path, priority) {
         };
       }
     });
-    global_hooker.sort(function (a, b) {
+    global_hookers.sort(function (a, b) {
       return a.priority < b.priority;
     });
   });
@@ -217,6 +218,11 @@ define_glob_hooker('if', 'qix-hook-if', 1000);
 // define_glob_hooker('ctx', 'qix-hook-ctx', 800);
 // define_glob_hooker('cmp', 'qix-hook-cmp', 700);
 // define_glob_hooker('tpl', 'qix-hook-tpl', 600);
+
+function get_globs_deps() {
+  return global_hookers
+    .map(prop.bind(null, 'hooker_path'));
+}
 function get_controller_by_definition(local_require, def) {
   var _module = local_require(def.module);
   return def.module_prop ? _module[def.module_prop] : _module;
@@ -248,7 +254,7 @@ function require_deps(seed, callback) {
     flatten(get_qix_controlled_elements(seed.master)
       .map(get_qix_attr_ctrl_defs_of))
     .map(prop.bind(null, 'module'));
-  seed.require(deps, (callback || noop).bind(null, seed));
+  seed.require(deps.concat(get_globs_deps()), callback.bind(null, seed));
 }
 define('qix-defhook', function () {
   function load(name, localrequire, onload, config) {
@@ -376,7 +382,7 @@ function make_template_seed(master, seed_require, require_cb) {
     require: seed_require
   };
   seed.spawn = spawn_seed.bind(null, seed);
-  require_deps(seed, require_cb);
+  require_deps(seed, (require_cb || noop));
   return seed;
 }
 
@@ -392,7 +398,7 @@ function control_content_of(holder, local_require, scope) {
   var component = {
     $message: noop
   };
-  global_hooker.forEach(function (hooker_def) {
+  global_hookers.forEach(function (hooker_def) {
     var hook;
     while ((hook = hooker_def.hook_one(holder, local_require)) !== null) {
       component[hook.scope_name] = hook.factory(scope);
