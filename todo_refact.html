@@ -1,0 +1,35 @@
+<div qix:a="qix-flux#when" qix:x="path/when-comp" x:par="1" qix:ay="../mod/core/test-ctrl#y" ay:par="22"></div>
+<div qix:b="qix-flux#when" qix:by="../mod/core/test-ctrl#y" by:par="322">
+  <div>
+    <div qix:y="path/when-comp" y:par="2"></div>
+  </div>
+</div>
+<div qix:c="qix-flux#when">
+  <div>STATIC</div>
+</div>
+<!--
+comp-seed: ok :{string,seed_require}
+
+compile: 
+	make a master-template element with seed.text 
+	scan & (seed)require all implied modules 
+											^- this will close the async level
+	array pipe of controller-def for each element(node?) -> attach (a $qix obj) to master-element object 
+		add to pipe to static(no-qix) elements & to elements that don't capture -> a static-controller that just clones & append
+		capture stops spawn cycle on that element
+
+controller = {
+	bind: function (elem, binders, link){ 
+		return controller;
+	},
+	capture: function (elem_clone, parent_elem(virtual), .. , [?, binders, link]){
+		return ?;
+	}
+}
+||
+controller = function bind()
+
+loop pipes -> capture
+append to target
+loop pipes.reverse() -> bind
+-->

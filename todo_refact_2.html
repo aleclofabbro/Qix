@@ -1,0 +1,43 @@
+<qix ctrl="zz:qix-flux#if">
+  <!-- shortcut:
+	<qix if="zz">
+	-->
+  <div qix="x:path/to/ctrl#prop|y:path/to/ctrl2#prp" x:par="22">
+    <qix comp="kk:qix-flux#map">
+      <!-- shortcut:
+				<qix map="kk">
+				-->
+      <span qix="k:/yy/uu" k:val="abc"></span>
+    </qix>
+  </div>
+</qix>
+<!--
+require('qix:**')
+	fase 1: resolvi deps
+		- attaversa i nodi:
+			- ELEMENT_NODE attr qix-component="{incr}:nome"/qix-controllers="{incr}:nome,nome,..."
+				- ATTRIBUTE_NODE 
+			-	 TEXT_NODE con interpolazioni trasformali in qix component con controller adeguati built in e  requireabili 
+		- colleziona deps e require	all
+
+	fase 2: compila
+		- seleziona attr qix-component
+			distacca il contenuto, (fanne un component ?) e passalo al qix-component 
+					-> 	sostituiscilo nel master con un elemento|commento di placeholder (unique-id:name), 
+							invoca il componente qix con args:
+							placeholder, content-component -> il ritorno (capture) attaccalo al placeholder(all'array?) .? 
+		- seleziona attr qix-controllers (i contenuti dei compnentt sono stati staccati)
+			- ELEMENT_NODE (setta un unique id ?)
+					attacca al master element(all'array?) la capture
+			[-- tirare fuori un'array di capture associati a unique-id ? ]
+
+comonent.spawn()
+	fase 1: capture root->leafs
+		- attaversa i nodi: ... (querySelector unique-id ?)
+			- invoke all in array
+	fase 2: link leafs->root
+		- invoke all in array reversed 
+
+qix-component -> capture -> link
+
+	-->

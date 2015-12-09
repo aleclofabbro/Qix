@@ -1,314 +1,324 @@
-(function() {
-  'use strict';
+(function () {
+    "use strict";
+function flatten(a) {
+  return a.reduce(function(acc, arr_el) {
+    return acc.concat(arr_el);
+  }, []);
+}
 
-  function is_array_like(obj) {
-    return ('length' in obj) && ('number' === typeof obj.length);
+function prop(prp, obj) {
+  return obj ? obj[prp] : void(0);
+}
+
+function is_array_like(obj) { // TODO: improve ?
+  return ('length' in obj) && ('number' === typeof obj.length);
+}
+
+function is_undefined(o) {
+  return o === void(0);
+}
+
+function as_array(obj, strict) {
+  if (!strict && is_undefined(obj))
+    return [];
+  return is_array_like(obj) ? Array.prototype.slice.call(obj) : [obj];
+}
+
+function clone_node(deep, node) {
+  return node.cloneNode(deep);
+}
+
+function query(elem, _query) {
+  return elem.querySelector(_query);
+}
+
+function queryAll(elem, _query) {
+  return as_array(elem.querySelectorAll(_query));
+}
+
+function select(_query, elem) {
+  return query(elem, _query);
+}
+
+function select_has_attr(attr, elem) {
+  return select('[' + attr + ']', elem);
+}
+
+function selectAll(_query, elem) {
+  return queryAll(elem, _query);
+}
+
+
+function remove_attribute(attr_name, elem) {
+  var val = elem.getAttribute(attr_name);
+  elem.removeAttribute(attr_name);
+  return val;
+}
+
+
+function insert_child_nodes(elem_holder, ref_elem, where) {
+  return insert_child_nodes_map(ref_elem, where, elem_holder);
+}
+
+function insert_child_nodes_map(ref_elem, where, elem_holder) {
+  return as_array(elem_holder.childNodes)
+    .map(insert_child_map.bind(null, ref_elem, where));
+}
+
+function replace_node(target, by) {
+  insert_child(by, target, 'before');
+  target.remove();
+  return by;
+}
+
+function insert_child_map(ref_elem, where, child_node) {
+  where = where || 'append';
+  //after / before / append / prepend ?
+  if (where === 'append' || (where === 'after' && !ref_elem.nextSibling)) { //case 'after' but no nextSibling === case 'append'
+    ref_elem.appendChild(child_node);
+  } else {
+    // case 'before'  ref_elem stands
+    var into_elem = ref_elem.parentNode;
+    if (where === 'prepend')
+      ref_elem = into_elem.firstChild;
+    else if (where === 'after')
+      ref_elem = ref_elem.nextSibling;
+    into_elem.insertBefore(child_node, ref_elem);
   }
+  return child_node;
+}
 
-  function as_array(obj) {
-    return is_array_like(obj) ? Array.prototype.slice.call(obj) : [obj];
-  }
-  define('qix', function() {
-    var _qix_attr_placeholder = 'qix-element-placeholder';
-    var is_qix_attr = is_attr_namespaced.bind(null, 'qix');
+function insert_child(child_node, ref_elem, where) {
+  return insert_child_map(ref_elem, where, child_node);
+}
 
-    function master_elem_array_from_text(text) {
-      var div = document.createElement('div');
-      div.innerHTML = text;
-      return as_array(div.children);
-    };
+function attr(attr_name, elem) {
+  return elem.getAttribute(attr_name);
+}
 
-    function is_attr_namespaced(prefix, attr) {
-      return split_attr_ns_name(attr)[0] === prefix;
-    }
+function remove(els) {
+  return as_array(els)
+    .map(function(el) {
+      el.remove();
+      return el;
+    });
+}
 
-    function split_attr_ns_name(attr) {
-      return attr.name.split(':');
-    }
+function noop() {}
+/*
 
-    function set_ctrl_attribute(ctrl_name, elem, name, val) {
-      var denorm_ns_attr_name = denormalize_hyphens(ctrl_name) + ':' + denormalize_hyphens(name);
-      if (val === null)
-        elem.removeAttribute(denorm_ns_attr_name, val);
-      else {
-        val = (val === void(0) ? '' : val)
-        elem.setAttribute(denorm_ns_attr_name, val);
+
+function attr_of(elem, attr_name) {
+  return attr(attr_name, elem);
+}
+function invoke(fn) {
+  return fn();
+}
+function is_element(elem) {
+  return elem.nodeType === Node.ELEMENT_NODE;
+}
+function has_attr(elem, attr_name) {
+  return elem.hasAttribute(attr_name);
+}
+
+
+function compose(fn1, fn2) {
+  return function() {
+    return fn1(fn2.apply(null, arguments));
+  };
+}
+
+function as_bool(v) {
+  return !!v;
+}
+
+function neg_bool(v) {
+  return !v;
+}
+
+
+
+function get_attribute(name, elem) {
+  return elem.getAttribute(name);
+}
+
+function id(v) {
+  return v;
+}
+
+function safe_string(str) {
+  return (str === null || str === void(0)) ? '' : String(str);
+}
+
+function prop_setter(prop, obj, val) {
+  return (obj[prop] = val);
+}
+
+
+function safe_string_prop_setter(prop, obj, str) {
+  return (obj[prop] = safe_string(str));
+}
+
+
+*/
+define('qix-hook-if', function () {
+  return function (placeholder, seed, main_scope) {
+    var current = null;
+    return function (cond, scope) {
+      if (cond) {
+        if (!current)
+          current = seed.spawn(scope || main_scope, placeholder, 'before');
+        return current;
+      } else {
+        if (current) {
+          current.$message('unbind');
+          remove(current.$content);
+          current = null;
+        }
       }
-      return val;
-    }
-
-    function get_ctrl_attributes(ctrl_name, elem) {
-      var _denomalized_name = denormalize_hyphens(ctrl_name);
-      return as_array(elem.attributes)
-        .filter(is_attr_namespaced.bind(null, _denomalized_name))
-        .reduce(function(ctrl_attrs, attr) {
-          var normalized_attr_name = normalize_hyphens(split_attr_ns_name(attr)[1]);
-          ctrl_attrs[normalized_attr_name] = attr.value;
-          return ctrl_attrs;
-        }, {});
-    }
-
-    function make_ctrl_def(attr) {
-      var name = split_attr_ns_name(attr)[1];
-      var val_split = attr.value.split('#');
-      return {
-        name: normalize_hyphens(name),
-        module_path: val_split[0],
-        module_prop: val_split[1]
-      };
-    }
-
-    function make_ctrl_defs_for_elem(master_elem) {
-      return as_array(master_elem.attributes)
-        .filter(is_qix_attr)
-        .map(make_ctrl_def);
-    }
-
-    function merge_objs(target, obj) {
-      for (var k in obj)
-        target[k] = obj[k];
-      return target;
-    }
-
-    function mark_as_qix_elem(master_elem, _ctrl_defs) {
-      if (_ctrl_defs.length) {
-        var _elems_ctrl_names = _ctrl_defs.map(prop_get.bind(null, 'name'));
-        master_elem.setAttribute(_qix_attr_placeholder, _elems_ctrl_names.join(','));
-      }
-    }
-
-    function get_all_ctrl_defs(master_elem_array) {
-      return master_elem_array
-        .reduce(function(all_defs, master_elem) {
-          var _ctrl_defs = make_ctrl_defs_for_elem(master_elem);
-          mark_as_qix_elem(master_elem, _ctrl_defs);
-          _ctrl_defs
-            .forEach(function(_ctrl_def) {
-              all_defs[_ctrl_def.name] = _ctrl_def;
-            });
-          return merge_objs(get_all_ctrl_defs(as_array(master_elem.children)), all_defs);
-        }, {});
-    }
-
-    function prop_get(prop, obj) {
-      return obj ? obj[prop] : void(0);
-    }
-
-    function get_prop(obj, prop) {
-      return prop_get(prop, obj);
-    }
-
-
-    function make_qix(callback, errback, component_seed) {
-      // TODO hook text 
-      var master_elem_array = master_elem_array_from_text(component_seed.text);
-      // TODO hook elems
-      var all_ctrl_defs = get_all_ctrl_defs(master_elem_array);
-      var all_defs_keys =
-        Object.keys(all_ctrl_defs);
-
-      var all_module_arr =
-        all_defs_keys
-        .map(get_prop.bind(null, all_ctrl_defs))
-        .map(prop_get.bind(null, 'module_path'));
-
-      component_seed.require(all_module_arr,
-        function( /* all_modules */ ) {
-          all_defs_keys.forEach(function(def_key, index) {
-            var ctrl_def = all_ctrl_defs[def_key];
-            var _module = component_seed.require(ctrl_def.module_path);
-            var factory = ctrl_def.module_prop ? _module[ctrl_def.module_prop] : _module;
-            if (!factory)
-              throw new Error('No Factory for ctrl_def' + JSON.stringify(ctrl_def, null, 4));
-            ctrl_def.factory = factory;
-          });
-          var qix_obj = {
-            spawn: spawn.bind(null, master_elem_array, all_ctrl_defs),
-            spawn_into: spawn_into.bind(null, master_elem_array, all_ctrl_defs)
-          };
-          callback(qix_obj);
-        }, errback);
-    }
-
-    function spawn(master_elem_array, all_ctrl_defs, ctrl_inits) {
-      var _root_elems = master_elem_array
-        .map(make_clone);
-      // TODO hook
-      var _tmp_container = document.create('div');
-      _root_elems.forEach(_tmp_container.appendChild.bind(_tmp_container));
-      return _root_elems
-        .reduce(function(ctrls, elem_clone) {
-          return bind_controllers(all_ctrl_defs, ctrl_inits, ctrls, elem_clone);
-        }, {
-          $root_elems: _root_elems
-        });
-    }
-
-    function spawn_into(master_elem_array, all_ctrl_defs, ctrl_inits, into_elem) {
-      var ctrls = spawn(master_elem_array, all_ctrl_defs, ctrl_inits);
-      ctrls
-        .$root_elems
-        .forEach(into_elem.appendChild.bind(into_elem));
-      return ctrls;
-    }
-
-    function make_clone(master_elem) {
-      return master_elem.cloneNode(true);
     };
+  };
+});
 
-    function normalize_hyphens(name) {
-      return name.replace(/-/g, '_');
-    }
+var global_hookers = [];
 
-    function denormalize_hyphens(name) {
-      return name.replace(/_/g, '-');
-    }
+function define_glob_hooker(name, hooker_path, priority) {
+  var attr_name = 'qix-' + name;
+  require([hooker_path], function (hooker) {
+    global_hookers.push({
+      hooker_path: hooker_path,
+      name: name,
+      hooker: hooker,
+      priority: Number(priority || 500),
+      hook_one: function (elem, local_require) {
+        var hook_elem = select_has_attr(attr_name, elem);
+        if (!hook_elem)
+          return null;
+        var attr_val = remove_attribute(attr_name, hook_elem);
+        var placeholder = document.createComment('qix-hooker:' + name);
+        replace_node(hook_elem, placeholder);
+        var holder = document.createElement('div');
+        holder.appendChild(hook_elem);
+        var hooker_seed = make_template_seed(holder, local_require);
 
-    function qix_emit( /*ns_name, elem, ev_name, payload*/ ) {
-      // !!!! TODO DUMMY
-      // elem.dispatchEvent(ev_name, {
-      //   ns: ns,
-      //   payload: payload
-      // });
-    }
-
-    function is_my_qix_event( /*ns_name, elem, ev_name, handler*/ ) {
-      // !!!! TODO DUMMY
-      // elem.addEventListener(ev_name, function(ev) {
-      //   if (ev.data.ns === ns)
-      //     handler(event);
-      // });
-    }
-
-    function make_ctrl_link(ctrl_def, elem) {
-      var name = ctrl_def.name;
-      var _ctrl_link = Object.create(ctrl_def);
-      _ctrl_link.get_attrs = get_ctrl_attributes.bind(null, name, elem);
-      _ctrl_link.set_attr = set_ctrl_attribute.bind(null, name, elem);
-      _ctrl_link.emit = qix_emit.bind(null /*, name, elem*/ );
-      _ctrl_link.is_my_qix_event = is_my_qix_event.bind(null /*, name, elem*/ );
-      _ctrl_link.elem = elem;
-      return _ctrl_link;
-    }
-
-    function bind_controller(ctrl_def, ctrl_inits, elem, ctrls) {
-      var name = ctrl_def.name;
-      if (ctrls[name])
-        throw new Error('QIX#bind_controller: duplicate ctrl name:' + name);
-      var _ctrl_link = make_ctrl_link(ctrl_def, elem);
-      // TODO hook
-      ctrls[name] = ctrl_def.factory(elem, ctrl_inits[name], _ctrl_link);
-      ctrls['$' + name] = _ctrl_link;
-      return ctrls;
-    }
-
-    function qix_control(factory, name, elem, ctrl_init) {
-      // DONT mark as qix
-      var control_link = make_ctrl_link({
-        name: name,
-        factory: factory,
-      }, elem);
-      var ctrl = {};
-      ctrl['$' + name] = control_link;
-      ctrl[name] = factory(elem, ctrl_init, control_link);
-      return ctrl;
-    }
-
-    function bind_controllers_elem(_all_ctrl_defs, ctrl_inits, ctrls, elem) {
-      var qix_attr_value = elem.getAttribute(_qix_attr_placeholder);
-      var elem_ctrl_names = qix_attr_value.split(',');
-      return elem_ctrl_names
-        .reduce(function(ctrls, name) {
-          return bind_controller(_all_ctrl_defs[name], ctrl_inits, elem, ctrls);
-        }, ctrls);
-    }
-
-    function is_qix_elem(elem) {
-      return elem.hasAttribute(_qix_attr_placeholder);
-    }
-
-    function get_qix_children_elems_array(elem) {
-      return as_array(elem.querySelectorAll('[' + _qix_attr_placeholder + ']'))
-    }
-
-    function get_all_qix_elems_array(elem) {
-      var _qix_elems = get_qix_children_elems_array(elem);
-      if (is_qix_elem(elem))
-        _qix_elems.unshift(elem);
-      return _qix_elems;
-    }
-
-    function bind_controllers(_all_ctrl_defs, ctrl_inits, ctrls, elem) {
-      return get_all_qix_elems_array(elem)
-        .reduce(bind_controllers_elem.bind(null, _all_ctrl_defs, ctrl_inits), ctrls);
-    }
-
-    function noop() {};
-
-    return {
-      load: function(name, localrequire, done) {
-        localrequire(['qix-seed!' + name], make_qix.bind(null, done, noop));
-      },
-      make: function(component_seed, callback, errback) {
-        return make_qix(callback, errback, component_seed);
-      },
-      control: qix_control
-    };
-  });
-
-  /*
-   * qix-seed loader
-   **/
-  define('qix-seed', function() {
-
-    function path_relative_to(baseurl, path) {
-      if (path.startsWith('.'))
-        return baseurl + path;
-      else
-        return path;
-    }
-
-    function load(name, localrequire, onload, config) {
-      var baseurl = name.substring(0, name.lastIndexOf('/') + 1);
-      var path_resolver = path_relative_to.bind(null, baseurl);
-      // var url = localrequire.toUrl(name);
-      // get_remote_text(url, function(text) {
-      localrequire(['text!' + name], function(text) {
-        var component_seed = {
-          text: text,
-          require: function(deps) {
-            if (Array.prototype.isPrototypeOf(deps)) {
-              var args = as_array(arguments);
-              args[0] = args[0].map(path_resolver);
-              return require.apply(null, args);
-            } else {
-              var _local_path = path_resolver(deps);
-              return require(_local_path);
-            }
-          }
+        return {
+          factory: hooker.bind(null, placeholder, hooker_seed),
+          scope_name: attr_val
         };
-        onload(component_seed);
-      });
-    }
-    return {
-      load: load
-    };
+      }
+    });
+    global_hookers.sort(function (a, b) {
+      return a.priority < b.priority;
+    });
   });
+}
 
+define_glob_hooker('if', 'qix-hook-if', 1000);
+// define_glob_hooker('map', 'qix-hook-map', 900);
+// define_glob_hooker('ctx', 'qix-hook-ctx', 800);
+// define_glob_hooker('cmp', 'qix-hook-cmp', 700);
+// define_glob_hooker('tpl', 'qix-hook-tpl', 600);
 
-  /*
-   * text loader
-   **/
-  define('text', function() {
-    function load(name, localrequire, onload, config) {
-      var url = localrequire.toUrl(name);
-      get_remote_text(url, onload);
-    }
-    return {
-      load: load
-    };
-  });
+function get_globs_deps() {
+  return global_hookers
+    .map(prop.bind(null, 'hooker_path'));
+}
+function get_controller_by_definition(local_require, def) {
+  var _module = local_require(def.module);
+  return def.module_prop ? _module[def.module_prop] : _module;
+}
 
+function get_component_definition_from_string(str) {
+  var toks = str.trim().split(':');
+  var ctrl_name = toks[0];
+  var toks_module = toks[1].split('#');
+  var module = toks_module[0];
+  var module_prop = toks_module[1];
+  return {
+    module: module,
+    module_prop: module_prop,
+    name: ctrl_name
+  };
+}
+
+function get_qix_attr_ctrl_defs_of(qix_elem) {
+  return attr('qix-ctl', qix_elem)
+    .split('|')
+    .map(get_component_definition_from_string);
+}
+
+var get_qix_controlled_elements = selectAll.bind(null, '[qix-ctl]');
+
+function require_deps(seed, callback) {
+  var deps =
+    flatten(get_qix_controlled_elements(seed.master)
+      .map(get_qix_attr_ctrl_defs_of))
+    .map(prop.bind(null, 'module'));
+  seed.require(deps.concat(get_globs_deps()), callback.bind(null, seed));
+}
+define('qix-defhook', function () {
+  function load(name, localrequire, onload, config) {
+    var path_and_args = name.split(':');
+    var path = path_and_args[0];
+    var args = path_and_args[1].split('#');
+    var hook_name = args[0];
+    var hook_priority = args[1];
+    localrequire([path], function (hook) {
+      define_glob_hooker(hook_name, hook, hook_priority);
+      onload(hook);
+    });
+  }
+  return {
+    load: load
+  };
+});
+define('qix-seed', function() {
+  function make_master_element_from_text(text) {
+    var master_el = document.createElement('div');
+    // master_el.setAttribute('qix-tpl');
+    master_el.innerHTML = text;
+    return master_el;
+  }
+
+  function path_relative_to(baseurl, path) {
+    if (path.startsWith('.'))
+      return baseurl + path;
+    else
+      return path;
+  }
+
+  function load(name, localrequire, onload, config) {
+    var baseurl = name.substring(0, name.lastIndexOf('/') + 1);
+    var path_resolver = path_relative_to.bind(null, baseurl);
+    localrequire(['qix-text!' + name], function(text) {
+      var master = make_master_element_from_text(text);
+      var seed_require = function(deps, cb, eb) {
+        if (Array.prototype.isPrototypeOf(deps)) {
+          deps = deps.map(path_resolver);
+          return require(deps, cb, eb);
+        } else {
+          var _local_path = path_resolver(deps);
+          return require(_local_path);
+        }
+      };
+      make_template_seed(master, seed_require, onload);
+      // onload(component_seed);
+    });
+  }
+  return {
+    load: load
+  };
+});
+define('qix-text', function () {
+  function load(name, localrequire, onload, config) {
+    var url = localrequire.toUrl(name);
+    get_remote_text(url, onload);
+  }
+  return {
+    load: load
+  };
+});
+var get_remote_text = (function () {
   function get_remote_text(url, callback) {
     var xhr = createXMLHTTPObject();
     if (!xhr)
@@ -316,31 +326,31 @@
     xhr.responseType = 'text';
     xhr.open('GET', url, true);
     // xhr.setRequestHeader('User-Agent', 'XMLHTTP/1.0');
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
       if (xhr.readyState != 4)
         return;
       if (xhr.status != 200 && xhr.status != 304) {
         throw new Error('get_remote_text HTTP error for [' + url + '] : ' + xhr.status);
       }
       callback(xhr.responseText);
-    }
+    };
     if (xhr.readyState == 4)
       return;
     xhr.send();
   }
 
   var XMLHttpFactories = [
-    function() {
-      return new XMLHttpRequest()
+    function () {
+      return new XMLHttpRequest();
     },
-    function() {
-      return new ActiveXObject('Msxml2.XMLHTTP')
+    function () {
+      return new ActiveXObject('Msxml2.XMLHTTP');
     },
-    function() {
-      return new ActiveXObject('Msxml3.XMLHTTP')
+    function () {
+      return new ActiveXObject('Msxml3.XMLHTTP');
     },
-    function() {
-      return new ActiveXObject('Microsoft.XMLHTTP')
+    function () {
+      return new ActiveXObject('Microsoft.XMLHTTP');
     }
   ];
 
@@ -356,4 +366,56 @@
     }
     return xmlhttp;
   }
+  return get_remote_text;
+})();
+define('qix', function() {
+  var qix_module = {
+    load: function load(name, localrequire, done) {
+      localrequire(['qix-seed!' + name], done);
+    }
+  };
+  return qix_module;
+});
+function make_template_seed(master, seed_require, require_cb) {
+  var seed = {
+    master: master,
+    require: seed_require
+  };
+  seed.spawn = spawn_seed.bind(null, seed);
+  require_deps(seed, (require_cb || noop));
+  return seed;
+}
+
+function spawn_seed(seed, scope, target, where) {
+  var master_clone = clone_node(true, seed.master);
+  var component = control_content_of(master_clone, seed.require, scope);
+  insert_child_nodes(master_clone, target, where);
+  return component;
+
+}
+
+function control_content_of(holder, local_require, scope) {
+  var component = {
+    $message: noop
+  };
+  global_hookers.forEach(function (hooker_def) {
+    var hook;
+    while ((hook = hooker_def.hook_one(holder, local_require)) !== null) {
+      component[hook.scope_name] = hook.factory(scope);
+    }
+  });
+  component.$content = as_array(holder.children); //as_array(holder.childNodes);
+
+  get_qix_controlled_elements(holder)
+    .map(function (elem) {
+      get_qix_attr_ctrl_defs_of(elem)
+        .forEach(function (def) {
+          var ctrl = get_controller_by_definition(local_require, def);
+          component[def.name] = ctrl(elem);
+          component['$' + def.name] = elem;
+        });
+    });
+  return component;
+}
 }());
+//# sourceMappingURL=qix.js.map
