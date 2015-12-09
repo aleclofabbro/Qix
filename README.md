@@ -1,5 +1,5 @@
 ```
 bower install
 < webserver on root dir >
-/test/index.html
+/test/main-test.html
 ```
