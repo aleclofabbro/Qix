@@ -163,20 +163,36 @@ function safe_string_prop_setter(prop, obj, str) {
 */
 define('qix-hook-if', function () {
   return function (placeholder, seed, main_scope) {
-    var current = null;
-    return function (cond, scope) {
+    var current_component = null;
+
+    function _destroy() {
+      console.log('DESTROY IF');
+      var _to_remove = current_component.$content.slice();
+      current_component.$message('unbind', 'destroy');
+      remove_elements(_to_remove);
+    }
+
+    function _unbind(detail) {
+      current_component.$message('unbind', detail);
+      current_component = null;
+      placeholder.removeEventListener('unbind', _unbind);
+    }
+
+    placeholder.addEventListener('unbind', _unbind);
+
+    function _if(cond, scope) {
       if (cond) {
-        if (!current)
-          current = seed.spawn(scope || main_scope, placeholder, 'before');
-        return current;
+        if (!current_component)
+          current_component = seed.spawn(scope || main_scope, placeholder, 'before');
+        return current_component;
       } else {
-        if (current) {
-          current.$message('unbind');
-          remove_elements(current.$content);
-          current = null;
+        if (current_component) {
+          _destroy();
+          current_component = null;
         }
       }
-    };
+    }
+    return _if;
   };
 });
 
@@ -203,7 +219,9 @@ function define_glob_hooker(name, hooker_path, priority) {
 
         return {
           factory: hooker.bind(null, placeholder, hooker_seed),
-          scope_name: attr_val
+          scope_name: attr_val,
+          elem: hook_elem,
+          placeholder: placeholder
         };
       }
     });
@@ -241,34 +259,11 @@ function get_controller_definition_from_string(str) {
   };
 }
 
-function attach_injects_to_ctrl_def(elem, def) {
-  def.injects = as_array(elem.attributes)
-    .filter(function (attr) {
-      return attr.name.startsWith(def.name + ':');
-    })
-    .map(function (attr) {
-      return get_injector(attr.value, attr.name.split(':')[1]);
-    });
-  return def;
-}
-
-function get_injector(arguments_string, _ctrl_fn_prop) {
-  var dbg = arguments_string[0] === '!';
-  arguments_string = dbg ? arguments_string.substring(1) : arguments_string;
-  var body = (dbg ? 'debugger;' : '') + 'return [' + arguments_string + '];';
-  return function (controller, scope_keys, scope_vals) {
-    var funct = _ctrl_fn_prop === '-' ? controller : controller[_ctrl_fn_prop];
-    var _arg_fn = Function.apply(null, scope_keys.concat(body));
-    var _inj_arguments = _arg_fn.apply(null, scope_vals);
-    funct.apply(null, _inj_arguments);
-  };
-}
 
 function get_qix_attr_ctrl_defs_of(qix_elem) {
   return attr('qix-ctl', qix_elem)
     .split('|')
-    .map(get_controller_definition_from_string)
-    .map(attach_injects_to_ctrl_def.bind(null, qix_elem));
+    .map(get_controller_definition_from_string);
 }
 
 var get_qix_controlled_elements = selectAll.bind(null, '[qix-ctl]');
@@ -280,8 +275,41 @@ function require_deps(seed, callback) {
     .map(prop.bind(null, 'module'));
   seed.require(deps.concat(get_globs_deps()), callback.bind(null, seed));
 }
+
+
+function get_injectors(elem, controller, scope_name, component) {
+  return function (_scope_keys, _scope_vals) {
+    as_array(elem.attributes)
+      .filter(function (attr) {
+        return attr.name.startsWith(scope_name + ':');
+      })
+      .map(function (attr) {
+        var attr_name_arr = attr.name.split(':');
+        var inj_fn = get_injector_function(attr.value, attr_name_arr[1], component);
+        inj_fn(controller, _scope_keys, _scope_vals);
+      });
+  };
+}
+
+function get_injector_function(signature_and_assign_string, _ctrl_fn_prop, assigner) {
+  var dbg = signature_and_assign_string[0] === '!';
+  signature_and_assign_string = dbg ? signature_and_assign_string.substring(1) : signature_and_assign_string;
+
+  var signature_and_assign_string_arr = signature_and_assign_string.split('>');
+  var signature_string = signature_and_assign_string_arr[0];
+  var assign_string = (signature_and_assign_string_arr[1] || '').trim();
+  var body = (dbg ? 'debugger;' : '') + 'return [' + signature_string + '];';
+  return function (controller, scope_keys, scope_vals) {
+    var funct = _ctrl_fn_prop === '-' ? controller : controller[_ctrl_fn_prop];
+    var _arg_fn = Function.apply(null, scope_keys.concat(body));
+    var _inj_arguments = _arg_fn.apply(null, scope_vals);
+    var _injection_returns = funct.apply(null, _inj_arguments);
+    if (assign_string)
+      assigner[assign_string] = _injection_returns;
+  };
+}
 define('qix-defhook', function () {
-  function load(name, localrequire, onload, config) {
+  function load(name, localrequire, onload /*, config*/ ) {
     var path_and_args = name.split(':');
     var path = path_and_args[0];
     var args = path_and_args[1].split('#');
@@ -296,7 +324,7 @@ define('qix-defhook', function () {
     load: load
   };
 });
-define('qix-seed', function() {
+define('qix-seed', function () {
   function make_master_element_from_text(text) {
     var master_el = document.createElement('div');
     // master_el.setAttribute('qix-tpl');
@@ -311,12 +339,12 @@ define('qix-seed', function() {
       return path;
   }
 
-  function load(name, localrequire, onload, config) {
+  function load(name, localrequire, onload /*, config*/ ) {
     var baseurl = name.substring(0, name.lastIndexOf('/') + 1);
     var path_resolver = path_relative_to.bind(null, baseurl);
-    localrequire(['qix-text!' + name], function(text) {
+    localrequire(['qix-text!' + name], function (text) {
       var master = make_master_element_from_text(text);
-      var seed_require = function(deps, cb, eb) {
+      var seed_require = function (deps, cb, eb) {
         if (Array.prototype.isPrototypeOf(deps)) {
           deps = deps.map(path_resolver);
           return require(deps, cb, eb);
@@ -334,7 +362,7 @@ define('qix-seed', function() {
   };
 });
 define('qix-text', function () {
-  function load(name, localrequire, onload, config) {
+  function load(name, localrequire, onload /*, config*/ ) {
     var url = localrequire.toUrl(name);
     get_remote_text(url, onload);
   }
@@ -412,36 +440,40 @@ function make_template_seed(master, seed_require, require_cb) {
 
 function spawn_seed(seed, scope, target, where) {
   var master_clone = clone_node(true, seed.master);
-  var component = control_content_of(master_clone, seed.require, scope);
+  var control_result = control_content_of(master_clone, seed.require, scope);
   insert_child_nodes(master_clone, target, where);
-  return component;
+  control_result.inject();
+  return control_result.component;
 }
 
-function nodes_sink_event(nodes, name, detail) {
-  return nodes.map(sink_event.bind(null, name, detail));
+function component_sink_event(component, name, detail) {
+  component.$controlled_nodes
+    .forEach(function sink_event(node) {
+      var event = new CustomEvent(name, {
+        detail: detail,
+        bubbles: false
+      });
+      node.dispatchEvent(event);
+    });
 }
 
-function sink_event(name, detail, node) {
-  var event = new CustomEvent(name, {
-    detail: detail
-  });
-  var _next_node;
-  while ((_next_node = node.childNodes[0]))
-    sink_event(node, detail, _next_node);
-  node.dispatchEvent(event);
-}
+
 
 function control_content_of(holder, local_require, scope) {
-  var component = {};
+  var component = {
+    $controlled_nodes: []
+  };
   var _injects = [];
   global_hookers.forEach(function (hooker_def) {
     var hook;
     while ((hook = hooker_def.hook_one(holder, local_require)) !== null) {
-      component[hook.scope_name] = hook.factory(scope);
+      var controller = component[hook.scope_name] = hook.factory(scope);
+      _injects = _injects.concat(get_injectors(hook.elem, controller, hook.scope_name, component));
+      component.$controlled_nodes.unshift(hook.placeholder);
     }
   });
-  component.$content = as_array(holder.children); //as_array(holder.childNodes);
-  component.$message = nodes_sink_event.bind(null, component.$content);
+  component.$content = as_array(holder.childNodes);
+  component.$message = component_sink_event.bind(null, component);
 
   get_qix_controlled_elements(holder)
     .map(function (elem) {
@@ -450,10 +482,8 @@ function control_content_of(holder, local_require, scope) {
           var ctrl_factory = get_controller_factory_by_definition(local_require, def);
           var controller = component[def.name] = ctrl_factory(elem);
           component['$' + def.name] = elem;
-          _injects = _injects.concat(def.injects
-            .map(function (def_inject) {
-              return def_inject.bind(null, controller);
-            }));
+          _injects = _injects.concat(get_injectors(elem, controller, def.name, component));
+          component.$controlled_nodes.unshift(elem);
         });
     });
   var _scope_keys = Object.keys(scope);
@@ -463,10 +493,14 @@ function control_content_of(holder, local_require, scope) {
     });
   _scope_keys.push('$');
   _scope_vals.push(component);
-  _injects.forEach(function (inj) {
-    inj(_scope_keys, _scope_vals);
-  });
-  return component;
+  return {
+    component: component,
+    inject: function () {
+      _injects.forEach(function (inj) {
+        inj(_scope_keys, _scope_vals);
+      });
+    }
+  };
 }
 }());
 //# sourceMappingURL=qix.js.map
