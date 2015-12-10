@@ -1,4 +1,4 @@
-define('qix-seed', function() {
+define('qix-seed', function () {
   function make_master_element_from_text(text) {
     var master_el = document.createElement('div');
     // master_el.setAttribute('qix-tpl');
@@ -13,12 +13,12 @@ define('qix-seed', function() {
       return path;
   }
 
-  function load(name, localrequire, onload, config) {
+  function load(name, localrequire, onload /*, config*/ ) {
     var baseurl = name.substring(0, name.lastIndexOf('/') + 1);
     var path_resolver = path_relative_to.bind(null, baseurl);
-    localrequire(['qix-text!' + name], function(text) {
+    localrequire(['qix-text!' + name], function (text) {
       var master = make_master_element_from_text(text);
-      var seed_require = function(deps, cb, eb) {
+      var seed_require = function (deps, cb, eb) {
         if (Array.prototype.isPrototypeOf(deps)) {
           deps = deps.map(path_resolver);
           return require(deps, cb, eb);

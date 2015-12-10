@@ -1,19 +1,35 @@
 define('qix-hook-if', function () {
   return function (placeholder, seed, main_scope) {
-    var current = null;
-    return function (cond, scope) {
+    var current_component = null;
+
+    function _destroy() {
+      console.log('DESTROY IF');
+      var _to_remove = current_component.$content.slice();
+      current_component.$message('unbind', 'destroy');
+      remove_elements(_to_remove);
+    }
+
+    function _unbind(detail) {
+      current_component.$message('unbind', detail);
+      current_component = null;
+      placeholder.removeEventListener('unbind', _unbind);
+    }
+
+    placeholder.addEventListener('unbind', _unbind);
+
+    function _if(cond, scope) {
       if (cond) {
-        if (!current)
-          current = seed.spawn(scope || main_scope, placeholder, 'before');
-        return current;
+        if (!current_component)
+          current_component = seed.spawn(scope || main_scope, placeholder, 'before');
+        return current_component;
       } else {
-        if (current) {
-          current.$message('unbind');
-          remove_elements(current.$content);
-          current = null;
+        if (current_component) {
+          _destroy();
+          current_component = null;
         }
       }
-    };
+    }
+    return _if;
   };
 });
 
@@ -40,7 +56,9 @@ function define_glob_hooker(name, hooker_path, priority) {
 
         return {
           factory: hooker.bind(null, placeholder, hooker_seed),
-          scope_name: attr_val
+          scope_name: attr_val,
+          elem: hook_elem,
+          placeholder: placeholder
         };
       }
     });

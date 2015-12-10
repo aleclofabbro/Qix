@@ -1,4 +1,4 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   // var jshint_files = ['./src/**/qix-*.js'];
   var src_files = ['./src/**/*.js'];
   var dist_dir = './dist/';
@@ -25,11 +25,12 @@ module.exports = function(grunt) {
         browser: true,
         strict: true,
         undef: true,
-        // unused: true,
+        unused: true,
         globals: {
           require: true,
           ActiveXObject: true,
           define: true,
+          console: true,
           debugger: true
         }
       },
