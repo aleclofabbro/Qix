@@ -2,21 +2,29 @@ define([],
   function () {
     "use strict";
     return {
-      x: function (elem, ctrl_inits, link) {
+      x: function (elem) {
         elem.innerText = 'controller [x] was here';
-        console.log('CONTROLLER X..', ctrl_inits);
+        console.log('CONTROLLER X..');
+        elem.addEventListener('unbind', function (e) {
+          console.log('UNBIND X');
+        });
         return function () {
-          return link.get_attrs();
+          console.log('X - this', arguments);
         };
       },
-      y: function (elem, ctrl_inits, link) {
+      y: function (elem) {
         elem.style.color = 'blue';
         // elem.style.textDecoration = 'underline';
         elem.title = 'controller [y] bound a click event here';
         elem.addEventListener('click', alert.bind(window, 'controller [y] rules!'));
-        console.log('CONTROLLER Y..', ctrl_inits);
-        return function () {
-          return link.get_attrs();
+        elem.addEventListener('unbind', function (e) {
+          console.log('UNBIND Y');
+        });
+        console.log('CONTROLLER Y..');
+        return {
+          yfn: function () {
+            console.log('Y - yfn', arguments);
+          }
         };
       },
     };

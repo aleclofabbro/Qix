@@ -9,7 +9,7 @@ define('qix-hook-if', function () {
       } else {
         if (current) {
           current.$message('unbind');
-          remove(current.$content);
+          remove_elements(current.$content);
           current = null;
         }
       }

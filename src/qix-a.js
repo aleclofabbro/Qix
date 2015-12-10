@@ -1,5 +1,5 @@
 function flatten(a) {
-  return a.reduce(function(acc, arr_el) {
+  return a.reduce(function (acc, arr_el) {
     return acc.concat(arr_el);
   }, []);
 }
@@ -65,7 +65,7 @@ function insert_child_nodes_map(ref_elem, where, elem_holder) {
 
 function replace_node(target, by) {
   insert_child(by, target, 'before');
-  target.remove();
+  remove_elements(target);
   return by;
 }
 
@@ -94,9 +94,9 @@ function attr(attr_name, elem) {
   return elem.getAttribute(attr_name);
 }
 
-function remove(els) {
+function remove_elements(els) {
   return as_array(els)
-    .map(function(el) {
+    .map(function (el) {
       el.remove();
       return el;
     });

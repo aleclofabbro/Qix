@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 function flatten(a) {
-  return a.reduce(function(acc, arr_el) {
+  return a.reduce(function (acc, arr_el) {
     return acc.concat(arr_el);
   }, []);
 }
@@ -67,7 +67,7 @@ function insert_child_nodes_map(ref_elem, where, elem_holder) {
 
 function replace_node(target, by) {
   insert_child(by, target, 'before');
-  target.remove();
+  remove_elements(target);
   return by;
 }
 
@@ -96,9 +96,9 @@ function attr(attr_name, elem) {
   return elem.getAttribute(attr_name);
 }
 
-function remove(els) {
+function remove_elements(els) {
   return as_array(els)
-    .map(function(el) {
+    .map(function (el) {
       el.remove();
       return el;
     });
@@ -172,7 +172,7 @@ define('qix-hook-if', function () {
       } else {
         if (current) {
           current.$message('unbind');
-          remove(current.$content);
+          remove_elements(current.$content);
           current = null;
         }
       }
@@ -223,28 +223,52 @@ function get_globs_deps() {
   return global_hookers
     .map(prop.bind(null, 'hooker_path'));
 }
-function get_controller_by_definition(local_require, def) {
+function get_controller_factory_by_definition(local_require, def) {
   var _module = local_require(def.module);
   return def.module_prop ? _module[def.module_prop] : _module;
 }
 
-function get_component_definition_from_string(str) {
+function get_controller_definition_from_string(str) {
   var toks = str.trim().split(':');
-  var ctrl_name = toks[0];
+  var ctrl_scope_name = toks[0];
   var toks_module = toks[1].split('#');
   var module = toks_module[0];
   var module_prop = toks_module[1];
   return {
     module: module,
     module_prop: module_prop,
-    name: ctrl_name
+    name: ctrl_scope_name
+  };
+}
+
+function attach_injects_to_ctrl_def(elem, def) {
+  def.injects = as_array(elem.attributes)
+    .filter(function (attr) {
+      return attr.name.startsWith(def.name + ':');
+    })
+    .map(function (attr) {
+      return get_injector(attr.value, attr.name.split(':')[1]);
+    });
+  return def;
+}
+
+function get_injector(arguments_string, _ctrl_fn_prop) {
+  var dbg = arguments_string[0] === '!';
+  arguments_string = dbg ? arguments_string.substring(1) : arguments_string;
+  var body = (dbg ? 'debugger;' : '') + 'return [' + arguments_string + '];';
+  return function (controller, scope_keys, scope_vals) {
+    var funct = _ctrl_fn_prop === '-' ? controller : controller[_ctrl_fn_prop];
+    var _arg_fn = Function.apply(null, scope_keys.concat(body));
+    var _inj_arguments = _arg_fn.apply(null, scope_vals);
+    funct.apply(null, _inj_arguments);
   };
 }
 
 function get_qix_attr_ctrl_defs_of(qix_elem) {
   return attr('qix-ctl', qix_elem)
     .split('|')
-    .map(get_component_definition_from_string);
+    .map(get_controller_definition_from_string)
+    .map(attach_injects_to_ctrl_def.bind(null, qix_elem));
 }
 
 var get_qix_controlled_elements = selectAll.bind(null, '[qix-ctl]');
@@ -391,13 +415,25 @@ function spawn_seed(seed, scope, target, where) {
   var component = control_content_of(master_clone, seed.require, scope);
   insert_child_nodes(master_clone, target, where);
   return component;
+}
 
+function nodes_sink_event(nodes, name, detail) {
+  return nodes.map(sink_event.bind(null, name, detail));
+}
+
+function sink_event(name, detail, node) {
+  var event = new CustomEvent(name, {
+    detail: detail
+  });
+  var _next_node;
+  while ((_next_node = node.childNodes[0]))
+    sink_event(node, detail, _next_node);
+  node.dispatchEvent(event);
 }
 
 function control_content_of(holder, local_require, scope) {
-  var component = {
-    $message: noop
-  };
+  var component = {};
+  var _injects = [];
   global_hookers.forEach(function (hooker_def) {
     var hook;
     while ((hook = hooker_def.hook_one(holder, local_require)) !== null) {
@@ -405,16 +441,31 @@ function control_content_of(holder, local_require, scope) {
     }
   });
   component.$content = as_array(holder.children); //as_array(holder.childNodes);
+  component.$message = nodes_sink_event.bind(null, component.$content);
 
   get_qix_controlled_elements(holder)
     .map(function (elem) {
       get_qix_attr_ctrl_defs_of(elem)
         .forEach(function (def) {
-          var ctrl = get_controller_by_definition(local_require, def);
-          component[def.name] = ctrl(elem);
+          var ctrl_factory = get_controller_factory_by_definition(local_require, def);
+          var controller = component[def.name] = ctrl_factory(elem);
           component['$' + def.name] = elem;
+          _injects = _injects.concat(def.injects
+            .map(function (def_inject) {
+              return def_inject.bind(null, controller);
+            }));
         });
     });
+  var _scope_keys = Object.keys(scope);
+  var _scope_vals = _scope_keys
+    .map(function (k) {
+      return scope[k];
+    });
+  _scope_keys.push('$');
+  _scope_vals.push(component);
+  _injects.forEach(function (inj) {
+    inj(_scope_keys, _scope_vals);
+  });
   return component;
 }
 }());
