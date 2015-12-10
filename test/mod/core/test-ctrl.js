@@ -8,6 +8,7 @@ define([],
         elem.addEventListener('unbind', function _unbind(e) {
           console.log('UNBIND X', elem);
           elem.removeEventListener('unbind', _unbind);
+          elem.innerText = 'controller [x] is gone';
         });
         elem.innerText = 'controller [x] was here';
         console.log('CONTROLLER X..', elem);
@@ -21,6 +22,7 @@ define([],
           console.log('UNBIND Y', elem);
           elem.removeEventListener('unbind', _unbind);
           elem.removeEventListener('click', _alert);
+          elem.title = 'controller [y] gone';
         });
         elem.style.color = 'blue';
         // elem.style.textDecoration = 'underline';
