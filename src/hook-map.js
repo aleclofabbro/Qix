@@ -5,6 +5,7 @@ function qix_hook_map(placeholder, seed, main_scope) {
   placeholder.addEventListener('destroy', _destroy);
 
   function _destroy() {
+    _destroy_components();
     _destroyed = true;
     _current_components
       .map(prop.bind(null, '$content'))
@@ -13,11 +14,14 @@ function qix_hook_map(placeholder, seed, main_scope) {
     placeholder.removeEventListener('destroy', _destroy);
   }
 
+  function _destroy_components() {
+    _current_components.forEach(function(_component) {
+      _component.$destroy();
+    });
+  }
 
   function _map(scopes) {
-    _current_components.forEach(function(_sub_component) {
-      _sub_component.$destroy();
-    });
+    _destroy_components();
     _current_components = scopes.map(function(scope, index) {
       var _use_scope = typeof scope === 'object' ? scope : main_scope;
       var _sub_scope = Object.create(_use_scope);

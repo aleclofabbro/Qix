@@ -68,7 +68,7 @@ function get_injector_function(signature_and_assign_string, _ctrl_fn_prop, assig
   };
 }
 // var __log = console.info.bind(console);
-var __log = noop;
+// var __log = noop;
 
 function flatten(a) {
   return a.reduce(function(acc, arr_el) {
@@ -276,6 +276,7 @@ function qix_hook_if(placeholder, seed, main_scope) {
     _destroyed = true;
     placeholder.removeEventListener('destroy', _destroy);
     _current_component.$destroy();
+    _current_component = null;
   }
 
   function _if(scope) {
@@ -299,6 +300,7 @@ function qix_hook_map(placeholder, seed, main_scope) {
   placeholder.addEventListener('destroy', _destroy);
 
   function _destroy() {
+    _destroy_components();
     _destroyed = true;
     _current_components
       .map(prop.bind(null, '$content'))
@@ -307,11 +309,14 @@ function qix_hook_map(placeholder, seed, main_scope) {
     placeholder.removeEventListener('destroy', _destroy);
   }
 
+  function _destroy_components() {
+    _current_components.forEach(function(_component) {
+      _component.$destroy();
+    });
+  }
 
   function _map(scopes) {
-    _current_components.forEach(function(_sub_component) {
-      _sub_component.$destroy();
-    });
+    _destroy_components();
     _current_components = scopes.map(function(scope, index) {
       var _use_scope = typeof scope === 'object' ? scope : main_scope;
       var _sub_scope = Object.create(_use_scope);

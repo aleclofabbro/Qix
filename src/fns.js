@@ -1,5 +1,5 @@
 // var __log = console.info.bind(console);
-var __log = noop;
+// var __log = noop;
 
 function flatten(a) {
   return a.reduce(function(acc, arr_el) {

@@ -13,6 +13,7 @@ function qix_hook_if(placeholder, seed, main_scope) {
     _destroyed = true;
     placeholder.removeEventListener('destroy', _destroy);
     _current_component.$destroy();
+    _current_component = null;
   }
 
   function _if(scope) {
