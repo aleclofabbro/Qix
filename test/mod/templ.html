@@ -1,14 +1,16 @@
-<div qix-ctl="a:./core/test-ctrl#y" a:yfn="299, a_lm, b_lm,b">
+<!-- <div qix-ctl="a:./core/test-ctrl#y" a:yfn="299, a_lm, b_lm,b">
   <span qix-ctl="b:mod/core/test-ctrl#x | c:./core/test-ctrl#x" b:-="'thi', a_lm, b_lm > b_1" c:-="'c-thi', b, b_lm> c_1">
   </span>
   <div qix-if="g" g:-="true > g_x" qix-ctl="h:./core/test-ctrl#y">
-    <span>GGGG1</span>
+    <span><span qix-ctl="h:./core/test-ctrl#x"></span>GGGG1</span>
     <span>GGGG2</span>
   </div>
 </div>
 QQQ
+-->
 <div qix-ctl="d:./core/test-ctrl#x" d:-="'$, $.a, d-thi', b_lm > bb_x" id="overload-this">
 </div>
+<!--
 <div qix-if="e" e:-="true > e_x" qix-ctl="f:./core/test-ctrl#y">
   <span qix-ctl="i:./core/test-ctrl#x"></span>
   <span>EEE</span>
@@ -18,4 +20,8 @@ QQQ
     <span qix-ctl="n:./core/test-ctrl#x"></span>
     <span>LLLL</span>
   </div>
+</div> -->
+<div qix-map="mapper">
+  <span qix-ctl="b:mod/core/test-ctrl#x | c:./core/test-ctrl#y" b:-="$index, $.c, $.d > b_1" c:yfn="'c-thi', b, b_lm> c_1">
+  </span>
 </div>

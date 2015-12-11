@@ -1,4 +1,4 @@
-module.exports = function (grunt) {
+module.exports = function(grunt) {
   // var jshint_files = ['./src/**/qix-*.js'];
   var src_files = ['./src/**/*.js'];
   var dist_dir = './dist/';
@@ -36,7 +36,7 @@ module.exports = function (grunt) {
       },
       sources: {
         files: {
-          src: src_files.concat(['!./src/head.js', '!./src/tail.js'])
+          src: src_files.concat(['!./src/0-head.js', '!./src/z-tail.js'])
         },
         options: {
           unused: false,

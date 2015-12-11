@@ -1,26 +1,26 @@
 define([],
-  function () {
+  function() {
     "use strict";
     var _x = 0;
     var _y = 0;
     return {
-      x: function (elem) {
-        elem.addEventListener('unbind', function _unbind(e) {
-          console.log('UNBIND X', elem);
-          elem.removeEventListener('unbind', _unbind);
+      x: function(elem) {
+        elem.addEventListener('destroy', function _unbind(e) {
+          console.log('DESTROY X', elem);
+          elem.removeEventListener('destroy', _unbind);
           elem.innerText = 'controller [x] is gone';
         });
         elem.innerText = 'controller [x] was here';
         console.log('CONTROLLER X..', elem);
-        return function () {
+        return function() {
           console.log('X - this', arguments);
           return [arguments, _x++];
         };
       },
-      y: function (elem) {
-        elem.addEventListener('unbind', function _unbind(e) {
-          console.log('UNBIND Y', elem);
-          elem.removeEventListener('unbind', _unbind);
+      y: function(elem) {
+        elem.addEventListener('destroy', function _unbind(e) {
+          console.log('DESTROY Y', elem);
+          elem.removeEventListener('destroy', _unbind);
           elem.removeEventListener('click', _alert);
           elem.title = 'controller [y] gone';
         });
@@ -32,7 +32,7 @@ define([],
         elem.addEventListener('click', _alert);
         console.log('CONTROLLER Y..', elem);
         return {
-          yfn: function () {
+          yfn: function() {
             console.log('Y - yfn', arguments);
             return [arguments, _y++];
           }

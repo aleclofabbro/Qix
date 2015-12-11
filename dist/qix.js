@@ -1,7 +1,77 @@
 (function () {
     "use strict";
+function get_controller_factory_by_definition(local_require, def) {
+  var _module = local_require(def.module);
+  return def.module_prop ? _module[def.module_prop] : _module;
+}
+
+function get_controller_definition_from_string(str) {
+  var toks = str.trim().split(':');
+  var ctrl_scope_name = toks[0];
+  var toks_module = toks[1].split('#');
+  var module = toks_module[0];
+  var module_prop = toks_module[1];
+  return {
+    module: module,
+    module_prop: module_prop,
+    name: ctrl_scope_name
+  };
+}
+
+
+function get_qix_attr_ctrl_defs_of(qix_elem) {
+  return attr('qix-ctl', qix_elem)
+    .split('|')
+    .map(get_controller_definition_from_string);
+}
+
+var get_qix_controlled_elements = selectAll.bind(null, '[qix-ctl]');
+
+function require_deps(seed, callback) {
+  var deps =
+    flatten(get_qix_controlled_elements(seed.master)
+      .map(get_qix_attr_ctrl_defs_of))
+    .map(prop.bind(null, 'module'));
+  seed.require(deps/*.concat(get_globs_deps())*/, callback.bind(null, seed));
+}
+
+
+function get_injectors(elem, controller, scope_name, component) {
+  return function (_scope_keys, _scope_vals) {
+    as_array(elem.attributes)
+      .filter(function (attr) {
+        return attr.name.startsWith(scope_name + ':');
+      })
+      .map(function (attr) {
+        var attr_name_arr = attr.name.split(':');
+        var inj_fn = get_injector_function(attr.value, attr_name_arr[1], component);
+        inj_fn(controller, _scope_keys, _scope_vals);
+      });
+  };
+}
+
+function get_injector_function(signature_and_assign_string, _ctrl_fn_prop, assigner) {
+  var dbg = signature_and_assign_string[0] === '!';
+  signature_and_assign_string = dbg ? signature_and_assign_string.substring(1) : signature_and_assign_string;
+
+  var signature_and_assign_string_arr = signature_and_assign_string.split('>');
+  var signature_string = signature_and_assign_string_arr[0];
+  var assign_string = (signature_and_assign_string_arr[1] || '').trim();
+  var body = (dbg ? 'debugger;' : '') + 'return [' + signature_string + '];';
+  return function (controller, scope_keys, scope_vals) {
+    var funct = _ctrl_fn_prop === '-' ? controller : controller[_ctrl_fn_prop];
+    var _arg_fn = Function.apply(null, scope_keys.concat(body));
+    var _inj_arguments = _arg_fn.apply(null, scope_vals);
+    var _injection_returns = funct.apply(null, _inj_arguments);
+    if (assign_string)
+      assigner[assign_string] = _injection_returns;
+  };
+}
+// var __log = console.log.bind(console);
+var __log = noop;
+
 function flatten(a) {
-  return a.reduce(function (acc, arr_el) {
+  return a.reduce(function(acc, arr_el) {
     return acc.concat(arr_el);
   }, []);
 }
@@ -98,7 +168,7 @@ function attr(attr_name, elem) {
 
 function remove_elements(els) {
   return as_array(els)
-    .map(function (el) {
+    .map(function(el) {
       el.remove();
       return el;
     });
@@ -111,9 +181,7 @@ function noop() {}
 function attr_of(elem, attr_name) {
   return attr(attr_name, elem);
 }
-function invoke(fn) {
-  return fn();
-}
+
 function is_element(elem) {
   return elem.nodeType === Node.ELEMENT_NODE;
 }
@@ -161,161 +229,119 @@ function safe_string_prop_setter(prop, obj, str) {
 
 
 */
-define('qix-hook-if', function () {
-  return function (placeholder, seed, main_scope) {
-    var current_component = null;
-
-    function _destroy() {
-      console.log('DESTROY IF');
-      var _to_remove = current_component.$content.slice();
-      current_component.$message('unbind', 'destroy');
-      remove_elements(_to_remove);
-    }
-
-    function _unbind(detail) {
-      current_component.$message('unbind', detail);
-      current_component = null;
-      placeholder.removeEventListener('unbind', _unbind);
-    }
-
-    placeholder.addEventListener('unbind', _unbind);
-
-    function _if(cond, scope) {
-      if (cond) {
-        if (!current_component)
-          current_component = seed.spawn(scope || main_scope, placeholder, 'before');
-        return current_component;
-      } else {
-        if (current_component) {
-          _destroy();
-          current_component = null;
-        }
-      }
-    }
-    return _if;
-  };
-});
-
 var global_hookers = [];
 
-function define_glob_hooker(name, hooker_path, priority) {
+function define_glob_hooker(name, hooker, priority) {
   var attr_name = 'qix-' + name;
-  require([hooker_path], function (hooker) {
-    global_hookers.push({
-      hooker_path: hooker_path,
-      name: name,
-      hooker: hooker,
-      priority: Number(priority || 500),
-      hook_one: function (elem, local_require) {
-        var hook_elem = select_has_attr(attr_name, elem);
-        if (!hook_elem)
-          return null;
-        var attr_val = remove_attribute(attr_name, hook_elem);
-        var placeholder = document.createComment('qix-hooker:' + name);
-        replace_node(hook_elem, placeholder);
-        var holder = document.createElement('div');
-        holder.appendChild(hook_elem);
-        var hooker_seed = make_template_seed(holder, local_require);
+  var _priority = arguments.length === 3 ? priority : 500;
+  global_hookers.push({
+    name: name,
+    hooker: hooker,
+    priority: _priority,
+    hook_one: function(elem, local_require) {
+      var hook_elem = select_has_attr(attr_name, elem);
+      if (!hook_elem)
+        return null;
+      var attr_val = remove_attribute(attr_name, hook_elem);
+      var placeholder = document.createComment('qix-hooker:' + name);
+      replace_node(hook_elem, placeholder);
+      var holder = document.createElement('div');
+      holder.appendChild(hook_elem);
+      var hooker_seed = make_template_seed(holder, local_require);
 
-        return {
-          factory: hooker.bind(null, placeholder, hooker_seed),
-          scope_name: attr_val,
-          elem: hook_elem,
-          placeholder: placeholder
-        };
-      }
-    });
-    global_hookers.sort(function (a, b) {
-      return a.priority < b.priority;
-    });
+      return {
+        factory: hooker.bind(null, placeholder, hooker_seed),
+        scope_name: attr_val,
+        elem: hook_elem,
+        placeholder: placeholder
+      };
+    }
+  });
+  global_hookers.sort(function(a, b) {
+    return a.priority < b.priority;
   });
 }
+function qix_hook_if(placeholder, seed, main_scope) {
+  var _current_component = null;
+  var _destroyed = false;
 
-define_glob_hooker('if', 'qix-hook-if', 1000);
-// define_glob_hooker('map', 'qix-hook-map', 900);
+  function _spawn(scope) {
+    var _use_scope = typeof scope === 'object' ? scope : main_scope;
+    _current_component = seed.spawn(_use_scope, placeholder, 'before');
+  }
+
+  placeholder.addEventListener('destroy', _destroy);
+
+  function _destroy() {
+    _destroyed = true;
+    placeholder.removeEventListener('destroy', _destroy);
+    _current_component.$destroy();
+  }
+
+  function _if(scope) {
+    if (_destroyed)
+      return;
+    if (!!scope && !_current_component) {
+      _spawn(scope);
+    } else if (!scope && _current_component) {
+      _current_component.$destroy();
+      _current_component = null;
+    }
+    return _current_component;
+  }
+  return _if;
+}
+define_glob_hooker('if', qix_hook_if, 1000);
+function qix_hook_map(placeholder, seed, main_scope) {
+  var _current_components = [];
+  var _destroyed = false;
+
+  placeholder.addEventListener('destroy', _destroy);
+
+  function _destroy() {
+    _destroyed = true;
+    _current_components
+      .map(prop.bind(null, '$content'))
+      .forEach(remove_elements);
+    _current_components = [];
+    placeholder.removeEventListener('destroy', _destroy);
+  }
+
+
+  function _map(scopes) {
+    _current_components.forEach(function(_sub_component) {
+      _sub_component.$destroy();
+    });
+    _current_components = scopes.map(function(scope, index) {
+      var _sub_scope = Object.create(scope || main_scope);
+      _sub_scope.$index = index;
+      return seed.spawn(_sub_scope, placeholder, 'before');
+    });
+  }
+  return _map;
+}
+define_glob_hooker('map', qix_hook_map, 900);
+
 // define_glob_hooker('ctx', 'qix-hook-ctx', 800);
 // define_glob_hooker('cmp', 'qix-hook-cmp', 700);
 // define_glob_hooker('tpl', 'qix-hook-tpl', 600);
-
-function get_globs_deps() {
-  return global_hookers
-    .map(prop.bind(null, 'hooker_path'));
-}
-function get_controller_factory_by_definition(local_require, def) {
-  var _module = local_require(def.module);
-  return def.module_prop ? _module[def.module_prop] : _module;
-}
-
-function get_controller_definition_from_string(str) {
-  var toks = str.trim().split(':');
-  var ctrl_scope_name = toks[0];
-  var toks_module = toks[1].split('#');
-  var module = toks_module[0];
-  var module_prop = toks_module[1];
-  return {
-    module: module,
-    module_prop: module_prop,
-    name: ctrl_scope_name
+define('qix', function() {
+  var qix_module = {
+    load: function load(name, localrequire, done) {
+      localrequire(['qix-seed!' + name], done);
+    }
   };
-}
-
-
-function get_qix_attr_ctrl_defs_of(qix_elem) {
-  return attr('qix-ctl', qix_elem)
-    .split('|')
-    .map(get_controller_definition_from_string);
-}
-
-var get_qix_controlled_elements = selectAll.bind(null, '[qix-ctl]');
-
-function require_deps(seed, callback) {
-  var deps =
-    flatten(get_qix_controlled_elements(seed.master)
-      .map(get_qix_attr_ctrl_defs_of))
-    .map(prop.bind(null, 'module'));
-  seed.require(deps.concat(get_globs_deps()), callback.bind(null, seed));
-}
-
-
-function get_injectors(elem, controller, scope_name, component) {
-  return function (_scope_keys, _scope_vals) {
-    as_array(elem.attributes)
-      .filter(function (attr) {
-        return attr.name.startsWith(scope_name + ':');
-      })
-      .map(function (attr) {
-        var attr_name_arr = attr.name.split(':');
-        var inj_fn = get_injector_function(attr.value, attr_name_arr[1], component);
-        inj_fn(controller, _scope_keys, _scope_vals);
-      });
-  };
-}
-
-function get_injector_function(signature_and_assign_string, _ctrl_fn_prop, assigner) {
-  var dbg = signature_and_assign_string[0] === '!';
-  signature_and_assign_string = dbg ? signature_and_assign_string.substring(1) : signature_and_assign_string;
-
-  var signature_and_assign_string_arr = signature_and_assign_string.split('>');
-  var signature_string = signature_and_assign_string_arr[0];
-  var assign_string = (signature_and_assign_string_arr[1] || '').trim();
-  var body = (dbg ? 'debugger;' : '') + 'return [' + signature_string + '];';
-  return function (controller, scope_keys, scope_vals) {
-    var funct = _ctrl_fn_prop === '-' ? controller : controller[_ctrl_fn_prop];
-    var _arg_fn = Function.apply(null, scope_keys.concat(body));
-    var _inj_arguments = _arg_fn.apply(null, scope_vals);
-    var _injection_returns = funct.apply(null, _inj_arguments);
-    if (assign_string)
-      assigner[assign_string] = _injection_returns;
-  };
-}
-define('qix-defhook', function () {
+  return qix_module;
+});
+// qix-defhook!path/to/hook:name#1000
+define('qix-defhook', function() {
   function load(name, localrequire, onload /*, config*/ ) {
     var path_and_args = name.split(':');
     var path = path_and_args[0];
     var args = path_and_args[1].split('#');
     var hook_name = args[0];
-    var hook_priority = args[1];
-    localrequire([path], function (hook) {
+    var hook_priority = Number(args[1]);
+    localrequire([path], function(hook) {
       define_glob_hooker(hook_name, hook, hook_priority);
       onload(hook);
     });
@@ -420,14 +446,6 @@ var get_remote_text = (function () {
   }
   return get_remote_text;
 })();
-define('qix', function() {
-  var qix_module = {
-    load: function load(name, localrequire, done) {
-      localrequire(['qix-seed!' + name], done);
-    }
-  };
-  return qix_module;
-});
 function make_template_seed(master, seed_require, require_cb) {
   var seed = {
     master: master,
@@ -443,6 +461,7 @@ function spawn_seed(seed, scope, target, where) {
   var control_result = control_content_of(master_clone, seed.require, scope);
   insert_child_nodes(master_clone, target, where);
   control_result.inject();
+  control_result.inject = noop;
   return control_result.component;
 }
 
@@ -458,13 +477,20 @@ function component_sink_event(component, name, detail) {
 }
 
 
+function destroy_component(component) {
+  __log('DESTROY COMPONENT', component);
+  component.$message('destroy');
+  remove_elements(component.$content);
+  component.$content = [];
+  component.$controlled_nodes = [];
+}
 
 function control_content_of(holder, local_require, scope) {
   var component = {
     $controlled_nodes: []
   };
   var _injects = [];
-  global_hookers.forEach(function (hooker_def) {
+  global_hookers.forEach(function(hooker_def) {
     var hook;
     while ((hook = hooker_def.hook_one(holder, local_require)) !== null) {
       var controller = component[hook.scope_name] = hook.factory(scope);
@@ -472,13 +498,14 @@ function control_content_of(holder, local_require, scope) {
       component.$controlled_nodes.unshift(hook.placeholder);
     }
   });
-  component.$content = as_array(holder.childNodes);
   component.$message = component_sink_event.bind(null, component);
+  component.$destroy = destroy_component.bind(null, component);
+  component.$content = as_array(holder.childNodes);
 
   get_qix_controlled_elements(holder)
-    .map(function (elem) {
+    .map(function(elem) {
       get_qix_attr_ctrl_defs_of(elem)
-        .forEach(function (def) {
+        .forEach(function(def) {
           var ctrl_factory = get_controller_factory_by_definition(local_require, def);
           var controller = component[def.name] = ctrl_factory(elem);
           component['$' + def.name] = elem;
@@ -486,17 +513,23 @@ function control_content_of(holder, local_require, scope) {
           component.$controlled_nodes.unshift(elem);
         });
     });
-  var _scope_keys = Object.keys(scope);
-  var _scope_vals = _scope_keys
-    .map(function (k) {
-      return scope[k];
-    });
+  // var _scope_keys = Object.keys(scope);
+  // var _scope_vals = _scope_keys
+  //   .map(function(k) {
+  //     return scope[k];
+  //   });
+  var _scope_keys = [];
+  var _scope_vals = [];
+  for (var _k in scope) {
+    _scope_keys.push(_k);
+    _scope_vals.push(scope[_k]);
+  }
   _scope_keys.push('$');
   _scope_vals.push(component);
   return {
     component: component,
-    inject: function () {
-      _injects.forEach(function (inj) {
+    inject: function() {
+      _injects.forEach(function(inj) {
         inj(_scope_keys, _scope_vals);
       });
     }

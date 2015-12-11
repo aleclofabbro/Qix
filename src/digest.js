@@ -30,7 +30,7 @@ function require_deps(seed, callback) {
     flatten(get_qix_controlled_elements(seed.master)
       .map(get_qix_attr_ctrl_defs_of))
     .map(prop.bind(null, 'module'));
-  seed.require(deps.concat(get_globs_deps()), callback.bind(null, seed));
+  seed.require(deps/*.concat(get_globs_deps())*/, callback.bind(null, seed));
 }
 
 
