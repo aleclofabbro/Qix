@@ -1,4 +1,4 @@
-// var __log = console.log.bind(console);
+// var __log = console.info.bind(console);
 var __log = noop;
 
 function flatten(a) {

@@ -1,6 +1,6 @@
   require(['qix!mod/templ.html', 'qix', 'require'], function(comp, qix, localrequire) {
-    // console.log = function() {}
-    // go = function () {
+    console.log = function() {}
+      // go = function () {
 
     function test_ctrls(name, ctrls) {
       console.log('-----\nController Test:' + name);

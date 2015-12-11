@@ -30,7 +30,7 @@ function component_sink_event(component, name, detail) {
 
 
 function destroy_component(component) {
-  __log('DESTROY COMPONENT', component);
+  // __log('QIX - DESTROY COMPONENT', component);
   component.$message('destroy');
   remove_elements(component.$content);
   component.$content = [];

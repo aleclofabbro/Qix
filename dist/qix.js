@@ -67,7 +67,7 @@ function get_injector_function(signature_and_assign_string, _ctrl_fn_prop, assig
       assigner[assign_string] = _injection_returns;
   };
 }
-// var __log = console.log.bind(console);
+// var __log = console.info.bind(console);
 var __log = noop;
 
 function flatten(a) {
@@ -313,10 +313,12 @@ function qix_hook_map(placeholder, seed, main_scope) {
       _sub_component.$destroy();
     });
     _current_components = scopes.map(function(scope, index) {
-      var _sub_scope = Object.create(scope || main_scope);
+      var _use_scope = typeof scope === 'object' ? scope : main_scope;
+      var _sub_scope = Object.create(_use_scope);
       _sub_scope.$index = index;
       return seed.spawn(_sub_scope, placeholder, 'before');
     });
+    return _current_components;
   }
   return _map;
 }
@@ -478,7 +480,7 @@ function component_sink_event(component, name, detail) {
 
 
 function destroy_component(component) {
-  __log('DESTROY COMPONENT', component);
+  // __log('QIX - DESTROY COMPONENT', component);
   component.$message('destroy');
   remove_elements(component.$content);
   component.$content = [];

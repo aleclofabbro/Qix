@@ -19,10 +19,12 @@ function qix_hook_map(placeholder, seed, main_scope) {
       _sub_component.$destroy();
     });
     _current_components = scopes.map(function(scope, index) {
-      var _sub_scope = Object.create(scope || main_scope);
+      var _use_scope = typeof scope === 'object' ? scope : main_scope;
+      var _sub_scope = Object.create(_use_scope);
       _sub_scope.$index = index;
       return seed.spawn(_sub_scope, placeholder, 'before');
     });
+    return _current_components;
   }
   return _map;
 }
