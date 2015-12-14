@@ -1,19 +1,8 @@
-function make_template_seed(master, seed_require, require_cb) {
-  var seed = {
-    master: master,
-    require: seed_require
-  };
-  seed.spawn = spawn_seed.bind(null, seed);
-  require_deps(seed, (require_cb || noop));
-  return seed;
-}
-
 function spawn_seed(seed, scope, target, where) {
   var master_clone = clone_node(true, seed.master);
-  var control_result = control_content_of(master_clone, seed.require, scope);
+  var control_result = control_content_of(master_clone, scope);
   insert_child_nodes(master_clone, target, where);
   control_result.inject();
-  control_result.inject = noop;
   return control_result.component;
 }
 
@@ -30,60 +19,78 @@ function component_sink_event(component, name, detail) {
 
 
 function destroy_component(component) {
-  // __log('QIX - DESTROY COMPONENT', component);
   component.$message('destroy');
-  remove_elements(component.$content);
+  remove_elements(component.$content.concat(component.$controlled_nodes));
   component.$content = [];
   component.$controlled_nodes = [];
 }
 
-function control_content_of(holder, local_require, scope) {
+function control_content_of(holder, scope) {
+  var _injectors = [];
   var component = {
     $controlled_nodes: []
   };
-  var _injects = [];
-  global_hookers.forEach(function(hooker_def) {
-    var hook;
-    while ((hook = hooker_def.hook_one(holder, local_require)) !== null) {
-      var controller = component[hook.scope_name] = hook.factory(scope);
-      _injects = _injects.concat(get_injectors(hook.elem, controller, hook.scope_name, component));
-      component.$controlled_nodes.unshift(hook.placeholder);
-    }
-  });
   component.$message = component_sink_event.bind(null, component);
   component.$destroy = destroy_component.bind(null, component);
   component.$content = as_array(holder.childNodes);
 
+  get_qix_hooked_elements(holder)
+    .forEach(function(_compiler_placeholder) {
+      var hooker_def = get_qix_hook_def_compile_placeholder(_compiler_placeholder);
+      var placeholder = document.createComment('qix-hooker ' + hooker_def.scope_name + ':' + hooker_def.hooker_def.name);
+      replace_node(_compiler_placeholder, placeholder);
+      var hooker_ctl = component[hooker_def.scope_name] = hooker_def.hook(placeholder, scope);
+      _injectors = _injectors.concat(
+        hooker_def.injectors
+        .map(function(injector) {
+          return injector.bind(null, hooker_ctl);
+        }));
+      component.$controlled_nodes.unshift(placeholder);
+    });
+
+
   get_qix_controlled_elements(holder)
-    .map(function(elem) {
-      get_qix_attr_ctrl_defs_of(elem)
-        .forEach(function(def) {
-          var ctrl_factory = get_controller_factory_by_definition(local_require, def);
-          var controller = component[def.name] = ctrl_factory(elem);
-          component['$' + def.name] = elem;
-          _injects = _injects.concat(get_injectors(elem, controller, def.name, component));
+    .forEach(function(elem) {
+      elem_indexed_ctrl_binders(elem)
+        .forEach(function(binder_def) {
+          var controller = component[binder_def.scope_name] = binder_def.control(elem);
+          component['$' + binder_def.scope_name] = elem;
+          _injectors = _injectors.concat(
+            binder_def.injectors
+            .map(function(injector) {
+              return injector.bind(null, controller);
+            }));
           component.$controlled_nodes.unshift(elem);
         });
     });
-  // var _scope_keys = Object.keys(scope);
-  // var _scope_vals = _scope_keys
-  //   .map(function(k) {
-  //     return scope[k];
-  //   });
-  var _scope_keys = [];
-  var _scope_vals = [];
-  for (var _k in scope) {
-    _scope_keys.push(_k);
-    _scope_vals.push(scope[_k]);
-  }
-  _scope_keys.push('$');
-  _scope_vals.push(component);
+
+
   return {
-    component: component,
     inject: function() {
-      _injects.forEach(function(inj) {
-        inj(_scope_keys, _scope_vals);
+      _injectors.forEach(function(inj) {
+        inj(scope, component);
       });
-    }
+    },
+    component: component
   };
 }
+
+
+// function hook_one(elem, local_require) {
+//   var hook_elem = select_has_attr(attr_name, elem);
+//   if (!hook_elem)
+//     return null;
+//   var attr_val = remove_attribute(attr_name, hook_elem);
+//   var placeholder = document.createComment('qix-hooker:' + name);
+//   replace_node(hook_elem, placeholder);
+//   var holder = document.createElement('div');
+//   holder.appendChild(hook_elem);
+//   var hooker_seed = make_template_seed(holder, local_require);
+
+//   return {
+//     factory: hooker.bind(null, placeholder, hooker_seed),
+//     scope_name: attr_val,
+//     elem: hook_elem,
+//     placeholder: placeholder
+//   };
+// }

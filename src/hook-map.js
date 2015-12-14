@@ -1,4 +1,4 @@
-function qix_hook_map(placeholder, seed, main_scope) {
+function qix_hook_map(seed, value, placeholder, main_scope) {
   var _current_components = [];
   var _destroyed = false;
 
