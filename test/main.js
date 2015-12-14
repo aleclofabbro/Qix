@@ -1,6 +1,6 @@
   require(['qix!mod/templ.html', 'qix', 'require'], function(comp, qix, localrequire) {
-    // console.log = function() {}
-    // go = function () {
+    console.log = function() {}
+      // go = function () {
 
     function test_ctrls(name, ctrls) {
       console.log('-----\nController Test:' + name);
@@ -15,16 +15,21 @@
 
     };
     //spawn 2 components in target
-    console.time(0)
     var target = document.getElementById('app-container');
+    // ctrls1 = comp.spawn({
+    //   A: '*A',
+    //   B: '*B',
+    //   C: '*C'
+    // }, target);
+    // console.time(0)
 
     // var cnt = 0;
     // var iv = setInterval(function () {
     //   target.innerHTML = '';
     ctrls1 = comp.spawn({
-      b_lm: '*blm',
-      a_lm: '*a',
-      b: '*b'
+      A: '*A',
+      B: '*B',
+      C: '*C'
     }, target);
     // ctrls1.$message('unbind');
     //   window.ctrls1 = ctrls1 = null;

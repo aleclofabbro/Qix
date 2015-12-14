@@ -1,6 +1,3 @@
-// var __log = console.info.bind(console);
-// var __log = noop;
-
 function flatten(a) {
   return a.reduce(function(acc, arr_el) {
     return acc.concat(arr_el);
@@ -8,6 +5,10 @@ function flatten(a) {
 }
 
 function prop(prp, obj) {
+  return obj ? obj[prp] : void(0);
+}
+
+function prop_of(obj, prp) {
   return obj ? obj[prp] : void(0);
 }
 
@@ -29,26 +30,21 @@ function clone_node(deep, node) {
   return node.cloneNode(deep);
 }
 
-function query(elem, _query) {
+function select(_query, elem) {
   return elem.querySelector(_query);
 }
 
-function queryAll(elem, _query) {
+function select_all(_query, elem) {
   return as_array(elem.querySelectorAll(_query));
-}
-
-function select(_query, elem) {
-  return query(elem, _query);
 }
 
 function select_has_attr(attr, elem) {
   return select('[' + attr + ']', elem);
 }
 
-function selectAll(_query, elem) {
-  return queryAll(elem, _query);
+function select_has_attr_all(attr, elem) {
+  return select_all('[' + attr + ']', elem);
 }
-
 
 function remove_attribute(attr_name, elem) {
   var val = elem.getAttribute(attr_name);
@@ -95,6 +91,10 @@ function insert_child(child_node, ref_elem, where) {
 
 function attr(attr_name, elem) {
   return elem.getAttribute(attr_name);
+}
+
+function attr_set(attr_name, val, elem) {
+  return elem.setAttribute(attr_name, val);
 }
 
 function remove_elements(els) {

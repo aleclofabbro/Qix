@@ -1,4 +1,4 @@
-function qix_hook_if(placeholder, seed, main_scope) {
+function qix_hook_if(seed, value, placeholder, main_scope) {
   var _current_component = null;
   var _destroyed = false;
 
@@ -25,8 +25,10 @@ function qix_hook_if(placeholder, seed, main_scope) {
       _current_component.$destroy();
       _current_component = null;
     }
+    _if.cmp = _current_component;
     return _current_component;
   }
   return _if;
 }
+
 define_glob_hooker('if', qix_hook_if, 1000);
