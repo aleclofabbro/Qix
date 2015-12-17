@@ -132,7 +132,7 @@ function make_template_seed(master, seed_require, require_cb) {
     require: seed_require
   };
   seed.spawn = spawn_seed.bind(null, seed);
-  compile(seed, function() {
+  compile(seed, function () {
     (require_cb || noop)(seed);
   });
   return seed;
@@ -149,10 +149,10 @@ function compile(seed, cb) {
 
 function get_injectors(elem, scope_name) {
   return as_array(elem.attributes)
-    .filter(function(attr) {
-      return attr.name.startsWith(scope_name + ':');
+    .filter(function (attr) {
+      return attr.name.startsWith(scope_name.replace(/_/g, '-') + ':');
     })
-    .map(function(attr) {
+    .map(function (attr) {
       var attr_name_arr = attr.name.split(':');
       var inj_fn = get_injector_function(attr.value, attr_name_arr[1]);
       return inj_fn;
@@ -168,7 +168,7 @@ function get_injector_function(signature_and_assign_string, _ctrl_fn_prop) {
   var assign_string = (signature_and_assign_string_arr[1] || '').trim();
   var body = (dbg ? 'debugger;' : '') + 'return [' + signature_string + '];';
   var injector_arguments_get = Function.apply(null, ['$', '_'].concat(body));
-  return function(controller, scope, component) {
+  return function (controller, scope, component) {
     var funct = _ctrl_fn_prop === '-' ? controller : controller[_ctrl_fn_prop];
     var _inj_arguments = injector_arguments_get(scope, component, controller);
     var _injection_returns = funct.apply(null, _inj_arguments);
@@ -177,7 +177,7 @@ function get_injector_function(signature_and_assign_string, _ctrl_fn_prop) {
   };
 }
 function flatten(a) {
-  return a.reduce(function(acc, arr_el) {
+  return a.reduce(function (acc, arr_el) {
     return acc.concat(arr_el);
   }, []);
 }
@@ -277,7 +277,7 @@ function attr_set(attr_name, val, elem) {
 
 function remove_elements(els) {
   return as_array(els)
-    .map(function(el) {
+    .map(function (el) {
       el.remove();
       return el;
     });
@@ -358,12 +358,9 @@ function define_glob_hooker(name, hooker, priority) {
 }
 function qix_hook_if(seed, value, placeholder, main_scope) {
   var _current_component = null;
+  var _current_component_scope = null;
   var _destroyed = false;
 
-  function _spawn(scope) {
-    var _use_scope = typeof scope === 'object' ? scope : main_scope;
-    _current_component = seed.spawn(_use_scope, placeholder, 'before');
-  }
 
   placeholder.addEventListener('destroy', _destroy);
 
@@ -372,20 +369,26 @@ function qix_hook_if(seed, value, placeholder, main_scope) {
     placeholder.removeEventListener('destroy', _destroy);
     _current_component.$destroy();
     _current_component = null;
+    _current_component_scope = null;
   }
 
   function _if(scope) {
     if (_destroyed)
       return;
     if (!!scope && !_current_component) {
-      _spawn(scope);
+      _current_component_scope = typeof scope === 'object' ? scope : main_scope;
+      _current_component = seed.spawn(_current_component_scope, placeholder, 'before');
     } else if (!scope && _current_component) {
       _current_component.$destroy();
       _current_component = null;
+      _current_component_scope = null;
     }
+    _if.scope = _current_component_scope;
     _if.cmp = _current_component;
     return _current_component;
   }
+  if (value === 'true')
+    _if(main_scope);
   return _if;
 }
 
@@ -407,28 +410,83 @@ function qix_hook_map(seed, value, placeholder, main_scope) {
   }
 
   function _destroy_components() {
-    _current_components.forEach(function(_component) {
+    _current_components.forEach(function (_component) {
       _component.$destroy();
     });
   }
 
   function _map(scopes) {
     _destroy_components();
-    _current_components = scopes.map(function(scope, index) {
+    if ('number' === typeof scopes)
+      scopes = Array.apply(null, new Array(scopes));
+    _current_components = scopes.map(function (scope, index) {
       var _use_scope = typeof scope === 'object' ? scope : main_scope;
       var _sub_scope = Object.create(_use_scope);
       _sub_scope.$index = index;
       return seed.spawn(_sub_scope, placeholder, 'before');
     });
+    _map.cmps = _current_components;
     return _current_components;
   }
   return _map;
 }
 define_glob_hooker('map', qix_hook_map, 900);
+function qix_hook_tpl(seed, value, placeholder, main_scope) {
+  var tpl_seed = seed.require('qix-seed!' + value);
+  var _destroyed = false;
+  as_array(tpl_seed.master.childNodes)
+    .forEach(function (node) {
+      seed.master.children[0].appendChild(node);
+    });
+  return function _tpl(scope) {
+    if (_destroyed)
+      return;
+    scope = scope || main_scope;
+    var _component = seed.spawn(main_scope, placeholder, 'before');
 
+    placeholder.addEventListener('destroy', _destroy);
+
+    function _destroy() {
+      _destroyed = true;
+      placeholder.removeEventListener('destroy', _destroy);
+      _component.$destroy();
+      _component = null;
+    }
+    _tpl.cmp = _component;
+    return _component;
+  };
+}
+qix_hook_tpl.get_deps = function (val) {
+  return 'qix-seed!' + val;
+};
+define_glob_hooker('tpl', qix_hook_tpl, 600);
+
+// function qix_hook_tpl(seed, value, placeholder, main_scope) {
+//   var tpl_seed = seed.require('qix-seed!' + value);
+//   var _destroyed = false;
+//   return function _tpl(scope) {
+//     if (_destroyed)
+//       return;
+//     scope = scope || main_scope;
+//     var _parent_cmp = seed.spawn(main_scope, placeholder, 'before');
+//     var _container = _parent_cmp.$content[0];
+//     var _component = tpl_seed.spawn(scope, _container);
+//     placeholder.addEventListener('destroy', _destroy);
+
+//     function _destroy() {
+//       _destroyed = true;
+//       placeholder.removeEventListener('destroy', _destroy);
+//       _component.$destroy();
+//       _parent_cmp.$destroy();
+//       _parent_cmp = null;
+//       _component = null;
+//     }
+//     _tpl.cmp = _component;
+//     return _component;
+//   };
+// }
 // define_glob_hooker('ctx', 'qix-hook-ctx', 800);
 // define_glob_hooker('cmp', 'qix-hook-cmp', 700);
-// define_glob_hooker('tpl', 'qix-hook-tpl', 600);
 define('qix', function() {
   var qix_module = {
     load: function load(name, localrequire, done) {
@@ -462,27 +520,40 @@ define('qix-seed', function () {
     return master_el;
   }
 
-  function path_relative_to(baseurl, path) {
-    if (path.startsWith('.'))
-      return baseurl + path;
-    else
-      return path;
-  }
+  // function path_relative_to(baseurl, path) {
+  //   if (path.startsWith('.') && !path.startsWith('/'))
+  //     return baseurl + path;
+  //   else
+  //     return path;
+  // }
+  var req_ctx = 0;
+  var glob_conf_skip = ['deps'];
 
   function load(name, localrequire, onload /*, config*/ ) {
-    var baseurl = name.substring(0, name.lastIndexOf('/') + 1);
-    var path_resolver = path_relative_to.bind(null, baseurl);
+    // var path_resolver = path_relative_to.bind(null, baseurl);
+    var resolved_name = localrequire.toUrl(name);
+    var baseurl = resolved_name.substring(0, resolved_name.lastIndexOf('/') + 1);
     localrequire(['qix-text!' + name], function (text) {
       var master = make_master_element_from_text(text);
-      var seed_require = function (deps, cb, eb) {
-        if (Array.prototype.isPrototypeOf(deps)) {
-          deps = deps.map(path_resolver);
-          return require(deps, cb, eb);
-        } else {
-          var _local_path = path_resolver(deps);
-          return require(_local_path);
-        }
-      };
+      // var seed_require = function (deps, cb, eb) {
+      //   if (Array.prototype.isPrototypeOf(deps)) {
+      //     deps = deps.map(path_resolver);
+      //     return require(deps, cb, eb);
+      //   } else {
+      //     var _local_path = path_resolver(deps);
+      //     return require(_local_path);
+      //   }
+      // };
+      var glob_conf = require.s.contexts._.config;
+      var req_config = Object.keys(glob_conf)
+        .reduce(function (cnf, k) {
+          if (glob_conf_skip.indexOf(k) === -1)
+            cnf[k] = glob_conf[k];
+          return cnf;
+        }, {});
+      req_config.baseUrl = baseurl;
+      req_config.context = req_ctx++;
+      var seed_require = require.config(req_config);
       make_template_seed(master, seed_require, onload);
       // onload(component_seed);
     });
@@ -577,6 +648,11 @@ function destroy_component(component) {
   component.$controlled_nodes = [];
 }
 
+function warn_duplicate_component_prop_name(scope_name, component) {
+  if (scope_name in component)
+    console.warn('component prop already taken will be overridden:', scope_name, component[scope_name], component);
+}
+
 function control_content_of(holder, scope) {
   var _injectors = [];
   var component = {
@@ -586,65 +662,49 @@ function control_content_of(holder, scope) {
   component.$destroy = destroy_component.bind(null, component);
   component.$content = as_array(holder.childNodes);
 
-  get_qix_hooked_elements(holder)
-    .forEach(function(_compiler_placeholder) {
-      var hooker_def = get_qix_hook_def_compile_placeholder(_compiler_placeholder);
-      var placeholder = document.createComment('qix-hooker ' + hooker_def.scope_name + ':' + hooker_def.hooker_def.name);
-      replace_node(_compiler_placeholder, placeholder);
-      var hooker_ctl = component[hooker_def.scope_name] = hooker_def.hook(placeholder, scope);
-      _injectors = _injectors.concat(
-        hooker_def.injectors
-        .map(function(injector) {
-          return injector.bind(null, hooker_ctl);
-        }));
-      component.$controlled_nodes.unshift(placeholder);
-    });
-
 
   get_qix_controlled_elements(holder)
-    .forEach(function(elem) {
+    .forEach(function (elem) {
       elem_indexed_ctrl_binders(elem)
-        .forEach(function(binder_def) {
+        .forEach(function (binder_def) {
+          warn_duplicate_component_prop_name(binder_def.scope_name, component);
           var controller = component[binder_def.scope_name] = binder_def.control(elem);
           component['$' + binder_def.scope_name] = elem;
-          _injectors = _injectors.concat(
-            binder_def.injectors
-            .map(function(injector) {
+          _injectors = _injectors.concat(binder_def.injectors
+            .map(function (injector) {
               return injector.bind(null, controller);
             }));
           component.$controlled_nodes.unshift(elem);
         });
     });
 
+  get_qix_hooked_elements(holder)
+    .forEach(function (_compiler_placeholder) {
+      var hooker_def = get_qix_hook_def_compile_placeholder(_compiler_placeholder);
+      component.$content.splice(component.$content.indexOf(_compiler_placeholder), 1);
+      var placeholder = document.createComment('qix-hooker ' + hooker_def.scope_name + ':' + hooker_def.hooker_def.name);
+      replace_node(_compiler_placeholder, placeholder);
+      warn_duplicate_component_prop_name(hooker_def.scope_name, component);
+      var hooker_ctl =
+        component[hooker_def.scope_name] = hooker_def.hook(placeholder, scope);
+      _injectors = _injectors
+        .concat(hooker_def.injectors
+          .map(function (injector) {
+            return injector.bind(null, hooker_ctl);
+          }));
+      component.$controlled_nodes.unshift(placeholder);
+    });
+
+
 
   return {
-    inject: function() {
-      _injectors.forEach(function(inj) {
+    inject: function () {
+      _injectors.forEach(function (inj) {
         inj(scope, component);
       });
     },
     component: component
   };
 }
-
-
-// function hook_one(elem, local_require) {
-//   var hook_elem = select_has_attr(attr_name, elem);
-//   if (!hook_elem)
-//     return null;
-//   var attr_val = remove_attribute(attr_name, hook_elem);
-//   var placeholder = document.createComment('qix-hooker:' + name);
-//   replace_node(hook_elem, placeholder);
-//   var holder = document.createElement('div');
-//   holder.appendChild(hook_elem);
-//   var hooker_seed = make_template_seed(holder, local_require);
-
-//   return {
-//     factory: hooker.bind(null, placeholder, hooker_seed),
-//     scope_name: attr_val,
-//     elem: hook_elem,
-//     placeholder: placeholder
-//   };
-// }
 }());
 //# sourceMappingURL=qix.js.map

@@ -1,5 +1,5 @@
 function flatten(a) {
-  return a.reduce(function(acc, arr_el) {
+  return a.reduce(function (acc, arr_el) {
     return acc.concat(arr_el);
   }, []);
 }
@@ -99,7 +99,7 @@ function attr_set(attr_name, val, elem) {
 
 function remove_elements(els) {
   return as_array(els)
-    .map(function(el) {
+    .map(function (el) {
       el.remove();
       return el;
     });

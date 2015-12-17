@@ -15,25 +15,24 @@ function qix_hook_map(seed, value, placeholder, main_scope) {
   }
 
   function _destroy_components() {
-    _current_components.forEach(function(_component) {
+    _current_components.forEach(function (_component) {
       _component.$destroy();
     });
   }
 
   function _map(scopes) {
     _destroy_components();
-    _current_components = scopes.map(function(scope, index) {
+    if ('number' === typeof scopes)
+      scopes = Array.apply(null, new Array(scopes));
+    _current_components = scopes.map(function (scope, index) {
       var _use_scope = typeof scope === 'object' ? scope : main_scope;
       var _sub_scope = Object.create(_use_scope);
       _sub_scope.$index = index;
       return seed.spawn(_sub_scope, placeholder, 'before');
     });
+    _map.cmps = _current_components;
     return _current_components;
   }
   return _map;
 }
 define_glob_hooker('map', qix_hook_map, 900);
-
-// define_glob_hooker('ctx', 'qix-hook-ctx', 800);
-// define_glob_hooker('cmp', 'qix-hook-cmp', 700);
-// define_glob_hooker('tpl', 'qix-hook-tpl', 600);
