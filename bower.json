@@ -2,8 +2,7 @@
   "name": "qix",
   "description": "qix",
   "devDependencies": {
-    "requirejs": "",
-    "qix": "https://github.com/aleclofabbro/Qix.git"
+    "requirejs": ""
   },
   "authors": [
     "aleclofabbro <alessandro.giansanti@gmail.com>"
