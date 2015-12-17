@@ -1,50 +1,128 @@
-function make_template_seed(master, seed_require, require_cb) {
+var get_all_qix_controlled_element = select_has_attr_all.bind(null, 'qix');
+var QIX_INDEXED_ATTR_NAME = 'qix-ctl-indexes';
+var get_one_qix_indexed_element = select_has_attr.bind(null, QIX_INDEXED_ATTR_NAME);
+var _indexed_ctrls = [];
+
+function push_indexed_ctrl(def) {
+  def.index = _indexed_ctrls.push(def) - 1;
+  return def;
+}
+
+function make_template_seed(master, seed_require) {
+  var deps = flatten(get_all_qix_controlled_element(master)
+    .map(index_elem_ctrls));
+
   var seed = {
     master: master,
-    require: seed_require
+    require: seed_require,
+    deps: deps
   };
-  seed.spawn = spawn_seed.bind(null, seed);
-  compile(seed, function () {
-    (require_cb || noop)(seed);
-  });
+  seed.spawn = function (model, into, where, cb) {
+    if (seed.resolved)
+      (cb || noop)(spawn_seed(seed, model, into, where));
+    else
+      seed.require(seed.deps, function () {
+        seed.resolved = true;
+        (cb || noop)(spawn_seed(seed, model, into, where));
+      });
+  };
   return seed;
 }
 
-function compile(seed, cb) {
-  var hooks_deps = crunch_hooks(seed);
-  var ctrls_defs = crunch_controllers(seed);
-  var ctrl_deps = ctrls_defs.map(prop.bind(null, 'module'));
-  seed.deps = ctrl_deps.concat(hooks_deps);
-  seed.require(seed.deps, cb);
-}
-
-
-function get_injectors(elem, scope_name) {
-  return as_array(elem.attributes)
-    .filter(function (attr) {
-      return attr.name.startsWith(scope_name.replace(/_/g, '-') + ':');
-    })
-    .map(function (attr) {
-      var attr_name_arr = attr.name.split(':');
-      var inj_fn = get_injector_function(attr.value, attr_name_arr[1]);
-      return inj_fn;
+function index_elem_ctrls(elem) {
+  var elem_ctrl_defs = attr('qix', elem)
+    .split('|')
+    .map(function (def_string) {
+      var io__name = def_string.trim().split(':');
+      var name__prop = io__name[1].split('#');
+      var module = name__prop[0];
+      var prop = name__prop[1];
+      var io = io__name[0];
+      return push_indexed_ctrl({
+        io: io,
+        module: module,
+        prop: prop
+      });
     });
+
+  var elem_deps = elem_ctrl_defs
+    .map(prop.bind(null, 'module'));
+  var elem_indexes = elem_ctrl_defs
+    .map(prop.bind(null, 'index'));
+  attr_rm('qix', elem);
+  attr_set(QIX_INDEXED_ATTR_NAME, elem_indexes.join(','), elem);
+  return elem_deps;
 }
 
-function get_injector_function(signature_and_assign_string, _ctrl_fn_prop) {
-  var dbg = signature_and_assign_string[0] === '!';
-  signature_and_assign_string = dbg ? signature_and_assign_string.substring(1) : signature_and_assign_string;
-
-  var signature_and_assign_string_arr = signature_and_assign_string.split('>');
-  var signature_string = signature_and_assign_string_arr[0];
-  var assign_string = (signature_and_assign_string_arr[1] || '').trim();
-  var body = (dbg ? 'debugger;' : '') + 'return [' + signature_string + '];';
-  var injector_arguments_get = Function.apply(null, ['$', '_'].concat(body));
-  return function (controller, scope, component) {
-    var funct = _ctrl_fn_prop === '-' ? controller : controller[_ctrl_fn_prop];
-    var _inj_arguments = injector_arguments_get(scope, component, controller);
-    var _injection_returns = funct.apply(null, _inj_arguments);
-    if (assign_string)
-      component[assign_string] = _injection_returns;
+function spawn_seed(seed, model, into, where) {
+  var master_clone = clone_node(true, seed.master);
+  crawl_indexed_elements(master_clone, seed, model);
+  var child_nodes = insert_child_nodes(master_clone, into, where);
+  return {
+    destroy: function () {
+      model.lens('$$.destroy').set(1);
+    },
+    child_nodes: child_nodes
   };
+}
+
+
+function crawl_indexed_elements(master_clone, seed, model) {
+  var indexed_elem = get_one_qix_indexed_element(master_clone);
+  if (!indexed_elem)
+    return;
+  crawl_indexes(indexed_elem, seed, model);
+  attr_rm(QIX_INDEXED_ATTR_NAME, indexed_elem);
+  crawl_indexed_elements(master_clone, seed, model);
+}
+
+function crawl_indexes(indexed_elem, seed, model) {
+  var indexes_attr = attr(QIX_INDEXED_ATTR_NAME, indexed_elem);
+  if (!indexes_attr) {
+    return;
+  }
+  var indexes = indexes_attr.split(',');
+  var _next_ctrl_index = indexes.shift();
+  var _next_ctrl_def = _indexed_ctrls[_next_ctrl_index];
+  attr_set(QIX_INDEXED_ATTR_NAME, indexes.join(','), indexed_elem);
+  var stripped = control(indexed_elem, model, seed, _next_ctrl_def);
+  if (!stripped)
+    crawl_indexes(indexed_elem, seed, model);
+}
+
+
+
+function control(elem, model, seed, ctrl_def) {
+  var factory = ctrl_def.factory;
+  if (!factory)
+    ctrl_def.factory = factory = seed.require(ctrl_def.module);
+  var _stripped = false;
+
+  function _strip() {
+    _stripped = true;
+    var placeholder = document.createComment('strip');
+    replace_node(elem, placeholder);
+    var holder = document.createElement('div');
+    holder.appendChild(clone_node(true, elem));
+    var _seed;
+    return {
+      spawn: function (model) {
+        if (!_seed)
+          _seed = make_template_seed(holder, seed.require);
+        _seed.spawn(model, placeholder, 'before');
+      }
+    };
+  }
+  if (ctrl_def.prop)
+    factory = factory[ctrl_def.prop];
+  var ctrl_ubind = factory(elem, model.lens(ctrl_def.io), model, _strip);
+  if (ctrl_ubind)
+    model
+    .lens('$$.destroy')
+    .skip(1)
+    .take(1)
+    .onValue(function () {
+      ctrl_ubind();
+    });
+  return _stripped;
 }

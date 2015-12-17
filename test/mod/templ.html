@@ -1,13 +1,4 @@
 <span>STATIC 1</span>
-<div qix-tpl="tp:../sub-tpl.html" tp:-='$.tpl_scope > tp_cmp' xxx></div>
+<div ctl qix="i:./core/if|d:./core/test-ctrl#x | f:./core/test-ctrl#y">
+</div>
 <span>STATIC 2</span>
-<div qix-ctl="d:./core/test-ctrl#x" d:-="'dddd', $.A, $.Q > bb_x" id="overload-this">
-</div>
-<div qix-map="mmm" qix-if="fff" fff:-='true'>
-  <span qix-ctl="b:/test/mod/core/test-ctrl.js#x | c:./core/test-ctrl#y" b:-="$.A, $.C > b_1" c:yfn="'c-thi', $.A, $.C> c_1">
-  </span>
-</div>
-<div qix-if="fz:true">
-  <span> IN IFFF</span>
-</div>
-<span>STATIC 3</span>

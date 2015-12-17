@@ -8,9 +8,9 @@ function prop(prp, obj) {
   return obj ? obj[prp] : void(0);
 }
 
-function prop_of(obj, prp) {
-  return obj ? obj[prp] : void(0);
-}
+// function prop_of(obj, prp) {
+//   return obj ? obj[prp] : void(0);
+// }
 
 function is_array_like(obj) { // TODO: improve ?
   return ('length' in obj) && ('number' === typeof obj.length);
@@ -46,7 +46,7 @@ function select_has_attr_all(attr, elem) {
   return select_all('[' + attr + ']', elem);
 }
 
-function remove_attribute(attr_name, elem) {
+function attr_rm(attr_name, elem) {
   var val = elem.getAttribute(attr_name);
   elem.removeAttribute(attr_name);
   return val;
@@ -85,6 +85,10 @@ function insert_child_map(ref_elem, where, child_node) {
   return child_node;
 }
 
+// function invoke(name, args, obj) {
+//   return obj[name].apply(obj, args);
+// }
+
 function insert_child(child_node, ref_elem, where) {
   return insert_child_map(ref_elem, where, child_node);
 }
@@ -96,6 +100,7 @@ function attr(attr_name, elem) {
 function attr_set(attr_name, val, elem) {
   return elem.setAttribute(attr_name, val);
 }
+
 
 function remove_elements(els) {
   return as_array(els)

@@ -3,7 +3,8 @@
   "description": "qix",
   "devDependencies": {
     "requirejs": "",
-    "qix": "https://github.com/aleclofabbro/Qix.git"
+    "bacon.model": "",
+    "bacon": ""
   },
   "authors": [
     "aleclofabbro <alessandro.giansanti@gmail.com>"

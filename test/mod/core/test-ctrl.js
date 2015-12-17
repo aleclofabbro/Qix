@@ -1,42 +1,26 @@
 define([],
-  function() {
+  function () {
     "use strict";
     var _x = 0;
     var _y = 0;
     return {
-      x: function(elem) {
-        elem.addEventListener('destroy', function _unbind(e) {
-          console.log('DESTROY X', elem);
-          elem.removeEventListener('destroy', _unbind);
-          elem.innerText = 'controller [x] is gone';
-        });
+      x: function (elem, model) {
+        // model.onValue(function (val) {
+        //   console.log('in X:', val);
+        // });
+        // model.lens('z.q').set(111);
         elem.innerText = 'controller [x] was here';
-        console.log('CONTROLLER X..', elem);
-        return function() {
-          console.log('X - this', arguments);
-          return [arguments, _x++];
-        };
       },
-      y: function(elem) {
-        elem.addEventListener('destroy', function _unbind(e) {
-          console.log('DESTROY Y', elem);
-          elem.removeEventListener('destroy', _unbind);
-          elem.removeEventListener('click', _alert);
-          elem.title = 'controller [y] gone';
-        });
+      y: function (elem, model) {
+        // model.lens('r.t').set(222);
+        // model.onValue(function (val) {
+        //   console.log('in Y:', val);
+        // });
         elem.style.color = 'blue';
-        // elem.style.textDecoration = 'underline';
         elem.title = 'controller [y] bound a click event here';
 
         var _alert = alert.bind(window, 'controller [y] rules!');
         elem.addEventListener('click', _alert);
-        console.log('CONTROLLER Y..', elem);
-        return {
-          yfn: function() {
-            console.log('Y - yfn', arguments);
-            return [arguments, _y++];
-          }
-        };
       },
     };
   });
