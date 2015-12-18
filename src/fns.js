@@ -13,7 +13,7 @@ function prop(prp, obj) {
 // }
 
 function is_array_like(obj) { // TODO: improve ?
-  return ('length' in obj) && ('number' === typeof obj.length);
+  return !!obj && ('length' in obj) && ('number' === typeof obj.length);
 }
 
 function is_undefined(o) {
@@ -117,7 +117,7 @@ function remove_elements(els) {
     });
 }
 
-function noop() {}
+// function noop() {}
 /*
 
 

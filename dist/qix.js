@@ -10,6 +10,9 @@ function push_indexed_ctrl(def) {
   def.index = _indexed_ctrls.push(def) - 1;
   return def;
 }
+var _qix_id = 0;
+
+
 
 function make_template_seed(master, seed_require, resolved) {
   var deps = flatten(get_all_qix_controlled_element(master)
@@ -21,23 +24,19 @@ function make_template_seed(master, seed_require, resolved) {
     deps: deps,
     resolved: resolved
   };
-  seed.spawn = function (model, into, where, cb) {
-    var msg = model.lens('$$');
-    var $destroy_stream = msg.filter(eq.bind(null, true, 'destroy')).take(1);
-    model.$destroy = msg.set.bind(msg, 'destroy');
-    model.$on_destroy = $destroy_stream.onValue.bind($destroy_stream);
-    model.$msg = msg;
-
+  seed.spawn = function (model, into, where) {
     if (seed.resolved)
-      (cb || noop)(spawn_seed(seed, model, into, where));
+      spawn_seed(seed, model, into, where);
     else
       seed.require(seed.deps, function () {
         seed.resolved = true;
-        (cb || noop)(spawn_seed(seed, model, into, where));
+        spawn_seed(seed, model, into, where);
       });
   };
   return seed;
 }
+
+
 
 function index_elem_ctrls(elem) {
   var elem_ctrl_defs = attr(QIX_MARKED_ATTR_NAME, elem)
@@ -64,16 +63,56 @@ function index_elem_ctrls(elem) {
   return elem_deps;
 }
 
+function qix_model(model, parent) {
+  if (!model.$qix) {
+    var msg = model.lens('$$');
+    var destroy_stream = msg.filter(eq.bind(null, true, 'destroy')).take(1);
+    var destroy_event = destroy_stream.onValue.bind(destroy_stream);
+    var destroy = msg.set.bind(msg, 'destroy');
+    model.$qix = {
+      id: _qix_id++,
+      on_destroy: destroy_event,
+      destroy: destroy,
+      msg: msg,
+      bound: [],
+      child_nodes: []
+    };
+    model.$qix.on_destroy(do_destroy_stream.bind(null, model));
+  }
+  if (parent)
+    parent.$qix.on_destroy(model.$qix.destroy);
+}
+
+function do_destroy_stream(model) {
+  // model.$qix.bound.forEach(function (unbind) {
+  //   unbind();
+  // });
+  if (!model.$qix)
+    return;
+  model.$qix.bound = [];
+  remove_elements(model.$qix.child_nodes);
+  model.$qix.child_nodes = [];
+  model.$qix = void(0);
+  model.doEnd();
+  model.set(void(0));
+  // model.dispatcher.unsubSrc();
+  // model.dispatcher.unsubscribeFromSource();
+  // model.dispatcher.subscriptions.forEach(function (subscription) {
+  //   model.dispatcher.removeSub(subscription);
+  // });
+}
+
 function spawn_seed(seed, model, into, where) {
+  qix_model(model);
   var master_clone = clone_node(true, seed.master);
   crawl_indexed_elements(master_clone, seed, model);
   var child_nodes = insert_child_nodes(master_clone, into, where);
-  return {
-    destroy: function () {
-      model.lens('$$').set('destroy');
-    },
-    child_nodes: child_nodes
-  };
+  model.$qix.child_nodes = model.$qix.child_nodes.concat(child_nodes);
+  // model.$qix.on_destroy(function () {
+  //   remove_elements(child_nodes);
+  //   model.$qix = void(0);
+  //   model.set(void(0));
+  // });
 }
 
 
@@ -116,21 +155,146 @@ function control(elem, model, seed, ctrl_def) {
     holder.appendChild(clone_node(true, elem));
     return {
       spawn: function (sub_model) {
+        qix_model(sub_model, model);
         if (!ctrl_def.sub_seed)
           ctrl_def.sub_seed = make_template_seed(holder, seed.require, true);
         ctrl_def.sub_seed.spawn(sub_model, placeholder, 'before');
-      }
+      },
+      placeholder: placeholder,
+      seed: seed
     };
   }
   if (ctrl_def.prop)
     factory = factory[ctrl_def.prop];
-  var ctrl_ubind = factory(elem, model.lens(ctrl_def.io), model, _strip);
-  if (ctrl_ubind)
-    model.$on_destroy(function () {
-      ctrl_ubind();
-    });
+  var ctrl_model;
+  if (ctrl_def.io) {
+    ctrl_model = model.lens(ctrl_def.io);
+    qix_model(ctrl_model, model);
+  } else
+    ctrl_model = model;
+  var ctrl_ubind = factory(elem, ctrl_model, model, _strip, ctrl_def);
+  if (ctrl_ubind) {
+    //model.$qix.bound.push(ctrl_ubind);
+    ctrl_model.$qix.on_destroy(ctrl_ubind);
+  }
   return _stripped;
 }
+define('qix-if',
+  function () {
+    return function (elem, model, mainmodel, strip) {
+      var seeder = strip();
+      var _current = null;
+      var _switch = false;
+      var unsub = model.onValue(function (val) {
+        if (_switch)
+          return;
+        _switch = true;
+        if (!_current && val) {
+          _current = model.lens('');
+          seeder.spawn(_current, seeder.placeholder, 'before');
+        } else if (_current && !val) {
+          destroy_sub();
+          _current = null;
+        }
+        _switch = false;
+      });
+
+      // mainmodel.$qix.on_destroy(destroy);
+
+      function destroy_sub() {
+        if (_current && _current.$qix) {
+          console.log('IF DESTROY SUB');
+          _current.$qix.destroy();
+        }
+        _current = null;
+
+      }
+
+      function destroy() {
+        console.log('IF DESTROY');
+        destroy_sub();
+        unsub();
+      }
+      return destroy;
+    };
+  });
+define('qix-map',
+  function () {
+    return function (elem, model, mainmodel, strip) {
+      var seeder = strip();
+      var currents = [];
+      var _switch = false;
+      var unsub = model.onValue(function (arr) {
+        if (_switch)
+          return;
+        _switch = true;
+        arr = as_array(arr);
+        var delta = arr.length - currents.length;
+        if (delta < 0)
+          destroy_subs(delta);
+        else if (delta > 0)
+          add_subs(delta);
+        _switch = false;
+      });
+
+      function add_subs(delta) {
+        var to_spawn = [];
+        var _l = currents.length;
+        for (var i = _l; i < (delta + _l); i++) {
+          var sub_model = model.lens('' + i);
+          currents.push(sub_model);
+          to_spawn.push(sub_model);
+        }
+        // setTimeout(function () {
+        to_spawn.forEach(function (sub_model) {
+          seeder.spawn(sub_model, seeder.placeholder, 'before');
+        });
+        // });
+      }
+
+      function destroy_subs(delta) {
+        var to_destroy = currents.splice(delta);
+        // setTimeout(function () {
+        console.log('MAP DESTROY ', to_destroy.length);
+        to_destroy.forEach(function (sub_model) {
+          sub_model.$qix.destroy();
+        });
+        // });
+      }
+      // mainmodel.$qix.on_destroy(destroy);
+
+      function destroy() {
+        unsub();
+        destroy_subs(-currents.length);
+        model.set(void(0));
+        console.log('MAP DESTROY', currents, model.get());
+      }
+      return destroy;
+    };
+  });
+define('qix-tpl',
+  function () {
+    return function (elem, model, mainmodel, strip, ctrl_def) {
+      var tpl_path = attr('qix-tpl', elem);
+      var stripper = strip();
+      if (!ctrl_def._my_seed)
+        stripper.seed.require(['qix!' + tpl_path], function (seed) {
+          ctrl_def._my_seed = seed;
+          seed.spawn(model, stripper.placeholder, 'before');
+        });
+      else
+        ctrl_def._my_seed.spawn(model, stripper.placeholder, 'before');
+
+      // mainmodel.$qix.on_destroy(destroy);
+
+      function destroy() {
+        console.log('TPL DESTROY');
+        if (model.$qix)
+          model.$qix.destroy();
+      }
+      return destroy;
+    };
+  });
 function flatten(a) {
   return a.reduce(function (acc, arr_el) {
     return acc.concat(arr_el);
@@ -146,7 +310,7 @@ function prop(prp, obj) {
 // }
 
 function is_array_like(obj) { // TODO: improve ?
-  return ('length' in obj) && ('number' === typeof obj.length);
+  return !!obj && ('length' in obj) && ('number' === typeof obj.length);
 }
 
 function is_undefined(o) {
@@ -250,7 +414,7 @@ function remove_elements(els) {
     });
 }
 
-function noop() {}
+// function noop() {}
 /*
 
 
