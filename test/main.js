@@ -1,5 +1,5 @@
   require(['qix!mod/templ'], function (comp) {
-    console.log = function () {};
+    // console.log = function () {};
     model = Bacon.Model({});
     model.onValue(function (val) {
       console.log('in main:', val);

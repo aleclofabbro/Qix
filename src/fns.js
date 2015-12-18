@@ -46,6 +46,13 @@ function select_has_attr_all(attr, elem) {
   return select_all('[' + attr + ']', elem);
 }
 
+function eq(strict, a, b) {
+  if (strict)
+    return a === b;
+  else
+    return a == b;
+}
+
 function attr_rm(attr_name, elem) {
   var val = elem.getAttribute(attr_name);
   elem.removeAttribute(attr_name);

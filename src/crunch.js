@@ -1,5 +1,6 @@
-var get_all_qix_controlled_element = select_has_attr_all.bind(null, 'qix');
 var QIX_INDEXED_ATTR_NAME = 'qix-ctl-indexes';
+var QIX_MARKED_ATTR_NAME = 'qix';
+var get_all_qix_controlled_element = select_has_attr_all.bind(null, QIX_MARKED_ATTR_NAME);
 var get_one_qix_indexed_element = select_has_attr.bind(null, QIX_INDEXED_ATTR_NAME);
 var _indexed_ctrls = [];
 
@@ -8,16 +9,23 @@ function push_indexed_ctrl(def) {
   return def;
 }
 
-function make_template_seed(master, seed_require) {
+function make_template_seed(master, seed_require, resolved) {
   var deps = flatten(get_all_qix_controlled_element(master)
     .map(index_elem_ctrls));
 
   var seed = {
     master: master,
     require: seed_require,
-    deps: deps
+    deps: deps,
+    resolved: resolved
   };
   seed.spawn = function (model, into, where, cb) {
+    var msg = model.lens('$$');
+    var $destroy_stream = msg.filter(eq.bind(null, true, 'destroy')).take(1);
+    model.$destroy = msg.set.bind(msg, 'destroy');
+    model.$on_destroy = $destroy_stream.onValue.bind($destroy_stream);
+    model.$msg = msg;
+
     if (seed.resolved)
       (cb || noop)(spawn_seed(seed, model, into, where));
     else
@@ -30,7 +38,7 @@ function make_template_seed(master, seed_require) {
 }
 
 function index_elem_ctrls(elem) {
-  var elem_ctrl_defs = attr('qix', elem)
+  var elem_ctrl_defs = attr(QIX_MARKED_ATTR_NAME, elem)
     .split('|')
     .map(function (def_string) {
       var io__name = def_string.trim().split(':');
@@ -60,7 +68,7 @@ function spawn_seed(seed, model, into, where) {
   var child_nodes = insert_child_nodes(master_clone, into, where);
   return {
     destroy: function () {
-      model.lens('$$.destroy').set(1);
+      model.lens('$$').set('destroy');
     },
     child_nodes: child_nodes
   };
@@ -104,12 +112,11 @@ function control(elem, model, seed, ctrl_def) {
     replace_node(elem, placeholder);
     var holder = document.createElement('div');
     holder.appendChild(clone_node(true, elem));
-    var _seed;
     return {
-      spawn: function (model) {
-        if (!_seed)
-          _seed = make_template_seed(holder, seed.require);
-        _seed.spawn(model, placeholder, 'before');
+      spawn: function (sub_model) {
+        if (!ctrl_def.sub_seed)
+          ctrl_def.sub_seed = make_template_seed(holder, seed.require, true);
+        ctrl_def.sub_seed.spawn(sub_model, placeholder, 'before');
       }
     };
   }
@@ -117,11 +124,7 @@ function control(elem, model, seed, ctrl_def) {
     factory = factory[ctrl_def.prop];
   var ctrl_ubind = factory(elem, model.lens(ctrl_def.io), model, _strip);
   if (ctrl_ubind)
-    model
-    .lens('$$.destroy')
-    .skip(1)
-    .take(1)
-    .onValue(function () {
+    model.$on_destroy(function () {
       ctrl_ubind();
     });
   return _stripped;
